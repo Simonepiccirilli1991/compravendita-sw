@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<!--/* Layout comune: le pagine lo usano con th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}" */-->
+<html lang="it" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:fragment="layout(title, content)">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <title th:replace="${title}">Gestionale</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/dist/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.min.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body th:attr="hx-headers=|{&quot;${_csrf.headerName}&quot;: &quot;${_csrf.token}&quot;}|">
+<div class="d-flex app-shell">
+    <nav class="sidebar d-flex flex-column flex-shrink-0 p-3 text-bg-dark">
+        <a th:href="@{/dashboard}" class="d-flex align-items-center mb-3 text-white text-decoration-none">
+            <i class="bi bi-box-seam fs-4 me-2"></i>
+            <span class="fs-5 fw-semibold">Compravendita</span>
+        </a>
+        <hr>
+        <ul class="nav nav-pills flex-column mb-auto">
+            <li class="nav-item">
+                <a th:href="@{/dashboard}" class="nav-link text-white"
+                   th:classappend="${activePage == 'dashboard'} ? 'active'">
+                    <i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+            </li>
+            <!--/* Sezioni disponibili nelle prossime fasi */-->
+            <li class="nav-item"><span class="nav-link text-secondary disabled"><i class="bi bi-collection me-2"></i>Catalogo</span></li>
+            <li class="nav-item"><span class="nav-link text-secondary disabled"><i class="bi bi-cart-plus me-2"></i>Acquisti</span></li>
+            <li class="nav-item"><span class="nav-link text-secondary disabled"><i class="bi bi-boxes me-2"></i>Magazzino</span></li>
+            <li class="nav-item"><span class="nav-link text-secondary disabled"><i class="bi bi-cash-coin me-2"></i>Vendite</span></li>
+            <li class="nav-item"><span class="nav-link text-secondary disabled"><i class="bi bi-shop me-2"></i>Piattaforme</span></li>
+            <li class="nav-item"><span class="nav-link text-secondary disabled"><i class="bi bi-graph-up-arrow me-2"></i>Report</span></li>
+        </ul>
+        <hr>
+        <div class="d-flex align-items-center justify-content-between">
+            <span class="small"><i class="bi bi-person-circle me-1"></i><span sec:authentication="name">utente</span></span>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="btn btn-sm btn-outline-light" title="Esci"><i class="bi bi-box-arrow-right"></i></button>
+            </form>
+        </div>
+    </nav>
+
+    <main class="flex-grow-1 p-4 bg-body-tertiary" th:replace="${content}">
+    </main>
+</div>
+
+<script th:src="@{/webjars/bootstrap/dist/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/webjars/htmx.org/dist/htmx.min.js}"></script>
+<script th:src="@{/webjars/chart.js/dist/chart.umd.js}"></script>
+</body>
+</html>

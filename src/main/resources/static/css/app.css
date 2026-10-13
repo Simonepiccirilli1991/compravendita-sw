@@ -1,0 +1,17 @@
+.app-shell {
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 240px;
+}
+
+@media (max-width: 768px) {
+    .app-shell {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+    }
+}

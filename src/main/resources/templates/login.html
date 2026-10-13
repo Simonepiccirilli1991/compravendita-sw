@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Accesso · Compravendita</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/dist/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.min.css}">
+</head>
+<body class="bg-body-tertiary d-flex align-items-center min-vh-100">
+<main class="container" style="max-width: 380px">
+    <div class="text-center mb-4">
+        <i class="bi bi-box-seam display-5"></i>
+        <h1 class="h4 mt-2">Gestionale Compravendita</h1>
+    </div>
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <div class="alert alert-danger py-2" th:if="${param.error}">Credenziali non valide.</div>
+            <div class="alert alert-success py-2" th:if="${param.logout}">Sei uscito correttamente.</div>
+            <form th:action="@{/login}" method="post">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Utente</label>
+                    <input type="text" id="username" name="username" class="form-control" autofocus required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" name="password" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Accedi</button>
+            </form>
+        </div>
+    </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: gestionale
+  config:
+    # Variabili opzionali da file .env nella cartella di avvio (vedi .env.example)
+    import: optional:file:.env[.properties]
+  profiles:
+    default: dev
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:compravendita}
+    username: ${DB_USER:compravendita}
+    password: ${DB_PASSWORD:compravendita}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  security:
+    user:
+      name: ${APP_USERNAME:admin}
+      password: ${APP_PASSWORD:admin}
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 20MB
+  web:
+    locale: it_IT
+    locale-resolver: fixed
+
+server:
+  port: ${APP_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+app:
+  # Cartella dove salvare foto articoli e allegati (Fase 2)
+  upload-dir: ${APP_UPLOAD_DIR:./data/uploads}

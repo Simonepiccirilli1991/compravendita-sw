@@ -1,0 +1,34 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: compravendita-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-compravendita}
+      POSTGRES_USER: ${DB_USER:-compravendita}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-compravendita}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-compravendita} -d ${DB_NAME:-compravendita}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Interfaccia web per ispezionare il DB: avvio con `docker compose --profile tools up -d`
+  pgadmin:
+    image: dpage/pgadmin4:9
+    container_name: compravendita-pgadmin
+    profiles: ["tools"]
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@local.dev
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
+volumes:
+  pgdata:

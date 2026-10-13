@@ -1,0 +1,7 @@
+# Profilo test: il DB è fornito da Testcontainers (@ServiceConnection)
+spring:
+  docker:
+    compose:
+      enabled: false
+  thymeleaf:
+    cache: false
