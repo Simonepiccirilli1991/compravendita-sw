@@ -53,6 +53,11 @@ Nel container l'app usa il profilo `prod`. Credenziali, porta e database si impo
 (vedi `.env.example`); foto e ricevute restano in `data/uploads`, quindi gli script di backup funzionano allo
 stesso modo. Per la demo in container: `SPRING_PROFILES_ACTIVE=prod,demo docker compose --profile app up -d`.
 
+## Spese generali
+Abbonamenti, materiali, fiere e altri costi dell'attività si registrano in *Spese* (barra laterale). Entrano nel
+profitto netto di dashboard, report e riepilogo annuale, ma non nel costo dei singoli articoli; si esportano in
+Excel/CSV come le altre liste.
+
 ## Import ed export
 - **Export:** nelle liste di acquisti, vendite e magazzino i pulsanti *Excel* e *CSV* scaricano i dati con i filtri
   attivi. Il riepilogo annuale (*Report → Riepilogo annuale*) si esporta allo stesso modo. I CSV usano `;` e la
@@ -85,11 +90,25 @@ pg_restore -h localhost -U compravendita -d compravendita --clean --if-exists --
 ```
 Conviene copiare i backup anche fuori dal PC (disco esterno o cloud).
 
+### Backup automatico
+Installa un backup giornaliero nell'Utilità di pianificazione di Windows (una volta sola):
+```powershell
+.\scripts\installa-backup-programmato.ps1                       # ogni giorno alle 21:00, ultimi 30 backup
+.\scripts\installa-backup-programmato.ps1 -Ora 13:00 -Conserva 60 -Destinazione "D:\Backup gestionale"
+.\scripts\installa-backup-programmato.ps1 -Rimuovi              # disattiva
+Start-ScheduledTask -TaskName "Gestionale Compravendita - Backup"  # prova subito
+```
+Se a quell'ora il PC è spento, il backup parte appena possibile. Docker Desktop deve essere avviato; il database
+può anche essere fermo (viene acceso per il backup e poi rispento). L'esito di ogni esecuzione è in
+`backup.log` nella cartella dei backup: controllalo ogni tanto, e scegli come destinazione un disco esterno o
+una cartella sincronizzata nel cloud.
+
 ## Test
 ```bash
 ./mvnw verify
 ```
 I test di integrazione usano Testcontainers (PostgreSQL 16 reale): richiedono Docker in esecuzione.
+`PagineSenzaTransazioneTest` apre ogni pagina con i dati demo fuori da una transazione, come il browser.
 Gli errori (pagina inesistente, dati non trovati, operazioni non consentite) mostrano una pagina in italiano;
 nelle azioni HTMX il messaggio compare in un avviso in alto a destra.
 

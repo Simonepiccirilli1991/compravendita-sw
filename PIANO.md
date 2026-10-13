@@ -91,7 +91,7 @@ La cartella di progetto `compravendita-sw` è vuota: si parte da zero.
 - [x] Report fiscale annuale riassuntivo (totali acquisti/vendite/profitto per anno)
 - [x] Script di backup/restore del DB (`pg_dump`) documentato nel README
 - [x] Ricerca globale rapida (nome articolo, n° certificato, n° set)
-  - Nota: script di backup in `scripts/` non provati dal vivo (Docker non disponibile durante lo sviluppo); la ricerca nel catalogo ora cerca anche negli attributi
+  - Nota: script di backup/ripristino provati dal vivo (PowerShell e bash); la ricerca nel catalogo cerca anche negli attributi
 
 ## Fase 8 – Qualità e rilascio
 - [x] Test di integrazione con Testcontainers (PostgreSQL) per repository e servizi
@@ -100,14 +100,20 @@ La cartella di progetto `compravendita-sw` è vuota: si parte da zero.
 - [x] Dockerfile dell'applicazione + `docker-compose` completo (app + db)
 - [x] Dati demo di esempio (profilo `demo`) per provare la dashboard
 
-> Note Fase 8: test eseguiti con PostgreSQL embedded perché Docker non era disponibile; Dockerfile e servizio `app`
-> di docker compose non ancora provati dal vivo. Dati demo nello schema separato `demo`.
+> Note Fase 8: `mvnw verify` con Testcontainers (PostgreSQL 16) verde; immagine Docker e servizio `app` provati dal vivo
+> (profilo prod, utente non root, upload in `data/uploads`). Dati demo nello schema separato `demo`.
+> Aggiunte: pagina **Spese generali** (`/spese`, con export) e test che apre tutte le pagine senza transazione.
 
 ---
 
 ## Verifica end-to-end
-- [ ] `docker compose up -d` avvia PostgreSQL; `mvn spring-boot:run` avvia l'app e Flyway crea lo schema
-- [ ] `mvn verify` esegue unit test + test di integrazione Testcontainers tutti verdi
-- [ ] Scenario manuale: creare un acquisto misto (es. 10 carte Pokémon + 1 LEGO con spedizione) → verificare costo unitario effettivo → vendere 3 carte su Cardmarket e il LEGO su eBay → controllare netto, profitto e ROI calcolati → dashboard e hot items aggiornati
-- [ ] Scenario reso: annullare una vendita e verificare ripristino giacenza e KPI
-- [ ] Scenario grading: inviare una carta a PSA, rientro come gradata, vendita e ROI che include il costo di grading
+- [x] `docker compose up -d` avvia PostgreSQL; `mvn spring-boot:run` avvia l'app e Flyway crea lo schema
+- [x] `mvn verify` esegue unit test + test di integrazione Testcontainers tutti verdi
+- [x] Scenario manuale: creare un acquisto misto (es. 10 carte Pokémon + 1 LEGO con spedizione) → verificare costo unitario effettivo → vendere 3 carte su Cardmarket e il LEGO su eBay → controllare netto, profitto e ROI calcolati → dashboard e hot items aggiornati
+- [x] Scenario reso: annullare una vendita e verificare ripristino giacenza e KPI
+- [x] Scenario grading: inviare una carta a PSA, rientro come gradata, vendita e ROI che include il costo di grading
+
+> Esito verifica (13/10/2026), valori controllati a mano: costi unitari 5,50 € (carte) e 165,00 € (LEGO);
+> vendita Cardmarket netto 33,88 €, profitto 17,38 €; LEGO su eBay netto 237,15 €, profitto 72,15 €, ROI 43,7%;
+> dopo l'annullamento giacenza carte tornata a 10 e KPI ricalcolati; carta gradata PSA 9 con costo 30,50 €
+> (5,50 + 25 di grading), venduta a 120 € con profitto 73,55 € e ROI 241,1%. Backup e ripristino provati.

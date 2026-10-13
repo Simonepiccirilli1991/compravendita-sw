@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Spese generali · Compravendita</title>
+</head>
+<body>
+<main>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h1 class="h3 mb-0">Spese generali</h1>
+            <p class="small text-secondary mb-0">Abbonamenti, materiali, fiere e altri costi dell'attività: entrano nel
+                profitto netto di dashboard e report.</p>
+        </div>
+        <a th:href="@{/spese/nuova}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Nuova spesa</a>
+    </div>
+
+    <form class="card card-body shadow-sm mb-3" th:action="@{/spese}" method="get"
+          th:attr="hx-get=@{/spese}" hx-target="#risultati" hx-swap="outerHTML"
+          hx-push-url="true" hx-trigger="input changed delay:300ms from:input[name='q'], change">
+        <div class="row g-2">
+            <div class="col-12 col-md-4">
+                <input type="search" name="q" class="form-control" placeholder="Descrizione, note o articolo…"
+                       th:value="${filtro.q}" aria-label="Cerca">
+            </div>
+            <div class="col-12 col-md-2">
+                <select name="categoria" class="form-select" aria-label="Categoria">
+                    <option value="">Tutte le categorie</option>
+                    <option th:each="c : ${categorie}" th:value="${c}" th:text="${c.etichetta}"
+                            th:selected="${c == filtro.categoria}">Categoria</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="input-group">
+                    <span class="input-group-text">Dal</span>
+                    <input type="date" name="da" class="form-control" th:value="${filtro.da}" aria-label="Dal">
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="input-group">
+                    <span class="input-group-text">Al</span>
+                    <input type="date" name="a" class="form-control" th:value="${filtro.a}" aria-label="Al">
+                </div>
+            </div>
+        </div>
+        <noscript><button type="submit" class="btn btn-secondary mt-2">Filtra</button></noscript>
+    </form>
+
+    <div id="risultati" th:fragment="risultati">
+        <div class="row g-2 mb-3">
+            <div class="col-6 col-md-3 col-xl-2">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body py-2">
+                        <div class="small text-secondary">Totale</div>
+                        <div class="fs-5 fw-semibold" th:text="${@formati.euro(totali.totale())}">0,00 €</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 col-xl-2" th:each="voce : ${totali.perCategoria()}">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body py-2">
+                        <div class="small text-secondary" th:text="${voce.key.etichetta}">Categoria</div>
+                        <div class="fs-5" th:text="${@formati.euro(voce.value)}">0,00 €</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mb-2">
+            <a th:href="@{/export/spese.xlsx(q=${filtro.q},categoria=${filtro.categoria},da=${filtro.da},a=${filtro.a})}" class="btn btn-sm btn-outline-success"><i class="bi bi-file-earmark-excel me-1"></i>Excel</a>
+            <a th:href="@{/export/spese.csv(q=${filtro.q},categoria=${filtro.categoria},da=${filtro.da},a=${filtro.a})}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-filetype-csv me-1"></i>CSV</a>
+        </div>
+        <div class="card shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Data</th>
+                        <th>Categoria</th>
+                        <th>Descrizione</th>
+                        <th>Articolo</th>
+                        <th class="text-end">Importo</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="s : ${pagina.content}">
+                        <td th:text="${@formati.data(s.dataSpesa)}">01/01/2026</td>
+                        <td><span class="badge text-bg-light border" th:text="${s.categoria.etichetta}">Categoria</span></td>
+                        <td>
+                            <span th:text="${s.descrizione}">Descrizione</span>
+                            <div class="small text-secondary text-truncate" style="max-width: 360px"
+                                 th:if="${s.note}" th:text="${s.note}">Note</div>
+                        </td>
+                        <td>
+                            <a th:if="${s.articolo}" th:href="@{/articoli/{id}(id=${s.articolo.id})}"
+                               class="text-decoration-none" th:text="${s.articolo.nome}">Articolo</a>
+                            <span th:unless="${s.articolo}" class="text-secondary">—</span>
+                        </td>
+                        <td class="text-end fw-semibold" th:text="${@formati.euro(s.importo)}">0</td>
+                        <td class="text-end text-nowrap">
+                            <a th:href="@{/spese/{id}/modifica(id=${s.id})}" class="btn btn-sm btn-outline-secondary"
+                               title="Modifica"><i class="bi bi-pencil"></i></a>
+                            <form th:action="@{/spese/{id}/elimina(id=${s.id})}" method="post" class="d-inline"
+                                  onsubmit="return confirm('Eliminare questa spesa?')">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Elimina">
+                                    <i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${pagina.empty}">
+                        <td colspan="6" class="text-center text-secondary py-4">Nessuna spesa trovata.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 gap-2" th:if="${pagina.totalElements > 0}">
+            <span class="small text-secondary"
+                  th:text="|${pagina.totalElements} spese · pagina ${pagina.number + 1} di ${pagina.totalPages}|"></span>
+            <nav th:if="${pagina.totalPages > 1}" aria-label="Paginazione">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item" th:classappend="${pagina.first} ? 'disabled'">
+                        <a class="page-link" th:href="@{/spese(q=${filtro.q},categoria=${filtro.categoria},da=${filtro.da},a=${filtro.a},page=${pagina.number - 1})}">&laquo;</a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, pagina.totalPages - 1)}"
+                        th:classappend="${i == pagina.number} ? 'active'">
+                        <a class="page-link" th:text="${i + 1}"
+                           th:href="@{/spese(q=${filtro.q},categoria=${filtro.categoria},da=${filtro.da},a=${filtro.a},page=${i})}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${pagina.last} ? 'disabled'">
+                        <a class="page-link" th:href="@{/spese(q=${filtro.q},categoria=${filtro.categoria},da=${filtro.da},a=${filtro.a},page=${pagina.number + 1})}">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</main>
+</body>
+</html>

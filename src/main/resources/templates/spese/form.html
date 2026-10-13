@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${spesa} ? 'Modifica spesa · Compravendita' : 'Nuova spesa · Compravendita'">Spesa</title>
+</head>
+<body>
+<main>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/spese}">Spese generali</a></li>
+            <li class="breadcrumb-item active" th:text="${spesa} ? 'Modifica' : 'Nuova'">Nuova</li>
+        </ol>
+    </nav>
+    <h1 class="h3 mb-3" th:text="${spesa} ? 'Modifica spesa' : 'Nuova spesa'">Nuova spesa</h1>
+
+    <form th:action="${spesa} ? @{/spese/{id}(id=${spesa.id})} : @{/spese}" th:object="${form}"
+          method="post" class="card shadow-sm" novalidate>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-6 col-md-3">
+                    <label for="dataSpesa" class="form-label">Data *</label>
+                    <input type="date" th:field="*{dataSpesa}" class="form-control"
+                           th:classappend="${#fields.hasErrors('dataSpesa')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:errors="*{dataSpesa}"></div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <label for="categoria" class="form-label">Categoria *</label>
+                    <select th:field="*{categoria}" class="form-select"
+                            th:classappend="${#fields.hasErrors('categoria')} ? 'is-invalid'">
+                        <option value="">Scegli…</option>
+                        <option th:each="c : ${categorie}" th:value="${c}" th:text="${c.etichetta}">Categoria</option>
+                    </select>
+                    <div class="invalid-feedback" th:errors="*{categoria}"></div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label for="importo" class="form-label">Importo *</label>
+                    <div class="input-group">
+                        <span class="input-group-text">€</span>
+                        <input type="number" step="0.01" min="0" th:field="*{importo}" class="form-control"
+                               th:classappend="${#fields.hasErrors('importo')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:errors="*{importo}"></div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <label for="descrizione" class="form-label">Descrizione *</label>
+                    <input type="text" th:field="*{descrizione}" class="form-control" maxlength="255"
+                           placeholder="Es. abbonamento negozio eBay, toploader e bustine, tavolo in fiera"
+                           th:classappend="${#fields.hasErrors('descrizione')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:errors="*{descrizione}"></div>
+                </div>
+                <div class="col-12">
+                    <label for="articoloEtichetta" class="form-label">Articolo collegato</label>
+                    <input type="text" th:field="*{articoloEtichetta}" class="form-control" list="elenco-articoli"
+                           placeholder="Facoltativo: cerca articolo…" autocomplete="off"
+                           th:classappend="${#fields.hasErrors('articoloEtichetta')} ? 'is-invalid'">
+                    <datalist id="elenco-articoli">
+                        <option th:each="o : ${opzioniArticoli}" th:value="${o.etichetta()}"></option>
+                    </datalist>
+                    <div class="invalid-feedback" th:errors="*{articoloEtichetta}"></div>
+                    <div class="form-text">Solo come riferimento: la spesa resta un costo generale e non cambia il costo
+                        dei lotti.</div>
+                </div>
+                <div class="col-12">
+                    <label for="note" class="form-label">Note</label>
+                    <textarea th:field="*{note}" class="form-control" rows="2"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer d-flex justify-content-end gap-2">
+            <a th:href="@{/spese}" class="btn btn-outline-secondary">Annulla</a>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Salva</button>
+        </div>
+    </form>
+</main>
+</body>
+</html>

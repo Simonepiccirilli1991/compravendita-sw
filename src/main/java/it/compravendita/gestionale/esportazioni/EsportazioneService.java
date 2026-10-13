@@ -21,6 +21,9 @@ import it.compravendita.gestionale.common.Formati;
 import it.compravendita.gestionale.magazzino.FiltroMagazzino;
 import it.compravendita.gestionale.report.CalcoloEconomicoService;
 import it.compravendita.gestionale.report.ContoAnnuale;
+import it.compravendita.gestionale.spese.FiltroSpese;
+import it.compravendita.gestionale.spese.Spesa;
+import it.compravendita.gestionale.spese.SpesaService;
 import it.compravendita.gestionale.vendite.FiltroVendite;
 import it.compravendita.gestionale.vendite.RigaVendita;
 import it.compravendita.gestionale.vendite.Vendita;
@@ -43,14 +46,17 @@ public class EsportazioneService {
 
 	private final SchemaAttributi schemaAttributi;
 
+	private final SpesaService spesaService;
+
 	public EsportazioneService(AcquistoRepository acquistoRepository, VenditaRepository venditaRepository,
 			RigaAcquistoRepository rigaAcquistoRepository, CalcoloEconomicoService calcolo,
-			SchemaAttributi schemaAttributi) {
+			SchemaAttributi schemaAttributi, SpesaService spesaService) {
 		this.acquistoRepository = acquistoRepository;
 		this.venditaRepository = venditaRepository;
 		this.rigaAcquistoRepository = rigaAcquistoRepository;
 		this.calcolo = calcolo;
 		this.schemaAttributi = schemaAttributi;
+		this.spesaService = spesaService;
 	}
 
 	/** Una riga per ogni riga d'acquisto. */
@@ -71,6 +77,17 @@ public class EsportazioneService {
 						r.getCostiAggiuntivi(), r.getCostoUnitarioEffettivo(), r.getQuantitaResidua(),
 						r.getStato().getEtichetta(), acquisto.getNote());
 			}
+		}
+		return tabella;
+	}
+
+	/** Spese generali, in ordine di data. */
+	public Tabella spese(FiltroSpese filtro) {
+		Tabella tabella = new Tabella("Spese").data("Data").testo("Categoria").testo("Descrizione")
+			.importo("Importo").testo("Articolo").testo("Note");
+		for (Spesa s : spesaService.tutte(filtro)) {
+			tabella.riga(s.getDataSpesa(), s.getCategoria().getEtichetta(), s.getDescrizione(), s.getImporto(),
+					s.getArticolo() != null ? s.getArticolo().getNome() : null, s.getNote());
 		}
 		return tabella;
 	}

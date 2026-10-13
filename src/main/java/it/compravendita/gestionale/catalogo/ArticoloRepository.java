@@ -1,6 +1,7 @@
 package it.compravendita.gestionale.catalogo;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,11 @@ public interface ArticoloRepository extends JpaRepository<Articolo, Long>, JpaSp
 	@Override
 	@EntityGraph(attributePaths = "brand")
 	Page<Articolo> findAll(Specification<Articolo> spec, Pageable pageable);
+
+	/** Con il brand, mostrato in dettaglio e form fuori dalla transazione (open-in-view disattivato). */
+	@Override
+	@EntityGraph(attributePaths = "brand")
+	Optional<Articolo> findById(Long id);
 
 	List<Articolo> findByCategoria(Categoria categoria);
 

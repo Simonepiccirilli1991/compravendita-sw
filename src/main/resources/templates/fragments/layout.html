@@ -61,6 +61,11 @@
                     <i class="bi bi-shop me-2"></i>Piattaforme</a>
             </li>
             <li class="nav-item">
+                <a th:href="@{/spese}" class="nav-link text-white"
+                   th:classappend="${activePage == 'spese'} ? 'active'">
+                    <i class="bi bi-receipt me-2"></i>Spese</a>
+            </li>
+            <li class="nav-item">
                 <a th:href="@{/report}" class="nav-link text-white"
                    th:classappend="${activePage == 'report'} ? 'active'">
                     <i class="bi bi-graph-up-arrow me-2"></i>Report</a>

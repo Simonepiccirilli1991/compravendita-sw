@@ -18,10 +18,11 @@ import it.compravendita.gestionale.common.Formati;
 import it.compravendita.gestionale.common.RisorsaNonTrovataException;
 import it.compravendita.gestionale.magazzino.FiltroMagazzino;
 import it.compravendita.gestionale.report.CalcoloEconomicoService;
+import it.compravendita.gestionale.spese.FiltroSpese;
 import it.compravendita.gestionale.vendite.FiltroVendite;
 
 /**
- * Download di acquisti, vendite, magazzino e riepilogo annuale in CSV o Excel. I parametri di
+ * Download di acquisti, vendite, magazzino, spese e riepilogo annuale in CSV o Excel. I parametri di
  * filtro sono gli stessi delle rispettive liste.
  */
 @Controller
@@ -59,6 +60,11 @@ public class EsportazioneController {
 	@GetMapping("/magazzino.{formato}")
 	ResponseEntity<byte[]> magazzino(@ModelAttribute FiltroMagazzino filtro, @PathVariable String formato) {
 		return file("magazzino", formato, List.of(esportazioneService.magazzino(filtro)));
+	}
+
+	@GetMapping("/spese.{formato}")
+	ResponseEntity<byte[]> spese(@ModelAttribute FiltroSpese filtro, @PathVariable String formato) {
+		return file("spese", formato, List.of(esportazioneService.spese(filtro)));
 	}
 
 	@GetMapping("/annuale.{formato}")
