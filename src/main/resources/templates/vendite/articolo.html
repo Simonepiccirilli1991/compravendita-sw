@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--/* Vendite di un articolo, caricate via HTMX nella scheda articolo */-->
+<div th:fragment="vendite" class="card shadow-sm mt-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">Vendite</span>
+        <a th:href="@{/vendite/nuova(articoloId=${articoloId})}" class="btn btn-sm btn-outline-success">
+            <i class="bi bi-cash-coin me-1"></i>Registra vendita</a>
+    </div>
+    <div class="table-responsive" th:unless="${#lists.isEmpty(righeVendita)}">
+        <table class="table table-sm table-hover align-middle mb-0">
+            <thead class="table-light">
+            <tr>
+                <th>Data</th>
+                <th>Piattaforma</th>
+                <th class="text-end">Q.tà</th>
+                <th class="text-end">Prezzo unit.</th>
+                <th class="text-end">Costo merce</th>
+                <th>Stato</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="r : ${righeVendita}" th:classappend="${!r.vendita.completata} ? 'text-secondary'">
+                <td><a th:href="@{/vendite/{id}(id=${r.vendita.id})}" class="text-decoration-none"
+                       th:text="${@formati.data(r.vendita.dataVendita)}">01/01/2026</a></td>
+                <td th:text="${r.vendita.piattaforma.nome}">eBay</td>
+                <td class="text-end" th:text="${r.quantita}">1</td>
+                <td class="text-end" th:text="${@formati.euro(r.prezzoUnitario)}">0</td>
+                <td class="text-end" th:text="${@formati.euro(r.costoVenduto)}">0</td>
+                <td><span th:replace="~{vendite/fragments :: stato(${r.vendita.stato})}"></span></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="card-body text-secondary small" th:if="${#lists.isEmpty(righeVendita)}">
+        Nessuna vendita registrata per questo articolo.
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--/* Scelta del lotto da cui prelevare la merce di una riga. Variabili: indice, lottiRiga, lottoScelto */-->
+<div th:fragment="sceltaLotto" th:id="|lotto-${indice}|">
+    <select class="form-select" th:name="|righe[${indice}].lottoId|" aria-label="Lotto">
+        <option value="">Automatico (FIFO)</option>
+        <option th:each="l : ${lottiRiga}" th:value="${l.id}" th:selected="${l.id == lottoScelto}"
+                th:text="|${@formati.data(l.acquisto.dataAcquisto)} · ${l.quantitaResidua} disp. · ${@formati.euro(l.costoUnitarioEffettivo)}|">Lotto</option>
+        <option th:if="${lottoScelto != null and (lottiRiga == null or !#lists.contains(lottiRiga.![id], lottoScelto))}"
+                th:value="${lottoScelto}" selected th:text="|Lotto attuale #${lottoScelto}|">Lotto attuale</option>
+    </select>
+</div>
+
+<!--/* Badge con lo stato di una vendita */-->
+<span th:fragment="stato(stato)" class="badge"
+      th:classappend="${stato.name() == 'COMPLETATA'} ? 'text-bg-success' : (${stato.name() == 'RESA'} ? 'text-bg-warning' : 'text-bg-secondary')"
+      th:text="${stato.etichetta}">Stato</span>
+
+</body>
+</html>

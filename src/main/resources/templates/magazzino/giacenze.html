@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Magazzino · Compravendita</title>
+</head>
+<body>
+<main>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h1 class="h3 mb-0">Magazzino</h1>
+        <a th:href="@{/acquisti/nuovo}" class="btn btn-primary"><i class="bi bi-cart-plus me-1"></i>Registra acquisto</a>
+    </div>
+    <ul th:replace="~{magazzino/fragments :: schede(${sezione})}"></ul>
+
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-lg">
+            <div class="card shadow-sm h-100"><div class="card-body">
+                <div class="small text-secondary">Valore a costo</div>
+                <div class="fs-4 fw-semibold" th:text="${@formati.euro(riepilogo.valore())}">0</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg">
+            <div class="card shadow-sm h-100"><div class="card-body">
+                <div class="small text-secondary">Pezzi in giacenza</div>
+                <div class="fs-4 fw-semibold" th:text="${riepilogo.pezzi()}">0</div>
+                <div class="small text-secondary" th:text="|${riepilogo.articoli()} articoli diversi|"></div>
+            </div></div>
+        </div>
+        <div class="col-4 col-lg">
+            <div class="card shadow-sm h-100"><div class="card-body">
+                <div class="small text-secondary">In vendita</div>
+                <div class="fs-4 fw-semibold" th:text="${riepilogo.inVendita()}">0</div>
+            </div></div>
+        </div>
+        <div class="col-4 col-lg">
+            <div class="card shadow-sm h-100"><div class="card-body">
+                <div class="small text-secondary">In arrivo</div>
+                <div class="fs-4 fw-semibold" th:text="${riepilogo.inArrivo()}">0</div>
+            </div></div>
+        </div>
+        <div class="col-4 col-lg">
+            <div class="card shadow-sm h-100"><div class="card-body">
+                <div class="small text-secondary">In grading</div>
+                <div class="fs-4 fw-semibold" th:text="${riepilogo.inGrading()}">0</div>
+            </div></div>
+        </div>
+    </div>
+
+    <form class="card card-body shadow-sm mb-3" th:action="@{/magazzino}" method="get"
+          th:attr="hx-get=@{/magazzino}" hx-target="#risultati" hx-swap="outerHTML"
+          hx-push-url="true" hx-trigger="input changed delay:300ms from:input[name='q'], change">
+        <div class="row g-2">
+            <div class="col-12 col-md-4">
+                <input type="search" name="q" class="form-control" placeholder="Cerca articolo…"
+                       th:value="${filtro.q}" aria-label="Cerca articolo">
+            </div>
+            <div class="col-6 col-md-3">
+                <select name="categoria" class="form-select" aria-label="Categoria">
+                    <option value="">Tutte le categorie</option>
+                    <option th:each="c : ${categorie}" th:value="${c}" th:text="${c.etichetta}"
+                            th:selected="${c == filtro.categoria}"></option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <select name="brandId" class="form-select" aria-label="Brand">
+                    <option value="">Tutti i brand</option>
+                    <option th:each="b : ${brands}" th:value="${b.id}" th:text="${b.nome}"
+                            th:selected="${b.id == filtro.brandId}"></option>
+                </select>
+            </div>
+            <div class="col-12 col-md-3">
+                <select name="ordine" class="form-select" aria-label="Ordina per">
+                    <option th:each="o : ${ordini}" th:value="${o}" th:text="|Ordina: ${o.etichetta}|"
+                            th:selected="${o == filtro.ordine}"></option>
+                </select>
+            </div>
+        </div>
+        <th:block th:if="${filtro.acquistatoPrima}">
+            <input type="hidden" name="acquistatoPrima" th:value="${filtro.acquistatoPrima}">
+            <div class="small mt-2">
+                <span class="badge text-bg-warning" th:text="|Solo merce acquistata prima del ${@formati.data(filtro.acquistatoPrima)}|"></span>
+                <a th:href="@{/magazzino}" class="ms-1">mostra tutto</a>
+            </div>
+        </th:block>
+        <noscript><button type="submit" class="btn btn-secondary mt-2">Filtra</button></noscript>
+    </form>
+
+    <div id="risultati" th:fragment="risultati">
+        <div class="d-flex justify-content-end gap-2 mb-2">
+            <a th:href="@{/export/magazzino.xlsx(q=${filtro.q},categoria=${filtro.categoria},brandId=${filtro.brandId})}" class="btn btn-sm btn-outline-success"><i class="bi bi-file-earmark-excel me-1"></i>Excel</a>
+            <a th:href="@{/export/magazzino.csv(q=${filtro.q},categoria=${filtro.categoria},brandId=${filtro.brandId})}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-filetype-csv me-1"></i>CSV</a>
+        </div>
+        <div class="card shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Articolo</th>
+                        <th>Brand</th>
+                        <th class="text-end">Pezzi</th>
+                        <th>Di cui</th>
+                        <th class="text-end">Costo medio</th>
+                        <th class="text-end">Valore</th>
+                        <th class="text-end">Giorni</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="g : ${pagina.content}">
+                        <td>
+                            <a th:href="@{/articoli/{id}(id=${g.articoloId()})}" class="fw-semibold text-decoration-none"
+                               th:text="${g.nome()}">Articolo</a>
+                            <div class="small text-secondary" th:text="${g.categoria().etichetta}">Categoria</div>
+                        </td>
+                        <td th:text="${g.brand()} ?: '—'">Brand</td>
+                        <td class="text-end fw-semibold" th:text="${g.pezzi()}">1</td>
+                        <td class="small">
+                            <span class="badge text-bg-success" th:if="${g.inVendita() > 0}" th:text="|${g.inVendita()} in vendita|"></span>
+                            <span class="badge text-bg-info" th:if="${g.inArrivo() > 0}" th:text="|${g.inArrivo()} in arrivo|"></span>
+                            <span class="badge text-bg-warning" th:if="${g.inGrading() > 0}" th:text="|${g.inGrading()} in grading|"></span>
+                        </td>
+                        <td class="text-end" th:text="${@formati.euro(g.costoMedio())}">0</td>
+                        <td class="text-end fw-semibold" th:text="${@formati.euro(g.valore())}">0</td>
+                        <td class="text-end" th:title="|Lotto più vecchio acquistato il ${@formati.data(g.primoAcquisto())}|">
+                            <span th:text="${g.giorniGiacenza()}"
+                                  th:classappend="${g.giorniGiacenza() > 180} ? 'text-danger fw-semibold' : (${g.giorniGiacenza() > 90} ? 'text-warning-emphasis')">0</span>
+                        </td>
+                    </tr>
+                    <tr th:if="${pagina.empty}">
+                        <td colspan="7" class="text-center text-secondary py-4">Nessun articolo in giacenza.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 gap-2" th:if="${pagina.totalElements > 0}">
+            <span class="small text-secondary"
+                  th:text="|${pagina.totalElements} articoli · pagina ${pagina.number + 1} di ${pagina.totalPages}|"></span>
+            <nav th:if="${pagina.totalPages > 1}" aria-label="Paginazione">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item" th:classappend="${pagina.first} ? 'disabled'">
+                        <a class="page-link" th:href="@{/magazzino(q=${filtro.q},categoria=${filtro.categoria},brandId=${filtro.brandId},ordine=${filtro.ordine},acquistatoPrima=${filtro.acquistatoPrima},page=${pagina.number - 1})}">&laquo;</a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, pagina.totalPages - 1)}"
+                        th:classappend="${i == pagina.number} ? 'active'">
+                        <a class="page-link" th:text="${i + 1}"
+                           th:href="@{/magazzino(q=${filtro.q},categoria=${filtro.categoria},brandId=${filtro.brandId},ordine=${filtro.ordine},acquistatoPrima=${filtro.acquistatoPrima},page=${i})}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${pagina.last} ? 'disabled'">
+                        <a class="page-link" th:href="@{/magazzino(q=${filtro.q},categoria=${filtro.categoria},brandId=${filtro.brandId},ordine=${filtro.ordine},acquistatoPrima=${filtro.acquistatoPrima},page=${pagina.number + 1})}">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</main>
+</body>
+</html>

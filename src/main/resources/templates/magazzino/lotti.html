@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Lotti · Magazzino · Compravendita</title>
+</head>
+<body>
+<main>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h1 class="h3 mb-0">Magazzino</h1>
+        <a th:href="@{/acquisti/nuovo}" class="btn btn-primary"><i class="bi bi-cart-plus me-1"></i>Registra acquisto</a>
+    </div>
+    <ul th:replace="~{magazzino/fragments :: schede(${sezione})}"></ul>
+
+    <form class="card card-body shadow-sm mb-3" th:action="@{/magazzino/lotti}" method="get"
+          th:attr="hx-get=@{/magazzino/lotti}" hx-target="#risultati" hx-swap="outerHTML"
+          hx-push-url="true" hx-trigger="input changed delay:300ms from:input[name='q'], change">
+        <div class="row g-2">
+            <div class="col-12 col-md-4">
+                <input type="search" name="q" class="form-control" placeholder="Cerca articolo…"
+                       th:value="${filtro.q}" aria-label="Cerca articolo">
+            </div>
+            <div class="col-6 col-md-3">
+                <select name="categoria" class="form-select" aria-label="Categoria">
+                    <option value="">Tutte le categorie</option>
+                    <option th:each="c : ${categorie}" th:value="${c}" th:text="${c.etichetta}"
+                            th:selected="${c == filtro.categoria}"></option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <select name="brandId" class="form-select" aria-label="Brand">
+                    <option value="">Tutti i brand</option>
+                    <option th:each="b : ${brands}" th:value="${b.id}" th:text="${b.nome}"
+                            th:selected="${b.id == filtro.brandId}"></option>
+                </select>
+            </div>
+            <div class="col-12 col-md-3">
+                <select name="stato" class="form-select" aria-label="Stato">
+                    <option value="">Tutti i disponibili</option>
+                    <option th:each="s : ${stati}" th:value="${s}" th:text="${s.etichetta}"
+                            th:selected="${s == filtro.stato}"></option>
+                </select>
+            </div>
+        </div>
+        <noscript><button type="submit" class="btn btn-secondary mt-2">Filtra</button></noscript>
+    </form>
+
+    <div id="risultati" th:fragment="risultati">
+        <div class="d-flex justify-content-end gap-2 mb-2">
+            <a th:href="@{/export/magazzino.xlsx(q=${filtro.q},categoria=${filtro.categoria},brandId=${filtro.brandId},stato=${filtro.stato})}" class="btn btn-sm btn-outline-success"><i class="bi bi-file-earmark-excel me-1"></i>Excel</a>
+            <a th:href="@{/export/magazzino.csv(q=${filtro.q},categoria=${filtro.categoria},brandId=${filtro.brandId},stato=${filtro.stato})}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-filetype-csv me-1"></i>CSV</a>
+        </div>
+        <div class="card shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Articolo</th>
+                        <th>Acquisto</th>
+                        <th>Stato</th>
+                        <th class="text-end">Disponibili</th>
+                        <th class="text-end">Costo unit.</th>
+                        <th class="text-end">Valore</th>
+                        <th class="text-end">Giorni</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="l : ${pagina.content}">
+                        <td>
+                            <a th:href="@{/articoli/{id}(id=${l.articolo.id})}" class="fw-semibold text-decoration-none"
+                               th:text="${l.articolo.nome}">Articolo</a>
+                            <div class="small text-secondary"
+                                 th:text="${l.articolo.categoria.etichetta} + (${l.articolo.brand} ? ' · ' + ${l.articolo.brand.nome} : '')">Categoria</div>
+                        </td>
+                        <td>
+                            <a th:href="@{/acquisti/{id}(id=${l.acquisto.id})}" class="text-decoration-none"
+                               th:text="${@formati.data(l.acquisto.dataAcquisto)}">01/01/2026</a>
+                            <div class="small text-secondary" th:text="${l.acquisto.fornitore}"></div>
+                        </td>
+                        <td><span th:replace="~{magazzino/fragments :: stato(${l.stato})}"></span></td>
+                        <td class="text-end" th:text="|${l.quantitaResidua} / ${l.quantita}|">1 / 1</td>
+                        <td class="text-end" th:text="${@formati.euro(l.costoUnitarioEffettivo)}">0</td>
+                        <td class="text-end fw-semibold" th:text="${@formati.euro(l.valoreResiduo)}">0</td>
+                        <td class="text-end" th:text="${@formati.giorniDa(l.acquisto.dataAcquisto)}">0</td>
+                        <td class="text-end">
+                            <div th:replace="~{magazzino/fragments :: azioniLotto(${l}, '/magazzino/lotti')}"></div>
+                        </td>
+                    </tr>
+                    <tr th:if="${pagina.empty}">
+                        <td colspan="8" class="text-center text-secondary py-4">Nessun lotto trovato.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 gap-2" th:if="${pagina.totalElements > 0}">
+            <span class="small text-secondary"
+                  th:text="|${pagina.totalElements} lotti · pagina ${pagina.number + 1} di ${pagina.totalPages}|"></span>
+            <nav th:if="${pagina.totalPages > 1}" aria-label="Paginazione">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item" th:classappend="${pagina.first} ? 'disabled'">
+                        <a class="page-link" th:href="@{/magazzino/lotti(q=${filtro.q},categoria=${filtro.categoria},brandId=${filtro.brandId},stato=${filtro.stato},page=${pagina.number - 1})}">&laquo;</a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, pagina.totalPages - 1)}"
+                        th:classappend="${i == pagina.number} ? 'active'">
+                        <a class="page-link" th:text="${i + 1}"
+                           th:href="@{/magazzino/lotti(q=${filtro.q},categoria=${filtro.categoria},brandId=${filtro.brandId},stato=${filtro.stato},page=${i})}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${pagina.last} ? 'disabled'">
+                        <a class="page-link" th:href="@{/magazzino/lotti(q=${filtro.q},categoria=${filtro.categoria},brandId=${filtro.brandId},stato=${filtro.stato},page=${pagina.number + 1})}">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</main>
+</body>
+</html>

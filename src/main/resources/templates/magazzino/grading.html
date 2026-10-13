@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Grading · Magazzino · Compravendita</title>
+</head>
+<body>
+<main>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h1 class="h3 mb-0">Magazzino</h1>
+    </div>
+    <ul th:replace="~{magazzino/fragments :: schede(${sezione})}"></ul>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div class="btn-group btn-group-sm" role="group" aria-label="Filtra per stato">
+            <a th:href="@{/magazzino/grading}" class="btn btn-outline-secondary"
+               th:classappend="${statoFiltro == null} ? 'active'">Tutti</a>
+            <a th:each="s : ${statiGrading}" th:href="@{/magazzino/grading(stato=${s})}" class="btn btn-outline-secondary"
+               th:classappend="${s == statoFiltro} ? 'active'" th:text="${s.etichetta}">Stato</a>
+        </div>
+        <span class="small text-secondary">Per inviare una carta usa <em>Azioni → Invia a grading</em> su un lotto di carte singole.</span>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>Carta</th>
+                    <th>Ente</th>
+                    <th>Invio</th>
+                    <th>Rientro</th>
+                    <th>Stato</th>
+                    <th class="text-end">Costo</th>
+                    <th class="text-end">Costo carta</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="g : ${elenco}">
+                    <td>
+                        <a th:href="@{/articoli/{id}(id=${g.rigaAcquisto.articolo.id})}" class="fw-semibold text-decoration-none"
+                           th:text="${g.rigaAcquisto.articolo.nome}">Carta</a>
+                        <div class="small text-secondary" th:if="${g.rigaAcquisto.articolo.id != g.articoloOriginale.id}"
+                             th:text="|da ${g.articoloOriginale.nome}|"></div>
+                    </td>
+                    <td>
+                        <span th:text="${g.ente}">PSA</span>
+                        <div class="small text-secondary" th:text="${g.servizio}"></div>
+                        <div class="small text-secondary" th:if="${g.numeroOrdine}" th:text="|Ordine ${g.numeroOrdine}|"></div>
+                    </td>
+                    <td th:text="${@formati.data(g.dataInvio)}">01/01/2026</td>
+                    <td>
+                        <span th:text="${@formati.data(g.dataRientro)}">—</span>
+                        <div class="small" th:if="${g.voto}" th:text="|Voto ${@formati.numero(g.voto)} · cert. ${g.numeroCertificato}|"></div>
+                    </td>
+                    <td><span class="badge" th:classappend="${g.stato.classeBadge}" th:text="${g.stato.etichetta}">Stato</span>
+                        <div class="small text-secondary" th:if="${g.inviato}"
+                             th:text="|da ${@formati.giorniDa(g.dataInvio)} giorni|"></div></td>
+                    <td class="text-end" th:text="${@formati.euro(g.costo)}">0</td>
+                    <td class="text-end" th:text="${@formati.euro(g.rigaAcquisto.costoUnitarioEffettivo)}">0</td>
+                    <td class="text-end text-nowrap">
+                        <th:block th:if="${g.inviato}">
+                            <a th:href="@{/magazzino/grading/{id}/rientro(id=${g.id})}" class="btn btn-sm btn-success">
+                                <i class="bi bi-box-arrow-in-down me-1"></i>Rientro</a>
+                            <form th:action="@{/magazzino/grading/{id}/annulla(id=${g.id})}" method="post" class="d-inline"
+                                  onsubmit="return confirm('Annullare il grading? La carta torna in magazzino senza costi aggiuntivi.');">
+                                <button type="submit" class="btn btn-sm btn-outline-secondary" title="Annulla grading">
+                                    <i class="bi bi-x-lg"></i></button>
+                            </form>
+                        </th:block>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(elenco)}">
+                    <td colspan="8" class="text-center text-secondary py-4">Nessun grading.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+</body>
+</html>

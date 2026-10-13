@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${articolo} ? 'Modifica articolo · Compravendita' : 'Nuovo articolo · Compravendita'">Articolo</title>
+</head>
+<body>
+<main>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/articoli}">Catalogo</a></li>
+            <li class="breadcrumb-item" th:if="${articolo}">
+                <a th:href="@{/articoli/{id}(id=${articolo.id})}" th:text="${articolo.nome}">Articolo</a></li>
+            <li class="breadcrumb-item active" th:text="${articolo} ? 'Modifica' : 'Nuovo'">Nuovo</li>
+        </ol>
+    </nav>
+    <h1 class="h3 mb-3" th:text="${articolo} ? 'Modifica articolo' : 'Nuovo articolo'">Nuovo articolo</h1>
+
+    <form th:action="${articolo} ? @{/articoli/{id}(id=${articolo.id})} : @{/articoli}" th:object="${form}"
+          method="post" enctype="multipart/form-data" class="card shadow-sm" novalidate>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-12 col-lg-8">
+                    <label for="nome" class="form-label">Nome *</label>
+                    <input type="text" th:field="*{nome}" class="form-control"
+                           th:classappend="${#fields.hasErrors('nome')} ? 'is-invalid'" required maxlength="255">
+                    <div class="invalid-feedback" th:errors="*{nome}"></div>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <label for="categoria" class="form-label">Categoria *</label>
+                    <select th:field="*{categoria}" class="form-select"
+                            th:classappend="${#fields.hasErrors('categoria')} ? 'is-invalid'" required
+                            th:attr="hx-get=@{/articoli/campi}" hx-target="#campi-attributi" hx-swap="outerHTML"
+                            hx-include="[name^='attributi']">
+                        <option value="">Scegli…</option>
+                        <option th:each="c : ${categorie}" th:value="${c}" th:text="${c.etichetta}"></option>
+                    </select>
+                    <div class="invalid-feedback" th:errors="*{categoria}"></div>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <label for="brandId" class="form-label">Brand</label>
+                    <select th:field="*{brandId}" class="form-select">
+                        <option value="">Nessuno</option>
+                        <option th:each="b : ${brands}" th:value="${b.id}" th:text="${b.nome}"></option>
+                    </select>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <label for="condizione" class="form-label">Condizione</label>
+                    <select th:field="*{condizione}" class="form-select">
+                        <option value="">Non specificata</option>
+                        <option th:each="c : ${condizioni}" th:value="${c}" th:text="${c.etichetta}"></option>
+                    </select>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <label for="lingua" class="form-label">Lingua</label>
+                    <input type="text" th:field="*{lingua}" class="form-control" list="lingue" maxlength="30"
+                           th:classappend="${#fields.hasErrors('lingua')} ? 'is-invalid'">
+                    <datalist id="lingue">
+                        <option value="ITA"></option>
+                        <option value="ENG"></option>
+                        <option value="JAP"></option>
+                        <option value="KOR"></option>
+                        <option value="CHN"></option>
+                        <option value="FRA"></option>
+                        <option value="DEU"></option>
+                        <option value="ESP"></option>
+                    </datalist>
+                    <div class="invalid-feedback" th:errors="*{lingua}"></div>
+                </div>
+            </div>
+
+            <h2 class="h6 text-secondary text-uppercase mt-4 mb-2">Dettagli categoria</h2>
+            <div id="campi-attributi" th:fragment="campiAttributi" class="row g-3">
+                <div class="col-12 text-secondary small" th:if="${#lists.isEmpty(campi)}">
+                    Nessun dettaglio specifico per questa categoria.
+                </div>
+                <div class="col-12 col-sm-6 col-lg-4" th:each="c : ${campi}"
+                     th:with="nomeCampo='attributi[' + ${c.chiave()} + ']', errore=${erroriAttributi[c.chiave()]}, valore=${valori[c.chiave()]}">
+                    <th:block th:switch="${c.tipo().name()}">
+                        <div th:case="'SI_NO'" class="form-check mt-4">
+                            <input type="checkbox" class="form-check-input" value="true" th:id="'attr-' + ${c.chiave()}"
+                                   th:name="${nomeCampo}" th:checked="${valore == 'true' or valore == 'Sì'}">
+                            <label class="form-check-label" th:for="'attr-' + ${c.chiave()}" th:text="${c.etichetta()}">Opzione</label>
+                        </div>
+                        <th:block th:case="'SCELTA'">
+                            <label class="form-label" th:for="'attr-' + ${c.chiave()}"
+                                   th:text="${c.etichetta()} + (${c.obbligatorio()} ? ' *' : '')">Campo</label>
+                            <select class="form-select" th:id="'attr-' + ${c.chiave()}" th:name="${nomeCampo}"
+                                    th:classappend="${errore} ? 'is-invalid'">
+                                <option value="">—</option>
+                                <option th:each="o : ${c.opzioni()}" th:value="${o}" th:text="${o}"
+                                        th:selected="${o == valore}"></option>
+                            </select>
+                        </th:block>
+                        <th:block th:case="*">
+                            <label class="form-label" th:for="'attr-' + ${c.chiave()}"
+                                   th:text="${c.etichetta()} + (${c.obbligatorio()} ? ' *' : '')">Campo</label>
+                            <input type="text" class="form-control" th:id="'attr-' + ${c.chiave()}" th:name="${nomeCampo}"
+                                   th:value="${valore}" th:classappend="${errore} ? 'is-invalid'"
+                                   th:attr="inputmode=${c.tipo().name() == 'TESTO'} ? 'text' : 'decimal'">
+                        </th:block>
+                    </th:block>
+                    <div class="invalid-feedback d-block" th:if="${errore}" th:text="${errore}"></div>
+                </div>
+            </div>
+
+            <div class="row g-3 mt-1">
+                <div class="col-12 col-lg-6">
+                    <label for="foto" class="form-label">Foto</label>
+                    <input type="file" id="foto" name="foto" class="form-control" accept="image/jpeg,image/png,image/webp,image/gif"
+                           th:classappend="${erroreFoto} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:text="${erroreFoto}"></div>
+                    <div class="d-flex align-items-center gap-2 mt-2" th:if="${articolo?.fotoPath}">
+                        <img th:src="@{'/media/' + ${articolo.fotoPath}}" class="thumb rounded" alt="Foto attuale">
+                        <div class="form-check">
+                            <input type="checkbox" th:field="*{rimuoviFoto}" class="form-check-input">
+                            <label class="form-check-label" for="rimuoviFoto1">Rimuovi foto attuale</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-6">
+                    <label for="note" class="form-label">Note</label>
+                    <textarea th:field="*{note}" class="form-control" rows="3"
+                              th:classappend="${#fields.hasErrors('note')} ? 'is-invalid'"></textarea>
+                    <div class="invalid-feedback" th:errors="*{note}"></div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer d-flex justify-content-end gap-2">
+            <a th:href="${articolo} ? @{/articoli/{id}(id=${articolo.id})} : @{/articoli}" class="btn btn-outline-secondary">Annulla</a>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Salva</button>
+        </div>
+    </form>
+</main>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Importa inventario · Compravendita</title>
+</head>
+<body>
+<main>
+    <h1 class="h3 mb-3">Importa inventario da CSV</h1>
+
+    <div class="row g-3 mb-3">
+        <div class="col-12 col-xl-5">
+            <form th:action="@{/import/anteprima}" method="post" enctype="multipart/form-data" class="card shadow-sm h-100">
+                <div class="card-body">
+                    <label for="file" class="form-label fw-semibold">File CSV</label>
+                    <input type="file" id="file" name="file" class="form-control" accept=".csv,text/csv">
+                    <div class="form-text">Separatore ";" o ",", codifica UTF-8. Prima riga con i nomi delle colonne.</div>
+                </div>
+                <div class="card-footer d-flex justify-content-between align-items-center">
+                    <a th:href="@{/import/modello.csv}" class="small"><i class="bi bi-download me-1"></i>Scarica il modello</a>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i>Controlla il file</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-12 col-xl-7">
+            <div class="card shadow-sm h-100">
+                <div class="card-body small">
+                    <p class="mb-2">Ogni riga è un lotto di merce già in tuo possesso.</p>
+                    <ul class="mb-2">
+                        <li><strong>Obbligatorie:</strong> <code>nome</code>, <code>categoria</code> (es. Carta singola, Carta gradata,
+                            Sealed TCG, Videogioco, LEGO, Altro), <code>quantita</code>, <code>prezzo_unitario</code> (costo per pezzo).</li>
+                        <li><strong>Facoltative:</strong> <code>brand</code> (creato se non esiste), <code>lingua</code>, <code>condizione</code>,
+                            <code>data_acquisto</code> (gg/mm/aaaa, oggi se vuota), <code>fornitore</code>, <code>stato</code>
+                            (in magazzino, in vendita, in arrivo), <code>note</code>.</li>
+                        <li><strong>Dettagli di categoria:</strong> una colonna per attributo con il suo nome, es. <code>set</code>,
+                            <code>numeroCarta</code>, <code>enteGrading</code>, <code>voto</code>, <code>numeroCertificato</code>,
+                            <code>console</code>, <code>numeroSet</code>. Quelli obbligatori per la categoria vanno compilati.</li>
+                    </ul>
+                    <p class="mb-0 text-secondary">Se un articolo con lo stesso nome, categoria e brand esiste già, i pezzi vengono
+                        aggiunti a quello. Le righe con la stessa data e lo stesso fornitore diventano un unico acquisto.
+                        Non viene importato nulla finché ci sono errori.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block th:if="${analisi}">
+        <div class="alert alert-danger" th:unless="${#lists.isEmpty(analisi.erroriGenerali())}">
+            <div th:each="e : ${analisi.erroriGenerali()}" th:text="${e}">Errore</div>
+        </div>
+        <div class="alert alert-warning py-2" th:unless="${#lists.isEmpty(analisi.colonneIgnorate())}"
+             th:text="|Colonne non riconosciute e ignorate: ${#strings.listJoin(analisi.colonneIgnorate(), ', ')}|"></div>
+
+        <div class="card shadow-sm" th:unless="${#lists.isEmpty(analisi.righe())}">
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <span>
+                    <span class="fw-semibold" th:text="${nomeFile}">file.csv</span>:
+                    <span th:text="|${analisi.righe().size()} righe, ${analisi.pezzi()} pezzi, ${@formati.euro(analisi.totale())}|"></span>
+                    · <span th:text="|${analisi.acquisti()} acquisti, ${analisi.articoliNuovi()} articoli nuovi|"></span>
+                    <span th:unless="${#sets.isEmpty(analisi.brandNuovi())}"
+                          th:text="|, brand nuovi: ${#strings.setJoin(analisi.brandNuovi(), ', ')}|"></span>
+                </span>
+                <span class="badge text-bg-danger" th:if="${analisi.righeConErrori() > 0}"
+                      th:text="|${analisi.righeConErrori()} righe con errori|"></span>
+                <form th:if="${analisi.valida()}" th:action="@{/import/conferma}" method="post">
+                    <input type="hidden" name="contenuto" th:value="${contenuto}">
+                    <button type="submit" class="btn btn-success"><i class="bi bi-check-lg me-1"></i>Importa</button>
+                </form>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Riga</th>
+                        <th>Articolo</th>
+                        <th>Categoria</th>
+                        <th>Brand</th>
+                        <th class="text-end">Q.tà</th>
+                        <th class="text-end">Prezzo</th>
+                        <th>Data</th>
+                        <th>Fornitore</th>
+                        <th>Esito</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="r : ${analisi.righe()}" th:classappend="${!r.valida} ? 'table-danger'">
+                        <td th:text="${r.riga()}">2</td>
+                        <td th:text="${r.nome()}">Nome</td>
+                        <td th:text="${r.categoria()?.etichetta}">Categoria</td>
+                        <td>
+                            <span th:text="${r.brand()}">Brand</span>
+                            <span class="badge text-bg-info" th:if="${r.brandNuovo()}">nuovo</span>
+                        </td>
+                        <td class="text-end" th:text="${r.quantita()}">1</td>
+                        <td class="text-end" th:text="${@formati.euro(r.prezzoUnitario())}">0</td>
+                        <td th:text="${@formati.data(r.dataAcquisto())}">01/01/2026</td>
+                        <td th:text="${r.fornitore()}">Fornitore</td>
+                        <td>
+                            <th:block th:if="${r.valida}">
+                                <span class="badge text-bg-success" th:if="${r.articoloNuovo}">Nuovo articolo</span>
+                                <span class="badge text-bg-secondary" th:unless="${r.articoloNuovo}">Articolo esistente</span>
+                            </th:block>
+                            <div class="small text-danger" th:each="e : ${r.errori()}" th:text="${e}">Errore</div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </th:block>
+</main>
+</body>
+</html>

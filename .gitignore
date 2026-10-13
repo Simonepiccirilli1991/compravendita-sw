@@ -35,3 +35,6 @@ build/
 ### Progetto ###
 data/
 .env
+
+### Backup locali
+backups/

@@ -1,0 +1,36 @@
+package it.compravendita.gestionale.catalogo;
+
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+public interface ArticoloRepository extends JpaRepository<Articolo, Long>, JpaSpecificationExecutor<Articolo> {
+
+	@Override
+	@EntityGraph(attributePaths = "brand")
+	Page<Articolo> findAll(Specification<Articolo> spec, Pageable pageable);
+
+	List<Articolo> findByCategoria(Categoria categoria);
+
+	List<Articolo> findByNomeContainingIgnoreCaseOrderByNomeAsc(String testo);
+
+	List<Articolo> findByNomeIgnoreCaseAndCategoria(String nome, Categoria categoria);
+
+	long countByBrandId(Long brandId);
+
+	/** Coppie [brandId, numero articoli]. */
+	@Query("select a.brand.id, count(a) from Articolo a where a.brand is not null group by a.brand.id")
+	List<Object[]> contaPerBrand();
+
+	/** Vero se l'articolo è la carta di partenza di un grading. */
+	@Query("select count(g) > 0 from Grading g where g.articoloOriginale.id = :articoloId")
+	boolean usatoInGrading(@Param("articoloId") Long articoloId);
+
+}

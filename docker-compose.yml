@@ -17,6 +17,32 @@ services:
       timeout: 5s
       retries: 10
 
+  # Applicazione in container (immagine dal Dockerfile): `docker compose --profile app up -d --build`.
+  # Non serve per lo sviluppo: con `mvnw spring-boot:run` parte solo il database.
+  app:
+    build: .
+    image: compravendita-gestionale
+    container_name: compravendita-app
+    profiles: ["app"]
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-compravendita}
+      DB_USER: ${DB_USER:-compravendita}
+      DB_PASSWORD: ${DB_PASSWORD:-compravendita}
+      APP_USERNAME: ${APP_USERNAME:-admin}
+      APP_PASSWORD: ${APP_PASSWORD:-admin}
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    volumes:
+      # stessa cartella usata in sviluppo e dagli script di backup
+      - ./data/uploads:/data/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   # Interfaccia web per ispezionare il DB: avvio con `docker compose --profile tools up -d`
   pgadmin:
     image: dpage/pgadmin4:9

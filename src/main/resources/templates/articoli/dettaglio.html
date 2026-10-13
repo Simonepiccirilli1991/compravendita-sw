@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="|${articolo.nome} · Compravendita|">Articolo</title>
+</head>
+<body>
+<main>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/articoli}">Catalogo</a></li>
+            <li class="breadcrumb-item active" th:text="${articolo.nome}">Articolo</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+        <div>
+            <h1 class="h3 mb-1" th:text="${articolo.nome}">Nome</h1>
+            <span class="badge text-bg-secondary" th:text="${articolo.categoria.etichetta}">Categoria</span>
+            <span class="badge text-bg-light border" th:if="${articolo.brand}" th:text="${articolo.brand.nome}">Brand</span>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/articoli/{id}/modifica(id=${articolo.id})}" class="btn btn-outline-primary">
+                <i class="bi bi-pencil me-1"></i>Modifica</a>
+            <form th:action="@{/articoli/{id}/elimina(id=${articolo.id})}" method="post"
+                  onsubmit="return confirm('Eliminare definitivamente questo articolo?');">
+                <button type="submit" class="btn btn-outline-danger"><i class="bi bi-trash me-1"></i>Elimina</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-12 col-lg-4" th:if="${articolo.fotoPath}">
+            <div class="card shadow-sm">
+                <img th:src="@{'/media/' + ${articolo.fotoPath}}" class="card-img-top foto-dettaglio p-2" th:alt="${articolo.nome}">
+            </div>
+        </div>
+        <div class="col-12" th:classappend="${articolo.fotoPath} ? 'col-lg-8'">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Condizione</dt>
+                        <dd class="col-sm-8" th:text="${articolo.condizione?.etichetta} ?: '—'">—</dd>
+                        <dt class="col-sm-4">Lingua</dt>
+                        <dd class="col-sm-8" th:text="${articolo.lingua} ?: '—'">—</dd>
+                        <th:block th:each="c : ${campi}">
+                            <dt class="col-sm-4" th:text="${c.etichetta()}">Attributo</dt>
+                            <dd class="col-sm-8"
+                                th:text="${@schemaAttributi.valore(articolo, c.chiave())}">—</dd>
+                        </th:block>
+                        <dt class="col-sm-4">Note</dt>
+                        <dd class="col-sm-8" style="white-space: pre-line" th:text="${articolo.note} ?: '—'">—</dd>
+                        <dt class="col-sm-4">Creato il</dt>
+                        <dd class="col-sm-8" th:text="${@formati.dataOra(articolo.creatoIl)}">—</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div th:attr="hx-get=@{/magazzino/articoli/{id}(id=${articolo.id})}" hx-trigger="load" hx-swap="outerHTML">
+                <div class="card shadow-sm mt-3">
+                    <div class="card-body text-secondary small">
+                        <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>Caricamento movimenti…
+                    </div>
+                </div>
+            </div>
+            <div th:attr="hx-get=@{/vendite/articoli/{id}(id=${articolo.id})}" hx-trigger="load" hx-swap="outerHTML"></div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

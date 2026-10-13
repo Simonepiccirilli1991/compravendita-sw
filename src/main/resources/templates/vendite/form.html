@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${vendita} ? 'Modifica vendita · Compravendita' : 'Nuova vendita · Compravendita'">Vendita</title>
+</head>
+<body>
+<main>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/vendite}">Vendite</a></li>
+            <li class="breadcrumb-item" th:if="${vendita}">
+                <a th:href="@{/vendite/{id}(id=${vendita.id})}" th:text="|Vendita del ${@formati.data(vendita.dataVendita)}|">Vendita</a></li>
+            <li class="breadcrumb-item active" th:text="${vendita} ? 'Modifica' : 'Nuova'">Nuova</li>
+        </ol>
+    </nav>
+    <h1 class="h3 mb-3" th:text="${vendita} ? 'Modifica vendita' : 'Registra vendita'">Registra vendita</h1>
+
+    <form id="form-vendita" th:action="${vendita} ? @{/vendite/{id}(id=${vendita.id})} : @{/vendite}"
+          th:object="${form}" method="post" novalidate>
+        <input type="hidden" name="venditaId" th:if="${vendita}" th:value="${vendita.id}">
+        <div class="row g-3">
+            <div class="col-12 col-xl-7">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header fw-semibold">Dati vendita</div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12 col-sm-4">
+                                <label for="dataVendita" class="form-label">Data *</label>
+                                <input type="date" th:field="*{dataVendita}" class="form-control"
+                                       th:classappend="${#fields.hasErrors('dataVendita')} ? 'is-invalid'">
+                                <div class="invalid-feedback" th:errors="*{dataVendita}"></div>
+                            </div>
+                            <div class="col-12 col-sm-8">
+                                <label for="piattaformaId" class="form-label">Piattaforma *</label>
+                                <select th:field="*{piattaformaId}" class="form-select"
+                                        th:classappend="${#fields.hasErrors('piattaformaId')} ? 'is-invalid'">
+                                    <option value="">Scegli…</option>
+                                    <option th:each="p : ${piattaforme}" th:value="${p.id}" th:text="${p.nome}"></option>
+                                    <option th:if="${vendita != null and !vendita.piattaforma.attiva}" th:value="${vendita.piattaforma.id}"
+                                            th:text="|${vendita.piattaforma.nome} (disattivata)|"></option>
+                                </select>
+                                <div class="invalid-feedback" th:errors="*{piattaformaId}"></div>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label for="acquirente" class="form-label">Acquirente</label>
+                                <input type="text" th:field="*{acquirente}" class="form-control" maxlength="255"
+                                       th:classappend="${#fields.hasErrors('acquirente')} ? 'is-invalid'">
+                                <div class="invalid-feedback" th:errors="*{acquirente}"></div>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label for="riferimentoOrdine" class="form-label">N° ordine</label>
+                                <input type="text" th:field="*{riferimentoOrdine}" class="form-control" maxlength="100"
+                                       th:classappend="${#fields.hasErrors('riferimentoOrdine')} ? 'is-invalid'">
+                                <div class="invalid-feedback" th:errors="*{riferimentoOrdine}"></div>
+                            </div>
+                            <div class="col-12">
+                                <label for="note" class="form-label">Note</label>
+                                <textarea th:field="*{note}" class="form-control" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-xl-5">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header fw-semibold">Spedizione, costi e commissioni</div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label for="spedizioneIncassata" class="form-label">Spedizione pagata dal cliente</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" min="0" th:field="*{spedizioneIncassata}" class="form-control"
+                                           th:classappend="${#fields.hasErrors('spedizioneIncassata')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:errors="*{spedizioneIncassata}"></div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label for="costoSpedizione" class="form-label">Spedizione pagata da te</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" min="0" th:field="*{costoSpedizione}" class="form-control"
+                                           th:classappend="${#fields.hasErrors('costoSpedizione')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:errors="*{costoSpedizione}"></div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label for="costoImballaggio" class="form-label">Imballaggio</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" min="0" th:field="*{costoImballaggio}" class="form-control"
+                                           th:classappend="${#fields.hasErrors('costoImballaggio')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:errors="*{costoImballaggio}"></div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label for="altriCosti" class="form-label">Altri costi</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" min="0" th:field="*{altriCosti}" class="form-control"
+                                           th:classappend="${#fields.hasErrors('altriCosti')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:errors="*{altriCosti}"></div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" th:field="*{commissioniAutomatiche}" class="form-check-input" role="switch">
+                                    <label class="form-check-label" for="commissioniAutomatiche1">
+                                        Calcola le commissioni dalla piattaforma</label>
+                                </div>
+                                <div class="form-text">Disattiva per inserire gli importi effettivi indicati dalla piattaforma.</div>
+                            </div>
+                            <div class="col-6">
+                                <label for="commissioniPiattaforma" class="form-label">Commissione piattaforma</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" min="0" th:field="*{commissioniPiattaforma}" class="form-control"
+                                           th:classappend="${#fields.hasErrors('commissioniPiattaforma')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:errors="*{commissioniPiattaforma}"></div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label for="commissioniPagamento" class="form-label">Commissione pagamento</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" min="0" th:field="*{commissioniPagamento}" class="form-control"
+                                           th:classappend="${#fields.hasErrors('commissioniPagamento')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:errors="*{commissioniPagamento}"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mt-3">
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <span class="fw-semibold">Articoli venduti</span>
+                <button type="button" class="btn btn-sm btn-outline-secondary" title="Ricarica l'elenco degli articoli disponibili"
+                        th:attr="hx-get=@{/vendite/elenco-articoli}" hx-target="#elenco-articoli" hx-swap="outerHTML">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Aggiorna elenco</button>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger py-2" th:if="${#fields.hasGlobalErrors()}">
+                    <i class="bi bi-exclamation-triangle me-1"></i><span th:each="e : ${#fields.globalErrors()}" th:text="${e}"></span>
+                </div>
+
+                <datalist id="elenco-articoli" th:fragment="elencoArticoli">
+                    <option th:each="o : ${opzioniArticoli}" th:value="${o.etichetta()}"></option>
+                </datalist>
+
+                <div id="righe" th:fragment="righe" th:object="${form}">
+                    <div class="row g-2 small text-secondary d-none d-md-flex mb-1">
+                        <div class="col-md-5">Articolo (solo quelli disponibili) *</div>
+                        <div class="col-md-1">Q.tà *</div>
+                        <div class="col-md-2">Prezzo unitario *</div>
+                        <div class="col-md-3">Lotto</div>
+                    </div>
+                    <div class="row g-2 align-items-start riga-vendita border-bottom pb-2 mb-2"
+                         th:each="r, it : *{righe}" th:with="i=${it.index}">
+                        <div class="col-12 col-md-5">
+                            <input type="text" th:field="*{righe[__${i}__].articoloEtichetta}" class="form-control"
+                                   list="elenco-articoli" placeholder="Cerca articolo…" autocomplete="off" aria-label="Articolo"
+                                   th:attr="hx-get=@{/vendite/lotti},hx-target='#lotto-' + ${i},hx-vals=|{&quot;indice&quot;: ${i}}|"
+                                   hx-trigger="change" hx-swap="outerHTML"
+                                   th:classappend="${#fields.hasErrors('righe[__${i}__].articoloEtichetta')} ? 'is-invalid'">
+                            <div class="invalid-feedback" th:errors="*{righe[__${i}__].articoloEtichetta}"></div>
+                        </div>
+                        <div class="col-4 col-md-1">
+                            <input type="number" min="1" step="1" th:field="*{righe[__${i}__].quantita}" class="form-control"
+                                   aria-label="Quantità" placeholder="Q.tà"
+                                   th:classappend="${#fields.hasErrors('righe[__${i}__].quantita')} ? 'is-invalid'">
+                            <div class="invalid-feedback" th:errors="*{righe[__${i}__].quantita}"></div>
+                        </div>
+                        <div class="col-8 col-md-2">
+                            <div class="input-group">
+                                <span class="input-group-text">€</span>
+                                <input type="number" min="0" step="0.01" th:field="*{righe[__${i}__].prezzoUnitario}"
+                                       class="form-control" aria-label="Prezzo unitario"
+                                       th:classappend="${#fields.hasErrors('righe[__${i}__].prezzoUnitario')} ? 'is-invalid'">
+                                <div class="invalid-feedback" th:errors="*{righe[__${i}__].prezzoUnitario}"></div>
+                            </div>
+                        </div>
+                        <div class="col-9 col-md-3">
+                            <th:block th:with="indice=${i}, lottiRiga=${lottiPerRiga.get(i)}, lottoScelto=${r.lottoId}">
+                                <div th:replace="~{vendite/fragments :: sceltaLotto}"></div>
+                            </th:block>
+                            <div class="invalid-feedback d-block" th:errors="*{righe[__${i}__].lottoId}"></div>
+                        </div>
+                        <div class="col-3 col-md-1 text-end">
+                            <button type="button" class="btn btn-outline-danger" title="Rimuovi riga"
+                                    th:attr="hx-get=@{/vendite/righe(azione='rimuovi',indice=${i})}"
+                                    hx-include="#righe" hx-target="#righe" hx-swap="outerHTML">
+                                <i class="bi bi-x-lg"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-outline-primary btn-sm"
+                        th:attr="hx-get=@{/vendite/righe(azione='aggiungi')}" hx-include="#righe"
+                        hx-target="#righe" hx-swap="outerHTML">
+                    <i class="bi bi-plus-lg me-1"></i>Aggiungi riga</button>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mt-3">
+            <div class="card-header fw-semibold">Riepilogo economico</div>
+            <div id="anteprima" th:fragment="anteprima" th:attr="hx-get=@{/vendite/anteprima}"
+                 hx-include="#form-vendita" hx-swap="outerHTML"
+                 hx-trigger="change from:#form-vendita, keyup changed delay:500ms from:#form-vendita, righeAggiornate from:body">
+                <div class="row g-0">
+                    <div class="col-12 col-lg-7">
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle mb-0">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>Articolo</th>
+                                    <th class="text-end">Q.tà</th>
+                                    <th class="text-end">Incasso</th>
+                                    <th class="text-end">Costo merce</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="r : ${anteprima.righe()}">
+                                    <td th:text="${r.articolo()}">Articolo</td>
+                                    <td class="text-end" th:text="${r.quantita()} ?: '—'">1</td>
+                                    <td class="text-end" th:text="${@formati.euro(r.totale())}">0</td>
+                                    <td class="text-end" th:text="${r.costo()} ? ${@formati.euro(r.costo())} : 'non disponibile'">0</td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(anteprima.righe())}">
+                                    <td colspan="4" class="text-secondary text-center py-3">Aggiungi gli articoli venduti.</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-5 border-start">
+                        <dl class="row mb-0 p-3 small">
+                            <dt class="col-7 fw-normal">Merce</dt>
+                            <dd class="col-5 text-end mb-1" th:text="${@formati.euro(anteprima.lordo())}">0</dd>
+                            <dt class="col-7 fw-normal">+ Spedizione incassata</dt>
+                            <dd class="col-5 text-end mb-1" th:text="${@formati.euro(anteprima.spedizioneIncassata())}">0</dd>
+                            <dt class="col-7 fw-normal">
+                                − Commissioni <span class="badge text-bg-light border" th:if="${anteprima.commissioniCalcolate()}">auto</span>
+                            </dt>
+                            <dd class="col-5 text-end mb-1"
+                                th:title="|Piattaforma ${@formati.euro(anteprima.commissioni().piattaforma())} · pagamento ${@formati.euro(anteprima.commissioni().pagamento())}|"
+                                th:text="${@formati.euro(anteprima.commissioni().totale())}">0</dd>
+                            <dt class="col-7 fw-normal">− Spedizione, imballaggio, altri</dt>
+                            <dd class="col-5 text-end mb-1" th:text="${@formati.euro(anteprima.costiVendita())}">0</dd>
+                            <dt class="col-7 border-top pt-1">Netto incassato</dt>
+                            <dd class="col-5 text-end border-top pt-1 fw-semibold mb-1" th:text="${@formati.euro(anteprima.netto())}">0</dd>
+                            <dt class="col-7 fw-normal">− Costo della merce</dt>
+                            <dd class="col-5 text-end mb-1" th:text="${@formati.euro(anteprima.costoVenduto())}">0</dd>
+                            <dt class="col-7 border-top pt-1">Profitto</dt>
+                            <dd class="col-5 text-end border-top pt-1 fw-semibold mb-1"
+                                th:classappend="${@formati.classeSegno(anteprima.profitto())}"
+                                th:text="${@formati.euro(anteprima.profitto())}">0</dd>
+                            <dt class="col-7 fw-normal">ROI</dt>
+                            <dd class="col-5 text-end mb-0" th:classappend="${@formati.classeSegno(anteprima.roi())}"
+                                th:text="${@formati.percentuale(anteprima.roi())}">0</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-3">
+            <a th:href="${vendita} ? @{/vendite/{id}(id=${vendita.id})} : @{/vendite}" class="btn btn-outline-secondary">Annulla</a>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Salva vendita</button>
+        </div>
+    </form>
+</main>
+</body>
+</html>

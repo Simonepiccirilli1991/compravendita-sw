@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Brand · Compravendita</title>
+</head>
+<body>
+<main>
+    <h1 class="h3 mb-3">Brand</h1>
+
+    <form th:action="@{/brand}" method="post" class="card card-body shadow-sm mb-3">
+        <div class="row g-2 align-items-end">
+            <div class="col-12 col-md-6">
+                <label for="nuovoBrand" class="form-label">Nuovo brand</label>
+                <input type="text" id="nuovoBrand" name="nome" class="form-control" maxlength="100" required
+                       placeholder="es. Yu-Gi-Oh!, Dragon Ball, Bandai…">
+            </div>
+            <div class="col-12 col-md-auto">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg me-1"></i>Aggiungi</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>Nome</th>
+                    <th class="text-center">Attivo</th>
+                    <th class="text-end">Articoli</th>
+                    <th class="text-end">Azioni</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="b : ${brands}" th:with="articoli=${conteggi[b.id] ?: 0}">
+                    <td>
+                        <form th:id="'brand-' + ${b.id}" th:action="@{/brand/{id}(id=${b.id})}" method="post"></form>
+                        <input type="text" name="nome" class="form-control form-control-sm" maxlength="100" required
+                               th:value="${b.nome}" th:attr="form='brand-' + ${b.id}" aria-label="Nome brand">
+                    </td>
+                    <td class="text-center">
+                        <input type="checkbox" name="attivo" value="true" class="form-check-input" th:checked="${b.attivo}"
+                               th:attr="form='brand-' + ${b.id}" aria-label="Attivo">
+                    </td>
+                    <td class="text-end">
+                        <a th:href="@{/articoli(brandId=${b.id})}" th:text="${articoli}">0</a>
+                    </td>
+                    <td class="text-end text-nowrap">
+                        <button type="submit" class="btn btn-sm btn-outline-primary" th:attr="form='brand-' + ${b.id}">
+                            <i class="bi bi-check-lg"></i> Salva</button>
+                        <form th:action="@{/brand/{id}/elimina(id=${b.id})}" method="post" class="d-inline"
+                              th:if="${articoli == 0}" onsubmit="return confirm('Eliminare questo brand?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Elimina"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <p class="small text-secondary mt-2">I brand con articoli collegati non si possono eliminare: disattivali per nasconderli dai nuovi inserimenti.</p>
+</main>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--/* Risultato economico di un acquisto, caricato via HTMX nella pagina dell'acquisto */-->
+<div th:fragment="risultato" class="card shadow-sm mt-3">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <span class="fw-semibold">Risultato economico</span>
+        <span class="badge text-bg-success" th:if="${risultato.ripagato}">Investimento rientrato</span>
+    </div>
+    <div class="card-body">
+        <div class="row g-3 mb-2">
+            <div class="col-6 col-lg-2">
+                <div class="small text-secondary">Investito</div>
+                <div class="fw-semibold" th:text="${@formati.euro(risultato.investito())}">0</div>
+            </div>
+            <div class="col-6 col-lg-2">
+                <div class="small text-secondary">Netto incassato</div>
+                <div class="fw-semibold" th:text="${@formati.euro(risultato.ricavoNetto())}">0</div>
+                <div class="small text-secondary" th:text="|${@formati.percentuale(risultato.recupero())} recuperato|"></div>
+            </div>
+            <div class="col-6 col-lg-2">
+                <div class="small text-secondary">Pezzi venduti</div>
+                <div class="fw-semibold" th:text="|${risultato.pezziVenduti()} su ${risultato.pezzi()}|">0</div>
+            </div>
+            <div class="col-6 col-lg-2">
+                <div class="small text-secondary">Profitto realizzato</div>
+                <div class="fw-semibold" th:classappend="${@formati.classeSegno(risultato.profittoRealizzato())}"
+                     th:text="${@formati.euro(risultato.profittoRealizzato())}">0</div>
+                <div class="small text-secondary" th:text="|ROI ${@formati.percentuale(risultato.roi())}|"></div>
+            </div>
+            <div class="col-6 col-lg-2">
+                <div class="small text-secondary">Perdite magazzino</div>
+                <div class="fw-semibold" th:text="${@formati.euro(risultato.perditeRettifiche())}">0</div>
+            </div>
+            <div class="col-6 col-lg-2">
+                <div class="small text-secondary">Ancora in magazzino</div>
+                <div class="fw-semibold" th:text="${@formati.euro(risultato.valoreResiduo())}">0</div>
+                <div class="small text-secondary" th:text="|${risultato.pezziResidui()} pezzi a costo|"></div>
+            </div>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+            <thead class="table-light">
+            <tr>
+                <th>Articolo</th>
+                <th class="text-end">Venduti</th>
+                <th class="text-end">Netto incassato</th>
+                <th class="text-end">Costo</th>
+                <th class="text-end">Profitto</th>
+                <th class="text-end">ROI</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="riga : ${acquisto.righe}" th:with="r=${risultato.righe().get(riga.id)}">
+                <td th:text="${riga.articolo.nome}">Articolo</td>
+                <td class="text-end" th:text="|${r.pezziVenduti()} / ${riga.quantita}|">0</td>
+                <td class="text-end" th:text="${@formati.euro(r.ricavoNetto())}">0</td>
+                <td class="text-end" th:text="${@formati.euro(r.costoVenduto())}">0</td>
+                <td class="text-end fw-semibold" th:classappend="${@formati.classeSegno(r.profitto())}"
+                    th:text="${@formati.euro(r.profitto())}">0</td>
+                <td class="text-end" th:text="${@formati.percentuale(r.roi())}">0</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

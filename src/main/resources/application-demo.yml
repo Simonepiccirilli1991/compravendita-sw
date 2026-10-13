@@ -1,0 +1,11 @@
+# Profilo demo: dati di esempio in uno schema separato ("demo"), i dati reali in "public" restano intatti.
+# Avvio: ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev,demo
+# Per ripartire da zero: drop schema demo cascade;
+spring:
+  datasource:
+    hikari:
+      # vale anche quando la connessione arriva da docker compose (che ignora spring.datasource.url)
+      connection-init-sql: set search_path to demo
+  flyway:
+    schemas: demo
+    default-schema: demo

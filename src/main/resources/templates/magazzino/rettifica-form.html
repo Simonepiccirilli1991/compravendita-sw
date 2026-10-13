@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Rettifica · Magazzino · Compravendita</title>
+</head>
+<body>
+<main>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/magazzino}">Magazzino</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/magazzino/rettifiche}">Rettifiche</a></li>
+            <li class="breadcrumb-item active">Nuova</li>
+        </ol>
+    </nav>
+    <h1 class="h3 mb-3">Rettifica inventario</h1>
+
+    <div th:replace="~{magazzino/articolo :: riepilogoLotto(${lotto})}"></div>
+
+    <form th:action="@{/magazzino/lotti/{id}/rettifica(id=${lotto.id})}" th:object="${form}" method="post"
+          class="card shadow-sm" novalidate>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-12 col-sm-4">
+                    <label for="data" class="form-label">Data *</label>
+                    <input type="date" th:field="*{data}" class="form-control"
+                           th:classappend="${#fields.hasErrors('data')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:errors="*{data}"></div>
+                </div>
+                <div class="col-12 col-sm-4">
+                    <label for="quantita" class="form-label">Pezzi da scaricare *</label>
+                    <input type="number" min="1" th:max="${lotto.quantitaResidua}" th:field="*{quantita}" class="form-control"
+                           th:classappend="${#fields.hasErrors('quantita')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:errors="*{quantita}"></div>
+                </div>
+                <div class="col-12 col-sm-4">
+                    <label for="motivo" class="form-label">Motivo *</label>
+                    <select th:field="*{motivo}" class="form-select"
+                            th:classappend="${#fields.hasErrors('motivo')} ? 'is-invalid'">
+                        <option value="">Scegli…</option>
+                        <option th:each="m : ${motivi}" th:value="${m}" th:text="${m.etichetta}"></option>
+                    </select>
+                    <div class="invalid-feedback" th:errors="*{motivo}"></div>
+                </div>
+                <div class="col-12 col-sm-4">
+                    <label for="importoRecuperato" class="form-label">Importo recuperato</label>
+                    <div class="input-group">
+                        <span class="input-group-text">€</span>
+                        <input type="number" min="0" step="0.01" th:field="*{importoRecuperato}" class="form-control"
+                               th:classappend="${#fields.hasErrors('importoRecuperato')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:errors="*{importoRecuperato}"></div>
+                    </div>
+                    <div class="form-text">Rimborso del fornitore, assicurazione della spedizione…</div>
+                </div>
+                <div class="col-12 col-sm-8">
+                    <label for="note" class="form-label">Note</label>
+                    <textarea th:field="*{note}" class="form-control" rows="2"
+                              th:classappend="${#fields.hasErrors('note')} ? 'is-invalid'"></textarea>
+                    <div class="invalid-feedback" th:errors="*{note}"></div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer d-flex justify-content-end gap-2">
+            <a th:href="@{/magazzino/lotti}" class="btn btn-outline-secondary">Annulla</a>
+            <button type="submit" class="btn btn-danger"><i class="bi bi-clipboard-minus me-1"></i>Registra rettifica</button>
+        </div>
+    </form>
+</main>
+</body>
+</html>

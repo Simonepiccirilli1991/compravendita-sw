@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Report · Compravendita</title>
+</head>
+<body>
+<main th:with="v=${riepilogo.vendite()}">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <h1 class="h3 mb-0">Report economico</h1>
+            <a th:href="@{/report/annuale}" class="btn btn-sm btn-outline-primary"><i class="bi bi-calendar3 me-1"></i>Riepilogo annuale</a>
+        </div>
+        <div class="d-flex flex-wrap gap-1">
+            <a th:each="s : ${scorciatoie}" class="btn btn-sm btn-outline-secondary"
+               th:classappend="${s.value.da == periodo.da and s.value.a == periodo.a} ? 'active'"
+               th:href="@{/report(da=${s.value.da},a=${s.value.a},per=${per})}" th:text="${s.key}">Periodo</a>
+        </div>
+    </div>
+
+    <form class="card card-body shadow-sm mb-3" th:action="@{/report}" method="get">
+        <input type="hidden" name="per" th:value="${per}">
+        <div class="row g-2 align-items-end">
+            <div class="col-6 col-md-3">
+                <label class="form-label small text-secondary mb-1" for="da">Dal</label>
+                <input type="date" id="da" name="da" class="form-control" th:value="${periodo.da}">
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label small text-secondary mb-1" for="a">Al</label>
+                <input type="date" id="a" name="a" class="form-control" th:value="${periodo.a}">
+            </div>
+            <div class="col-12 col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Aggiorna</button>
+            </div>
+            <div class="col-12 col-md-4 small text-secondary">
+                Conta le vendite per data di vendita; le vendite annullate sono escluse.
+            </div>
+        </div>
+    </form>
+
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-xl-3">
+            <div class="card shadow-sm h-100"><div class="card-body">
+                <div class="small text-secondary">Fatturato merce</div>
+                <div class="fs-4 fw-semibold" th:text="${@formati.euro(v.lordo())}">0</div>
+                <div class="small text-secondary" th:text="|${v.vendite()} vendite · ${v.pezzi()} pezzi|"></div>
+            </div></div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="card shadow-sm h-100"><div class="card-body">
+                <div class="small text-secondary">Netto incassato</div>
+                <div class="fs-4 fw-semibold" th:text="${@formati.euro(v.netto())}">0</div>
+                <div class="small text-secondary" th:text="|Costo merce ${@formati.euro(v.costoVenduto())}|"></div>
+            </div></div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="card shadow-sm h-100"><div class="card-body">
+                <div class="small text-secondary">Profitto sulle vendite</div>
+                <div class="fs-4 fw-semibold" th:classappend="${@formati.classeSegno(v.profitto())}"
+                     th:text="${@formati.euro(v.profitto())}">0</div>
+                <div class="small text-secondary"
+                     th:text="|ROI ${@formati.percentuale(v.roi())} · margine ${@formati.percentuale(v.margine())}|"></div>
+            </div></div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="card shadow-sm h-100"><div class="card-body">
+                <div class="small text-secondary">Profitto netto</div>
+                <div class="fs-4 fw-semibold" th:classappend="${@formati.classeSegno(riepilogo.profittoNetto())}"
+                     th:text="${@formati.euro(riepilogo.profittoNetto())}">0</div>
+                <div class="small text-secondary" th:text="|ROI netto ${@formati.percentuale(riepilogo.roiNetto())}|"></div>
+            </div></div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <div class="row small g-2">
+                <div class="col-12 col-md-6 col-xl">
+                    <span class="text-secondary">Profitto sulle vendite</span>
+                    <span class="float-end" th:text="${@formati.euro(v.netto().subtract(v.costoVenduto()))}">0</span>
+                </div>
+                <div class="col-12 col-md-6 col-xl">
+                    <span class="text-secondary">− Costi dei resi</span>
+                    <span class="float-end" th:text="${@formati.euro(v.costiResi())}">0</span>
+                </div>
+                <div class="col-12 col-md-6 col-xl">
+                    <span class="text-secondary">− Perdite di magazzino</span>
+                    <span class="float-end" th:text="${@formati.euro(riepilogo.perditeRettifiche())}">0</span>
+                </div>
+                <div class="col-12 col-md-6 col-xl">
+                    <span class="text-secondary">− Spese generali</span>
+                    <span class="float-end" th:text="${@formati.euro(riepilogo.speseGenerali())}">0</span>
+                </div>
+                <div class="col-12 col-md-6 col-xl">
+                    <span class="text-secondary">Acquistato nel periodo</span>
+                    <span class="float-end" th:text="${@formati.euro(riepilogo.acquistato())}">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs">
+        <li class="nav-item" th:each="d : ${dimensioni}">
+            <a class="nav-link" th:classappend="${d == per} ? 'active'" th:text="|Per ${#strings.toLowerCase(d.etichetta)}|"
+               th:href="@{/report(da=${periodo.da},a=${periodo.a},per=${d})}">Per categoria</a>
+        </li>
+    </ul>
+    <div class="card shadow-sm border-top-0 rounded-top-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th th:text="${per.etichetta}">Voce</th>
+                    <th class="text-end">Vendite</th>
+                    <th class="text-end">Pezzi</th>
+                    <th class="text-end">Fatturato</th>
+                    <th class="text-end">Netto</th>
+                    <th class="text-end">Costo merce</th>
+                    <th class="text-end">Profitto</th>
+                    <th class="text-end">ROI</th>
+                    <th class="text-end">Margine</th>
+                    <th class="text-end">Prezzo medio</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="r : ${righe}">
+                    <td>
+                        <a th:if="${per.name() == 'ARTICOLO'}" th:href="@{/articoli/{id}(id=${r.chiave()})}"
+                           class="text-decoration-none" th:text="${r.etichetta()}">Voce</a>
+                        <a th:if="${per.name() == 'PIATTAFORMA'}"
+                           th:href="@{/vendite(piattaformaId=${r.chiave()},da=${periodo.da},a=${periodo.a})}"
+                           class="text-decoration-none" th:text="${r.etichetta()}">Voce</a>
+                        <span th:unless="${per.name() == 'ARTICOLO' or per.name() == 'PIATTAFORMA'}" th:text="${r.etichetta()}">Voce</span>
+                    </td>
+                    <td class="text-end" th:text="${r.vendite()}">0</td>
+                    <td class="text-end" th:text="${r.pezzi()}">0</td>
+                    <td class="text-end" th:text="${@formati.euro(r.lordo())}">0</td>
+                    <td class="text-end" th:text="${@formati.euro(r.netto())}">0</td>
+                    <td class="text-end" th:text="${@formati.euro(r.costoVenduto())}">0</td>
+                    <td class="text-end fw-semibold" th:classappend="${@formati.classeSegno(r.profitto())}"
+                        th:text="${@formati.euro(r.profitto())}">0</td>
+                    <td class="text-end" th:classappend="${@formati.classeSegno(r.roi())}"
+                        th:text="${@formati.percentuale(r.roi())}">0</td>
+                    <td class="text-end" th:text="${@formati.percentuale(r.margine())}">0</td>
+                    <td class="text-end" th:text="${@formati.euro(r.prezzoMedio())}">0</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(righe)}">
+                    <td colspan="10" class="text-center text-secondary py-4">Nessuna vendita nel periodo.</td>
+                </tr>
+                </tbody>
+                <tfoot class="table-group-divider" th:unless="${#lists.isEmpty(righe)}">
+                <tr class="fw-semibold">
+                    <td>Totale</td>
+                    <td class="text-end" th:text="${v.vendite()}">0</td>
+                    <td class="text-end" th:text="${v.pezzi()}">0</td>
+                    <td class="text-end" th:text="${@formati.euro(v.lordo())}">0</td>
+                    <td class="text-end" th:text="${@formati.euro(v.netto())}">0</td>
+                    <td class="text-end" th:text="${@formati.euro(v.costoVenduto())}">0</td>
+                    <td class="text-end" th:classappend="${@formati.classeSegno(v.profitto())}"
+                        th:text="${@formati.euro(v.profitto())}">0</td>
+                    <td class="text-end" th:text="${@formati.percentuale(v.roi())}">0</td>
+                    <td class="text-end" th:text="${@formati.percentuale(v.margine())}">0</td>
+                    <td class="text-end" th:text="${@formati.euro(v.prezzoMedio())}">0</td>
+                </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+    <p class="small text-secondary mt-2">
+        Nelle vendite con più articoli netto e costi dei resi sono ripartiti sulle righe in proporzione all'incasso:
+        per questo la somma delle voci può differire dal totale di qualche centesimo. Il profitto delle voci include
+        i costi dei resi; perdite di magazzino e spese generali sono solo nel profitto netto.
+    </p>
+</main>
+</body>
+</html>

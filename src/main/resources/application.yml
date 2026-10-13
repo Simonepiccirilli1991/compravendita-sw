@@ -35,6 +35,9 @@ spring:
 
 server:
   port: ${APP_PORT:8080}
+  tomcat:
+    # l'anteprima dell'import rimanda il file CSV nel form di conferma
+    max-http-form-post-size: 30MB
 
 management:
   endpoints:

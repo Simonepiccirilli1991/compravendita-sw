@@ -1,0 +1,9 @@
+target/
+data/
+backups/
+.git/
+.idea/
+.vscode/
+*.iml
+.env
+scripts/

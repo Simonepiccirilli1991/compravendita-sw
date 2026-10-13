@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="|Acquisto del ${@formati.data(acquisto.dataAcquisto)} · Compravendita|">Acquisto</title>
+</head>
+<body>
+<main>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/acquisti}">Acquisti</a></li>
+            <li class="breadcrumb-item active" th:text="|Acquisto del ${@formati.data(acquisto.dataAcquisto)}|">Acquisto</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+        <div>
+            <h1 class="h3 mb-1" th:text="|Acquisto del ${@formati.data(acquisto.dataAcquisto)}|">Acquisto</h1>
+            <span class="text-secondary" th:text="${acquisto.fornitore} ?: 'Fornitore non indicato'">Fornitore</span>
+            <span class="badge text-bg-light border ms-1" th:if="${acquisto.canale}" th:text="${acquisto.canale}">Canale</span>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/acquisti/{id}/modifica(id=${acquisto.id})}" class="btn btn-outline-primary">
+                <i class="bi bi-pencil me-1"></i>Modifica</a>
+            <form th:action="@{/acquisti/{id}/elimina(id=${acquisto.id})}" method="post" th:if="${#sets.isEmpty(bloccate)}"
+                  onsubmit="return confirm('Eliminare questo acquisto e tutte le sue righe?');">
+                <button type="submit" class="btn btn-outline-danger"><i class="bi bi-trash me-1"></i>Elimina</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-lg-3">
+            <div class="card shadow-sm h-100"><div class="card-body">
+                <div class="small text-secondary">Merce</div>
+                <div class="fs-5 fw-semibold" th:text="${@formati.euro(acquisto.totaleMerce)}">0</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card shadow-sm h-100"><div class="card-body">
+                <div class="small text-secondary">Costi accessori</div>
+                <div class="fs-5 fw-semibold" th:text="${@formati.euro(acquisto.totaleCostiAccessori)}">0</div>
+                <div class="small text-secondary"
+                     th:text="|Sped. ${@formati.euro(acquisto.costoSpedizione)} · Comm. ${@formati.euro(acquisto.commissioni)} · Altri ${@formati.euro(acquisto.altriCosti)}|"></div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card shadow-sm h-100"><div class="card-body">
+                <div class="small text-secondary">Totale speso</div>
+                <div class="fs-5 fw-semibold" th:text="${@formati.euro(acquisto.totale)}">0</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card shadow-sm h-100"><div class="card-body">
+                <div class="small text-secondary">Ripartizione costi</div>
+                <div class="fw-semibold" th:text="${acquisto.metodoRipartizione.etichetta}">Prezzo</div>
+                <a th:if="${acquisto.allegatoPath}" th:href="@{'/media/' + ${acquisto.allegatoPath}}" target="_blank" class="small">
+                    <i class="bi bi-paperclip"></i> Ricevuta</a>
+            </div></div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header fw-semibold" th:text="|Righe (${acquisto.totalePezzi} pezzi)|">Righe</div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>Articolo</th>
+                    <th>Stato</th>
+                    <th class="text-end">Q.tà</th>
+                    <th class="text-end">Disponibili</th>
+                    <th class="text-end">Prezzo unit.</th>
+                    <th class="text-end">Quota costi</th>
+                    <th class="text-end">Costi aggiuntivi</th>
+                    <th class="text-end">Costo unit. effettivo</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="r : ${acquisto.righe}">
+                    <td>
+                        <a th:href="@{/articoli/{id}(id=${r.articolo.id})}" class="text-decoration-none" th:text="${r.articolo.nome}">Articolo</a>
+                        <div class="small text-secondary" th:text="${r.articolo.categoria.etichetta}">Categoria</div>
+                    </td>
+                    <td><span th:replace="~{magazzino/fragments :: stato(${r.stato})}"></span></td>
+                    <td class="text-end" th:text="${r.quantita}">1</td>
+                    <td class="text-end" th:text="${r.quantitaResidua}">1</td>
+                    <td class="text-end" th:text="${@formati.euro(r.prezzoUnitario)}">0</td>
+                    <td class="text-end" th:text="${@formati.euro(r.quotaCostiAccessori)}">0</td>
+                    <td class="text-end" th:text="${@formati.euro(r.costiAggiuntivi)}">0</td>
+                    <td class="text-end fw-semibold" th:text="${@formati.euro(r.costoUnitarioEffettivo)}">0</td>
+                    <td class="text-end">
+                        <div th:replace="~{magazzino/fragments :: azioniLotto(${r}, ${'/acquisti/' + acquisto.id})}"></div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div th:attr="hx-get=@{/report/acquisti/{id}(id=${acquisto.id})}" hx-trigger="load" hx-swap="outerHTML"></div>
+
+    <div class="card shadow-sm mt-3" th:if="${acquisto.note}">
+        <div class="card-body">
+            <div class="small text-secondary mb-1">Note</div>
+            <div style="white-space: pre-line" th:text="${acquisto.note}">Note</div>
+        </div>
+    </div>
+    <p class="small text-secondary mt-3" th:unless="${#sets.isEmpty(bloccate)}">
+        <i class="bi bi-lock me-1"></i>Alcune righe hanno movimenti (vendite, grading, rettifiche): puoi ancora
+        modificare i dati e i costi dell'acquisto, ma non quelle righe, e l'acquisto non può essere eliminato.
+    </p>
+</main>
+</body>
+</html>

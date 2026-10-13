@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Rientro dal grading · Compravendita</title>
+</head>
+<body>
+<main>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/magazzino}">Magazzino</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/magazzino/grading}">Grading</a></li>
+            <li class="breadcrumb-item active">Rientro</li>
+        </ol>
+    </nav>
+    <h1 class="h3 mb-3">Rientro dal grading</h1>
+
+    <div th:replace="~{magazzino/articolo :: riepilogoLotto(${grading.rigaAcquisto})}"></div>
+
+    <form th:action="@{/magazzino/grading/{id}/rientro(id=${grading.id})}" th:object="${form}" method="post"
+          class="card shadow-sm" novalidate>
+        <div class="card-body">
+            <p class="small text-secondary">
+                <i class="bi bi-info-circle me-1"></i>Verrà creato un nuovo articolo <strong>carta gradata</strong>
+                (<span th:text="${grading.ente}">PSA</span>) con brand, lingua, set e numero della carta originale.
+                Il costo del grading si aggiunge al costo della carta.
+            </p>
+            <div class="row g-3">
+                <div class="col-12 col-lg-6">
+                    <label for="nomeArticolo" class="form-label">Nome articolo gradato *</label>
+                    <input type="text" th:field="*{nomeArticolo}" class="form-control" maxlength="255"
+                           th:classappend="${#fields.hasErrors('nomeArticolo')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:errors="*{nomeArticolo}"></div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <label for="voto" class="form-label">Voto *</label>
+                    <input type="number" min="1" max="10" step="0.5" th:field="*{voto}" class="form-control"
+                           th:classappend="${#fields.hasErrors('voto')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:errors="*{voto}"></div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <label for="numeroCertificato" class="form-label">N° certificato *</label>
+                    <input type="text" th:field="*{numeroCertificato}" class="form-control"
+                           th:classappend="${#fields.hasErrors('numeroCertificato')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:errors="*{numeroCertificato}"></div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <label for="dataRientro" class="form-label">Data rientro *</label>
+                    <input type="date" th:field="*{dataRientro}" class="form-control"
+                           th:classappend="${#fields.hasErrors('dataRientro')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:errors="*{dataRientro}"></div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <label for="costo" class="form-label">Costo totale grading *</label>
+                    <div class="input-group">
+                        <span class="input-group-text">€</span>
+                        <input type="number" min="0" step="0.01" th:field="*{costo}" class="form-control"
+                               th:classappend="${#fields.hasErrors('costo')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:errors="*{costo}"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer d-flex justify-content-end gap-2">
+            <a th:href="@{/magazzino/grading}" class="btn btn-outline-secondary">Annulla</a>
+            <button type="submit" class="btn btn-success"><i class="bi bi-box-arrow-in-down me-1"></i>Registra rientro</button>
+        </div>
+    </form>
+</main>
+</body>
+</html>

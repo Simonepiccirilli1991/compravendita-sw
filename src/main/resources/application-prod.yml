@@ -1,0 +1,10 @@
+# Profilo per l'esecuzione nel container (Dockerfile) o come jar: database già avviato altrove,
+# nessuna gestione automatica di docker compose.
+spring:
+  docker:
+    compose:
+      enabled: false
+
+logging:
+  level:
+    it.compravendita: INFO

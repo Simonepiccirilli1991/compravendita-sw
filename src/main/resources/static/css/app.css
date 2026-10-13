@@ -15,3 +15,36 @@
         width: 100%;
     }
 }
+
+.content-area {
+    min-width: 0;
+}
+
+.thumb {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+}
+
+.foto-dettaglio {
+    max-height: 360px;
+    object-fit: contain;
+}
+
+.grafico {
+    position: relative;
+    height: 260px;
+}
+
+.grafico-alto {
+    height: 300px;
+}
+
+/* Avvisi di errore delle richieste HTMX (static/js/app.js) */
+.avvisi-errore {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1080;
+    width: min(420px, calc(100vw - 2rem));
+}

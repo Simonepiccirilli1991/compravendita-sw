@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Riepilogo annuale · Compravendita</title>
+</head>
+<body>
+<main>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/report}">Report</a></li>
+            <li class="breadcrumb-item active">Riepilogo annuale</li>
+        </ol>
+    </nav>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h1 class="h3 mb-0">Riepilogo annuale</h1>
+        <div class="d-flex gap-2">
+            <a th:href="@{/export/annuale.xlsx}" class="btn btn-outline-success"><i class="bi bi-file-earmark-excel me-1"></i>Excel</a>
+            <a th:href="@{/export/annuale.csv}" class="btn btn-outline-secondary"><i class="bi bi-filetype-csv me-1"></i>CSV</a>
+        </div>
+    </div>
+    <p class="small text-secondary">
+        Totali per anno solare (dal 1° gennaio al 31 dicembre) come base per la contabilità o la dichiarazione:
+        verificali con il tuo commercialista. Le rimanenze sono i pezzi in giacenza a fine anno, valutati al costo
+        d'acquisto attuale (grading compreso).
+    </p>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>Voce</th>
+                    <th class="text-end" th:each="c : ${conti}" th:text="${c.anno()}">2026</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="table-group-divider"><th th:attr="colspan=${conti.size() + 1}" class="small text-secondary text-uppercase">Acquisti</th></tr>
+                <tr>
+                    <td>Acquisti (merce e costi accessori)</td>
+                    <td class="text-end" th:each="c : ${conti}" th:text="${@formati.euro(c.acquistato())}">0</td>
+                </tr>
+                <tr>
+                    <td>Costi di grading</td>
+                    <td class="text-end" th:each="c : ${conti}" th:text="${@formati.euro(c.costiGrading())}">0</td>
+                </tr>
+                <tr class="table-group-divider"><th th:attr="colspan=${conti.size() + 1}" class="small text-secondary text-uppercase">Vendite completate</th></tr>
+                <tr>
+                    <td>Numero di vendite / pezzi</td>
+                    <td class="text-end" th:each="c : ${conti}" th:text="|${c.vendite().vendite()} / ${c.vendite().pezzi()}|">0</td>
+                </tr>
+                <tr>
+                    <td>Fatturato merce</td>
+                    <td class="text-end" th:each="c : ${conti}" th:text="${@formati.euro(c.vendite().lordo())}">0</td>
+                </tr>
+                <tr>
+                    <td>+ Spedizioni incassate</td>
+                    <td class="text-end" th:each="c : ${conti}" th:text="${@formati.euro(c.spedizioniIncassate())}">0</td>
+                </tr>
+                <tr>
+                    <td>− Commissioni (piattaforme e pagamenti)</td>
+                    <td class="text-end" th:each="c : ${conti}" th:text="${@formati.euro(c.commissioni())}">0</td>
+                </tr>
+                <tr>
+                    <td>− Spedizioni, imballaggi e altri costi</td>
+                    <td class="text-end" th:each="c : ${conti}" th:text="${@formati.euro(c.costiVendita())}">0</td>
+                </tr>
+                <tr class="fw-semibold">
+                    <td>Netto incassato</td>
+                    <td class="text-end" th:each="c : ${conti}" th:text="${@formati.euro(c.vendite().netto())}">0</td>
+                </tr>
+                <tr>
+                    <td>− Costo della merce venduta</td>
+                    <td class="text-end" th:each="c : ${conti}" th:text="${@formati.euro(c.vendite().costoVenduto())}">0</td>
+                </tr>
+                <tr>
+                    <td>− Costi dei resi</td>
+                    <td class="text-end" th:each="c : ${conti}" th:text="${@formati.euro(c.vendite().costiResi())}">0</td>
+                </tr>
+                <tr class="fw-semibold">
+                    <td>Profitto sulle vendite</td>
+                    <td class="text-end" th:each="c : ${conti}" th:classappend="${@formati.classeSegno(c.vendite().profitto())}"
+                        th:text="${@formati.euro(c.vendite().profitto())}">0</td>
+                </tr>
+                <tr class="table-group-divider"><th th:attr="colspan=${conti.size() + 1}" class="small text-secondary text-uppercase">Altri costi e risultato</th></tr>
+                <tr>
+                    <td>− Perdite di magazzino</td>
+                    <td class="text-end" th:each="c : ${conti}" th:text="${@formati.euro(c.perditeRettifiche())}">0</td>
+                </tr>
+                <tr>
+                    <td>− Spese generali</td>
+                    <td class="text-end" th:each="c : ${conti}" th:text="${@formati.euro(c.speseGenerali())}">0</td>
+                </tr>
+                <tr class="fw-bold">
+                    <td>Profitto netto</td>
+                    <td class="text-end" th:each="c : ${conti}" th:classappend="${@formati.classeSegno(c.profittoNetto())}"
+                        th:text="${@formati.euro(c.profittoNetto())}">0</td>
+                </tr>
+                <tr>
+                    <td>Rimanenze al 31/12 (al costo)</td>
+                    <td class="text-end" th:each="c : ${conti}" th:text="${@formati.euro(c.rimanenzeFinali())}">0</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+</body>
+</html>

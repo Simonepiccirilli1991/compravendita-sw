@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="|Vendita del ${@formati.data(vendita.dataVendita)} · Compravendita|">Vendita</title>
+</head>
+<body>
+<main>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/vendite}">Vendite</a></li>
+            <li class="breadcrumb-item active" th:text="|Vendita del ${@formati.data(vendita.dataVendita)}|">Vendita</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+        <div>
+            <h1 class="h3 mb-1">
+                <span th:text="|Vendita del ${@formati.data(vendita.dataVendita)}|">Vendita</span>
+                <span th:replace="~{vendite/fragments :: stato(${vendita.stato})}"></span>
+            </h1>
+            <span class="badge text-bg-light border" th:text="${vendita.piattaforma.nome}">eBay</span>
+            <span class="text-secondary ms-1" th:if="${vendita.acquirente}" th:text="${vendita.acquirente}">Acquirente</span>
+            <span class="text-secondary ms-1" th:if="${vendita.riferimentoOrdine}" th:text="|· ordine ${vendita.riferimentoOrdine}|"></span>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <th:block th:if="${vendita.completata}">
+                <a th:href="@{/vendite/{id}/modifica(id=${vendita.id})}" class="btn btn-outline-primary">
+                    <i class="bi bi-pencil me-1"></i>Modifica</a>
+                <a th:href="@{/vendite/{id}/reso(id=${vendita.id})}" class="btn btn-outline-warning">
+                    <i class="bi bi-arrow-return-left me-1"></i>Reso</a>
+                <a th:href="@{/vendite/{id}/annulla(id=${vendita.id})}" class="btn btn-outline-danger">
+                    <i class="bi bi-x-circle me-1"></i>Annulla</a>
+            </th:block>
+            <form th:if="${vendita.stato.name() == 'ANNULLATA'}" th:action="@{/vendite/{id}/elimina(id=${vendita.id})}"
+                  method="post" onsubmit="return confirm('Eliminare definitivamente questa vendita annullata?');">
+                <button type="submit" class="btn btn-outline-danger"><i class="bi bi-trash me-1"></i>Elimina</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="alert alert-secondary" th:unless="${vendita.completata}">
+        <i class="bi bi-info-circle me-1"></i>
+        <span th:text="|${vendita.stato.etichetta} il ${@formati.data(vendita.dataStorno)}: la merce è tornata in magazzino.|"></span>
+        <span th:if="${vendita.motivoStorno}" th:text="|Motivo: ${vendita.motivoStorno}|"></span>
+        <span th:if="${vendita.stato.name() == 'RESA'}" th:text="|Costi rimasti a carico: ${@formati.euro(vendita.costiReso)}.|"></span>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-12 col-xl-8">
+            <div class="card shadow-sm">
+                <div class="card-header fw-semibold" th:text="|Articoli (${vendita.totalePezzi} pezzi)|">Articoli</div>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Articolo</th>
+                            <th class="text-end">Q.tà</th>
+                            <th class="text-end">Prezzo unit.</th>
+                            <th class="text-end">Totale</th>
+                            <th class="text-end">Costo merce</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <th:block th:each="r : ${vendita.righe}">
+                            <tr>
+                                <td>
+                                    <a th:href="@{/articoli/{id}(id=${r.articolo.id})}" class="text-decoration-none" th:text="${r.articolo.nome}">Articolo</a>
+                                    <div class="small text-secondary" th:text="${r.articolo.categoria.etichetta}">Categoria</div>
+                                </td>
+                                <td class="text-end" th:text="${r.quantita}">1</td>
+                                <td class="text-end" th:text="${@formati.euro(r.prezzoUnitario)}">0</td>
+                                <td class="text-end" th:text="${@formati.euro(r.totale)}">0</td>
+                                <td class="text-end" th:text="${@formati.euro(r.costoVenduto)}">0</td>
+                            </tr>
+                            <tr class="small text-secondary" th:each="a : ${r.allocazioni}">
+                                <td colspan="5" class="ps-4 py-1 border-0">
+                                    <i class="bi bi-arrow-return-right me-1"></i>
+                                    <span th:text="|${a.quantita} pz dal lotto del |"></span>
+                                    <a th:href="@{/acquisti/{id}(id=${a.rigaAcquisto.acquisto.id})}"
+                                       th:text="${@formati.data(a.rigaAcquisto.acquisto.dataAcquisto)}">01/01/2026</a>
+                                    <span th:text="|a ${@formati.euro(a.costoUnitario)} cad.|"></span>
+                                </td>
+                            </tr>
+                        </th:block>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card shadow-sm mt-3" th:if="${vendita.note}">
+                <div class="card-body">
+                    <div class="small text-secondary mb-1">Note</div>
+                    <div style="white-space: pre-line" th:text="${vendita.note}">Note</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-4">
+            <div class="card shadow-sm">
+                <div class="card-header fw-semibold">Conto economico</div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-7 fw-normal">Merce</dt>
+                        <dd class="col-5 text-end" th:text="${@formati.euro(vendita.totaleLordo)}">0</dd>
+                        <dt class="col-7 fw-normal">+ Spedizione incassata</dt>
+                        <dd class="col-5 text-end" th:text="${@formati.euro(vendita.spedizioneIncassata)}">0</dd>
+                        <dt class="col-7 fw-normal">− Commissione piattaforma</dt>
+                        <dd class="col-5 text-end" th:text="${@formati.euro(vendita.commissioniPiattaforma)}">0</dd>
+                        <dt class="col-7 fw-normal">− Commissione pagamento</dt>
+                        <dd class="col-5 text-end" th:text="${@formati.euro(vendita.commissioniPagamento)}">0</dd>
+                        <dt class="col-7 fw-normal">− Spedizione</dt>
+                        <dd class="col-5 text-end" th:text="${@formati.euro(vendita.costoSpedizione)}">0</dd>
+                        <dt class="col-7 fw-normal">− Imballaggio</dt>
+                        <dd class="col-5 text-end" th:text="${@formati.euro(vendita.costoImballaggio)}">0</dd>
+                        <dt class="col-7 fw-normal">− Altri costi</dt>
+                        <dd class="col-5 text-end" th:text="${@formati.euro(vendita.altriCosti)}">0</dd>
+                        <dt class="col-7 border-top pt-2">Netto</dt>
+                        <dd class="col-5 text-end border-top pt-2 fw-semibold" th:text="${@formati.euro(vendita.netto)}">0</dd>
+                        <dt class="col-7 fw-normal">− Costo della merce</dt>
+                        <dd class="col-5 text-end" th:text="${@formati.euro(vendita.costoVenduto)}">0</dd>
+                        <dt class="col-7 border-top pt-2">Profitto</dt>
+                        <dd class="col-5 text-end border-top pt-2 fs-5 fw-semibold"
+                            th:classappend="${@formati.classeSegno(vendita.profitto)}"
+                            th:text="${@formati.euro(vendita.profitto)}">0</dd>
+                        <dt class="col-7 fw-normal">ROI</dt>
+                        <dd class="col-5 text-end" th:classappend="${@formati.classeSegno(vendita.roi)}"
+                            th:text="${@formati.percentuale(vendita.roi)}">0</dd>
+                        <dt class="col-7 fw-normal">Margine sul venduto</dt>
+                        <dd class="col-5 text-end mb-0" th:text="${@formati.percentuale(vendita.margine)}">0</dd>
+                    </dl>
+                    <p class="small text-secondary mt-2 mb-0" th:if="${vendita.completata}">
+                        Commissioni <span th:text="${vendita.commissioniAutomatiche} ? 'calcolate dalla piattaforma' : 'inserite a mano'"></span>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

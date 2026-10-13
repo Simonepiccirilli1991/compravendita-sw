@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Catalogo · Compravendita</title>
+</head>
+<body>
+<main>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h1 class="h3 mb-0">Catalogo articoli</h1>
+        <a th:href="@{/articoli/nuovo}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Nuovo articolo</a>
+    </div>
+
+    <form class="card card-body shadow-sm mb-3" th:action="@{/articoli}" method="get"
+          th:attr="hx-get=@{/articoli}" hx-target="#risultati" hx-swap="outerHTML"
+          hx-push-url="true" hx-trigger="input changed delay:300ms from:input[name='q'], change">
+        <div class="row g-2">
+            <div class="col-12 col-md-4">
+                <input type="search" name="q" class="form-control" placeholder="Nome, n° certificato, n° set…"
+                       th:value="${filtro.q}" aria-label="Cerca">
+            </div>
+            <div class="col-6 col-md-3">
+                <select name="categoria" class="form-select" aria-label="Categoria">
+                    <option value="">Tutte le categorie</option>
+                    <option th:each="c : ${categorie}" th:value="${c}" th:text="${c.etichetta}"
+                            th:selected="${c == filtro.categoria}"></option>
+                </select>
+            </div>
+            <div class="col-6 col-md-3">
+                <select name="brandId" class="form-select" aria-label="Brand">
+                    <option value="">Tutti i brand</option>
+                    <option th:each="b : ${brands}" th:value="${b.id}" th:text="${b.nome}"
+                            th:selected="${b.id == filtro.brandId}"></option>
+                </select>
+            </div>
+            <div class="col-12 col-md-2">
+                <select name="condizione" class="form-select" aria-label="Condizione">
+                    <option value="">Ogni condizione</option>
+                    <option th:each="c : ${condizioni}" th:value="${c}" th:text="${c.etichetta}"
+                            th:selected="${c == filtro.condizione}"></option>
+                </select>
+            </div>
+        </div>
+        <noscript><button type="submit" class="btn btn-secondary mt-2">Filtra</button></noscript>
+    </form>
+
+    <div id="risultati" th:fragment="risultati">
+        <div class="card shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th style="width: 64px"></th>
+                        <th>Nome</th>
+                        <th>Categoria</th>
+                        <th>Brand</th>
+                        <th>Condizione</th>
+                        <th>Dettagli</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="a : ${pagina.content}">
+                        <td>
+                            <img th:if="${a.fotoPath}" th:src="@{'/media/' + ${a.fotoPath}}" class="thumb rounded" alt="">
+                            <div th:unless="${a.fotoPath}" class="thumb rounded bg-secondary-subtle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-image text-secondary"></i>
+                            </div>
+                        </td>
+                        <td><a th:href="@{/articoli/{id}(id=${a.id})}" class="fw-semibold text-decoration-none" th:text="${a.nome}">Nome</a>
+                            <div class="small text-secondary" th:if="${a.lingua}" th:text="${a.lingua}"></div></td>
+                        <td><span class="badge text-bg-secondary" th:text="${a.categoria.etichetta}">Categoria</span></td>
+                        <td th:text="${a.brand?.nome} ?: '—'">Brand</td>
+                        <td th:text="${a.condizione?.etichetta} ?: '—'">Condizione</td>
+                        <td class="small text-secondary" th:text="${@schemaAttributi.riepilogo(a)}"></td>
+                    </tr>
+                    <tr th:if="${pagina.empty}">
+                        <td colspan="6" class="text-center text-secondary py-4">Nessun articolo trovato.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 gap-2" th:if="${pagina.totalElements > 0}">
+            <span class="small text-secondary"
+                  th:text="|${pagina.totalElements} articoli · pagina ${pagina.number + 1} di ${pagina.totalPages}|"></span>
+            <nav th:if="${pagina.totalPages > 1}" aria-label="Paginazione">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item" th:classappend="${pagina.first} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/articoli(q=${filtro.q},categoria=${filtro.categoria},brandId=${filtro.brandId},condizione=${filtro.condizione},page=${pagina.number - 1})}">&laquo;</a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, pagina.totalPages - 1)}"
+                        th:classappend="${i == pagina.number} ? 'active'">
+                        <a class="page-link" th:text="${i + 1}"
+                           th:href="@{/articoli(q=${filtro.q},categoria=${filtro.categoria},brandId=${filtro.brandId},condizione=${filtro.condizione},page=${i})}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${pagina.last} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/articoli(q=${filtro.q},categoria=${filtro.categoria},brandId=${filtro.brandId},condizione=${filtro.condizione},page=${pagina.number + 1})}">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</main>
+</body>
+</html>

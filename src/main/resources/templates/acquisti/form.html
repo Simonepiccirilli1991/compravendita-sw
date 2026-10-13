@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title th:text="${acquisto} ? 'Modifica acquisto · Compravendita' : 'Nuovo acquisto · Compravendita'">Acquisto</title>
+</head>
+<body>
+<main>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/acquisti}">Acquisti</a></li>
+            <li class="breadcrumb-item" th:if="${acquisto}">
+                <a th:href="@{/acquisti/{id}(id=${acquisto.id})}" th:text="|Acquisto del ${@formati.data(acquisto.dataAcquisto)}|">Acquisto</a></li>
+            <li class="breadcrumb-item active" th:text="${acquisto} ? 'Modifica' : 'Nuovo'">Nuovo</li>
+        </ol>
+    </nav>
+    <h1 class="h3 mb-3" th:text="${acquisto} ? 'Modifica acquisto' : 'Nuovo acquisto'">Nuovo acquisto</h1>
+
+    <form id="form-acquisto" th:action="${acquisto} ? @{/acquisti/{id}(id=${acquisto.id})} : @{/acquisti}"
+          th:object="${form}" method="post" enctype="multipart/form-data" novalidate>
+        <div class="row g-3">
+            <div class="col-12 col-xl-7">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header fw-semibold">Dati acquisto</div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12 col-sm-4">
+                                <label for="dataAcquisto" class="form-label">Data *</label>
+                                <input type="date" th:field="*{dataAcquisto}" class="form-control"
+                                       th:classappend="${#fields.hasErrors('dataAcquisto')} ? 'is-invalid'" required>
+                                <div class="invalid-feedback" th:errors="*{dataAcquisto}"></div>
+                            </div>
+                            <div class="col-12 col-sm-8">
+                                <label for="fornitore" class="form-label">Fornitore / venditore</label>
+                                <input type="text" th:field="*{fornitore}" class="form-control" maxlength="255"
+                                       th:classappend="${#fields.hasErrors('fornitore')} ? 'is-invalid'">
+                                <div class="invalid-feedback" th:errors="*{fornitore}"></div>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label for="canale" class="form-label">Canale</label>
+                                <input type="text" th:field="*{canale}" class="form-control" list="canali" maxlength="100"
+                                       th:classappend="${#fields.hasErrors('canale')} ? 'is-invalid'">
+                                <datalist id="canali">
+                                    <option value="eBay"></option>
+                                    <option value="Vinted"></option>
+                                    <option value="Cardmarket"></option>
+                                    <option value="Subito"></option>
+                                    <option value="Wallapop"></option>
+                                    <option value="Fiera"></option>
+                                    <option value="Negozio"></option>
+                                    <option value="Privato"></option>
+                                </datalist>
+                                <div class="invalid-feedback" th:errors="*{canale}"></div>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label for="allegato" class="form-label">Ricevuta / fattura</label>
+                                <input type="file" id="allegato" name="allegato" class="form-control"
+                                       accept="application/pdf,image/jpeg,image/png,image/webp"
+                                       th:classappend="${erroreAllegato} ? 'is-invalid'">
+                                <div class="invalid-feedback" th:text="${erroreAllegato}"></div>
+                                <div class="d-flex align-items-center gap-2 mt-2" th:if="${acquisto?.allegatoPath}">
+                                    <a th:href="@{'/media/' + ${acquisto.allegatoPath}}" target="_blank" class="small">
+                                        <i class="bi bi-paperclip"></i> Allegato attuale</a>
+                                    <div class="form-check">
+                                        <input type="checkbox" th:field="*{rimuoviAllegato}" class="form-check-input">
+                                        <label class="form-check-label small" for="rimuoviAllegato1">Rimuovi</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label for="note" class="form-label">Note</label>
+                                <textarea th:field="*{note}" class="form-control" rows="2"
+                                          th:classappend="${#fields.hasErrors('note')} ? 'is-invalid'"></textarea>
+                                <div class="invalid-feedback" th:errors="*{note}"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-xl-5">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header fw-semibold">Costi accessori</div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12 col-sm-4 col-xl-6">
+                                <label for="costoSpedizione" class="form-label">Spedizione</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" min="0" th:field="*{costoSpedizione}" class="form-control"
+                                           th:classappend="${#fields.hasErrors('costoSpedizione')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:errors="*{costoSpedizione}"></div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-4 col-xl-6">
+                                <label for="commissioni" class="form-label">Commissioni</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" min="0" th:field="*{commissioni}" class="form-control"
+                                           th:classappend="${#fields.hasErrors('commissioni')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:errors="*{commissioni}"></div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-4 col-xl-6">
+                                <label for="altriCosti" class="form-label">Dogana / altri</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" min="0" th:field="*{altriCosti}" class="form-control"
+                                           th:classappend="${#fields.hasErrors('altriCosti')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:errors="*{altriCosti}"></div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-xl-6">
+                                <label for="metodoRipartizione" class="form-label">Ripartizione sulle righe</label>
+                                <select th:field="*{metodoRipartizione}" class="form-select">
+                                    <option th:each="m : ${metodi}" th:value="${m}" th:text="${m.etichetta}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <p class="small text-secondary mt-3 mb-0">
+                            I costi accessori vengono distribuiti sulle righe e inclusi nel costo unitario effettivo,
+                            usato per calcolare il profitto delle vendite.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mt-3">
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <span class="fw-semibold">Articoli acquistati</span>
+                <div class="d-flex gap-2">
+                    <a th:href="@{/articoli/nuovo}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-box-arrow-up-right me-1"></i>Nuovo articolo nel catalogo</a>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" title="Ricarica l'elenco degli articoli"
+                            th:attr="hx-get=@{/acquisti/elenco-articoli}" hx-target="#elenco-articoli" hx-swap="outerHTML">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Aggiorna elenco</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger py-2" th:if="${#fields.hasGlobalErrors()}">
+                    <i class="bi bi-exclamation-triangle me-1"></i><span th:each="e : ${#fields.globalErrors()}" th:text="${e}"></span>
+                </div>
+
+                <datalist id="elenco-articoli" th:fragment="elencoArticoli">
+                    <option th:each="o : ${opzioniArticoli}" th:value="${o.etichetta()}"></option>
+                </datalist>
+
+                <div id="righe" th:fragment="righe" th:object="${form}">
+                    <div class="row g-2 small text-secondary d-none d-md-flex mb-1">
+                        <div class="col-md-6">Articolo (scrivi per cercare) *</div>
+                        <div class="col-md-1">Q.tà *</div>
+                        <div class="col-md-2">Prezzo unitario *</div>
+                        <div class="col-md-2">Stato</div>
+                    </div>
+                    <div class="row g-2 align-items-start riga-acquisto border-bottom pb-2 mb-2"
+                         th:each="r, it : *{righe}" th:with="i=${it.index}">
+                        <input type="hidden" th:field="*{righe[__${i}__].id}">
+                        <input type="hidden" th:field="*{righe[__${i}__].bloccata}">
+                        <th:block th:if="${r.bloccata}">
+                            <input type="hidden" th:field="*{righe[__${i}__].articoloEtichetta}">
+                            <input type="hidden" th:field="*{righe[__${i}__].quantita}">
+                            <input type="hidden" th:field="*{righe[__${i}__].prezzoUnitario}">
+                            <input type="hidden" th:field="*{righe[__${i}__].stato}">
+                            <div class="col-12 col-md-6">
+                                <div class="form-control-plaintext" th:text="${r.articoloEtichetta}">Articolo</div>
+                            </div>
+                            <div class="col-4 col-md-1"><div class="form-control-plaintext" th:text="${r.quantita}">1</div></div>
+                            <div class="col-4 col-md-2"><div class="form-control-plaintext" th:text="${@formati.euro(r.prezzoUnitario)}">0</div></div>
+                            <div class="col-4 col-md-3">
+                                <div class="form-control-plaintext small text-secondary">
+                                    <i class="bi bi-lock me-1"></i>Con movimenti: non modificabile</div>
+                            </div>
+                        </th:block>
+                        <th:block th:unless="${r.bloccata}">
+                            <div class="col-12 col-md-6">
+                                <input type="text" th:field="*{righe[__${i}__].articoloEtichetta}" class="form-control"
+                                       list="elenco-articoli" placeholder="Cerca articolo…" autocomplete="off"
+                                       aria-label="Articolo"
+                                       th:classappend="${#fields.hasErrors('righe[__${i}__].articoloEtichetta')} ? 'is-invalid'">
+                                <div class="invalid-feedback" th:errors="*{righe[__${i}__].articoloEtichetta}"></div>
+                            </div>
+                            <div class="col-4 col-md-1">
+                                <input type="number" min="1" step="1" th:field="*{righe[__${i}__].quantita}" class="form-control"
+                                       aria-label="Quantità" placeholder="Q.tà"
+                                       th:classappend="${#fields.hasErrors('righe[__${i}__].quantita')} ? 'is-invalid'">
+                                <div class="invalid-feedback" th:errors="*{righe[__${i}__].quantita}"></div>
+                            </div>
+                            <div class="col-8 col-md-2">
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" min="0" step="0.01" th:field="*{righe[__${i}__].prezzoUnitario}"
+                                           class="form-control" aria-label="Prezzo unitario"
+                                           th:classappend="${#fields.hasErrors('righe[__${i}__].prezzoUnitario')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:errors="*{righe[__${i}__].prezzoUnitario}"></div>
+                                </div>
+                            </div>
+                            <div class="col-9 col-md-2">
+                                <select th:field="*{righe[__${i}__].stato}" class="form-select" aria-label="Stato">
+                                    <option th:each="s : ${stati}" th:value="${s}" th:text="${s.etichetta}"></option>
+                                </select>
+                            </div>
+                            <div class="col-3 col-md-1 text-end">
+                                <button type="button" class="btn btn-outline-danger" title="Rimuovi riga"
+                                        th:attr="hx-get=@{/acquisti/righe(azione='rimuovi',indice=${i})}"
+                                        hx-include="#righe" hx-target="#righe" hx-swap="outerHTML">
+                                    <i class="bi bi-x-lg"></i></button>
+                            </div>
+                        </th:block>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-outline-primary btn-sm"
+                        th:attr="hx-get=@{/acquisti/righe(azione='aggiungi')}" hx-include="#righe"
+                        hx-target="#righe" hx-swap="outerHTML">
+                    <i class="bi bi-plus-lg me-1"></i>Aggiungi riga</button>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mt-3">
+            <div class="card-header fw-semibold">Riepilogo costi</div>
+            <div id="anteprima" th:fragment="anteprima" th:attr="hx-get=@{/acquisti/anteprima}"
+                 hx-include="#form-acquisto" hx-swap="outerHTML"
+                 hx-trigger="change from:#form-acquisto, keyup changed delay:500ms from:#form-acquisto, righeAggiornate from:body">
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Articolo</th>
+                            <th class="text-end">Q.tà</th>
+                            <th class="text-end">Merce</th>
+                            <th class="text-end">Quota costi</th>
+                            <th class="text-end">Costo unitario effettivo</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="r : ${anteprima.righe()}">
+                            <td th:text="${r.articolo()}">Articolo</td>
+                            <td class="text-end" th:text="${r.quantita()} ?: '—'">1</td>
+                            <td class="text-end" th:text="${@formati.euro(r.totalePrezzo())}">0</td>
+                            <td class="text-end" th:text="${@formati.euro(r.quota())}">0</td>
+                            <td class="text-end fw-semibold" th:text="${@formati.euro(r.costoUnitario())}">0</td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(anteprima.righe())}">
+                            <td colspan="5" class="text-secondary text-center py-3">Aggiungi gli articoli per vedere i costi.</td>
+                        </tr>
+                        </tbody>
+                        <tfoot class="table-group-divider">
+                        <tr class="fw-semibold">
+                            <td>Totale</td>
+                            <td class="text-end" th:text="${anteprima.totalePezzi()}">0</td>
+                            <td class="text-end" th:text="${@formati.euro(anteprima.totaleMerce())}">0</td>
+                            <td class="text-end" th:text="${@formati.euro(anteprima.totaleCosti())}">0</td>
+                            <td class="text-end" th:text="|Totale speso: ${@formati.euro(anteprima.totale())}|">0</td>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-3">
+            <a th:href="${acquisto} ? @{/acquisti/{id}(id=${acquisto.id})} : @{/acquisti}" class="btn btn-outline-secondary">Annulla</a>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Salva acquisto</button>
+        </div>
+    </form>
+</main>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<!--/* Pagina d'errore: usata da GestoreErrori e da Spring Boot (/error). Non usa il layout perché
+       può essere mostrata anche senza sessione o token CSRF. */-->
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="|${status} · Compravendita|">Errore · Compravendita</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/dist/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.min.css}">
+</head>
+<body class="bg-body-tertiary d-flex align-items-center min-vh-100">
+<main class="container text-center" style="max-width: 560px">
+    <i class="bi display-4 text-secondary"
+       th:classappend="${status == 404} ? 'bi-search' : (${status >= 500} ? 'bi-bug' : 'bi-exclamation-triangle')"></i>
+    <h1 class="h3 mt-3" th:text="${titolo} ?: (${status == 404} ? 'Non trovato' : (${status >= 500} ? 'Errore' : 'Richiesta non valida'))">
+        Errore</h1>
+    <!--/* Il frammento viene restituito da solo alle richieste HTMX */-->
+    <p class="lead" th:fragment="messaggio" th:switch="${titolo != null}">
+        <span th:case="true" th:text="${message}">Messaggio</span>
+        <span th:case="*" th:switch="${status}">
+            <span th:case="403">Non hai i permessi per questa operazione, oppure la sessione è scaduta: ricarica la pagina.</span>
+            <span th:case="404">La pagina richiesta non esiste.</span>
+            <span th:case="405">Operazione non consentita su questo indirizzo.</span>
+            <span th:case="413">Il file è troppo grande.</span>
+            <span th:case="*" th:text="${status >= 500} ? 'Si è verificato un errore imprevisto.' : 'La richiesta non può essere completata.'">
+                Errore</span>
+        </span>
+    </p>
+    <p class="text-secondary small" th:text="|Codice ${status}|">Codice 500</p>
+    <div class="d-flex gap-2 justify-content-center mt-4">
+        <a href="javascript:history.back()" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Indietro</a>
+        <a th:href="@{/dashboard}" class="btn btn-primary"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a>
+    </div>
+</main>
+</body>
+</html>

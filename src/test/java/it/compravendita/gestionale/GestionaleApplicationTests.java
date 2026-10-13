@@ -2,7 +2,7 @@ package it.compravendita.gestionale;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -31,7 +31,7 @@ class GestionaleApplicationTests {
 	void dashboardRichiedeLogin() throws Exception {
 		mvc.perform(get("/dashboard"))
 			.andExpect(status().is3xxRedirection())
-			.andExpect(redirectedUrlPattern("**/login"));
+			.andExpect(redirectedUrl("/login"));
 	}
 
 	@Test

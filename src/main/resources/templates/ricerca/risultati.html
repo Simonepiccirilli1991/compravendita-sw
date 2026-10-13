@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Ricerca · Compravendita</title>
+</head>
+<body>
+<main>
+    <h1 class="h3 mb-3">Ricerca</h1>
+    <form th:action="@{/cerca}" method="get" class="mb-3" role="search">
+        <div class="input-group">
+            <input type="search" name="q" class="form-control form-control-lg" th:value="${q}" autofocus
+                   placeholder="Nome articolo, n° certificato, n° set, fornitore, acquirente, n° ordine…" aria-label="Cerca">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
+        </div>
+    </form>
+
+    <p class="text-secondary" th:if="${#strings.length(q) < 2}">Scrivi almeno 2 caratteri.</p>
+
+    <th:block th:if="${articoli}">
+        <p class="text-secondary" th:if="${articoli.empty and acquisti.empty and vendite.empty}"
+           th:text="|Nessun risultato per “${q}”.|">Nessun risultato.</p>
+
+        <div class="card shadow-sm mb-3" th:unless="${articoli.empty}">
+            <div class="card-header d-flex justify-content-between">
+                <span class="fw-semibold" th:text="|Articoli (${articoli.totalElements})|">Articoli</span>
+                <a th:if="${articoli.totalElements > articoli.size}" th:href="@{/articoli(q=${q})}" class="small">Vedi tutti</a>
+            </div>
+            <div class="list-group list-group-flush">
+                <a th:each="a : ${articoli.content}" th:href="@{/articoli/{id}(id=${a.id})}"
+                   class="list-group-item list-group-item-action d-flex justify-content-between align-items-center gap-2">
+                    <span>
+                        <span class="fw-semibold" th:text="${a.nome}">Articolo</span>
+                        <span class="small text-secondary" th:text="${@schemaAttributi.riepilogo(a)}"></span>
+                    </span>
+                    <span class="badge text-bg-secondary" th:text="${a.categoria.etichetta}">Categoria</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-3" th:unless="${acquisti.empty}">
+            <div class="card-header d-flex justify-content-between">
+                <span class="fw-semibold" th:text="|Acquisti (${acquisti.totalElements})|">Acquisti</span>
+                <a th:if="${acquisti.totalElements > acquisti.size}" th:href="@{/acquisti(q=${q})}" class="small">Vedi tutti</a>
+            </div>
+            <div class="list-group list-group-flush">
+                <a th:each="a : ${acquisti.content}" th:href="@{/acquisti/{id}(id=${a.id})}"
+                   class="list-group-item list-group-item-action d-flex justify-content-between gap-2">
+                    <span th:text="|${@formati.data(a.dataAcquisto)} · ${a.fornitore ?: 'fornitore non indicato'}|">Acquisto</span>
+                    <span class="text-secondary" th:text="|${a.totalePezzi} pz · ${@formati.euro(a.totale)}|"></span>
+                </a>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-3" th:unless="${vendite.empty}">
+            <div class="card-header d-flex justify-content-between">
+                <span class="fw-semibold" th:text="|Vendite (${vendite.totalElements})|">Vendite</span>
+                <a th:if="${vendite.totalElements > vendite.size}" th:href="@{/vendite(q=${q})}" class="small">Vedi tutte</a>
+            </div>
+            <div class="list-group list-group-flush">
+                <a th:each="v : ${vendite.content}" th:href="@{/vendite/{id}(id=${v.id})}"
+                   class="list-group-item list-group-item-action d-flex justify-content-between gap-2">
+                    <span>
+                        <span th:text="|${@formati.data(v.dataVendita)} · ${v.piattaforma.nome}|">Vendita</span>
+                        <span class="small text-secondary" th:if="${v.acquirente}" th:text="|· ${v.acquirente}|"></span>
+                        <span class="small text-secondary" th:unless="${#lists.isEmpty(v.righe)}"
+                              th:text="|· ${v.righe[0].articolo.nome}|"></span>
+                    </span>
+                    <span class="text-secondary" th:text="${@formati.euro(v.totaleLordo)}">0</span>
+                </a>
+            </div>
+        </div>
+    </th:block>
+</main>
+</body>
+</html>

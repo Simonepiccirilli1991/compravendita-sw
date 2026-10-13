@@ -5,24 +5,315 @@
     <title>Dashboard · Compravendita</title>
 </head>
 <body>
-<main class="flex-grow-1 p-4 bg-body-tertiary">
-    <h1 class="h3 mb-4">Dashboard</h1>
+<main th:with="r=${d.riepilogo()}, v=${d.riepilogo().vendite()}, m=${d.magazzino()}">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h1 class="h3 mb-0">Dashboard</h1>
+            <span class="small text-secondary" th:if="${!tutto}"
+                  th:text="|Dal ${@formati.data(periodo.da)} al ${@formati.data(periodo.a)}|"></span>
+            <span class="small text-secondary" th:if="${tutto}">Intero storico</span>
+        </div>
+        <div class="d-flex flex-wrap gap-1 align-items-center">
+            <a th:each="s : ${scorciatoie}" class="btn btn-sm btn-outline-secondary"
+               th:classappend="${!tutto and s.value.da == periodo.da and s.value.a == periodo.a} ? 'active'"
+               th:href="@{/dashboard(da=${s.value.da},a=${s.value.a},giorniFermo=${d.giorniFermo()})}" th:text="${s.key}">Periodo</a>
+            <a class="btn btn-sm btn-outline-secondary" th:classappend="${tutto} ? 'active'"
+               th:href="@{/dashboard(tutto=true,giorniFermo=${d.giorniFermo()})}">Sempre</a>
+            <form class="d-flex gap-1 ms-1" th:action="@{/dashboard}" method="get">
+                <input type="hidden" name="giorniFermo" th:value="${d.giorniFermo()}">
+                <input type="date" name="da" class="form-control form-control-sm" th:value="${periodo.da}" aria-label="Dal">
+                <input type="date" name="a" class="form-control form-control-sm" th:value="${periodo.a}" aria-label="Al">
+                <button type="submit" class="btn btn-sm btn-primary" title="Applica"><i class="bi bi-arrow-right"></i></button>
+            </form>
+        </div>
+    </div>
 
-    <div class="row g-3 mb-4">
-        <div class="col-6 col-lg-3" th:each="kpi : ${ {'Fatturato', 'Netto', 'Profitto', 'ROI medio'} }">
+    <!--/* KPI */-->
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-lg-3">
+            <div class="card shadow-sm h-100"><div class="card-body">
+                <div class="small text-secondary"><i class="bi bi-receipt me-1"></i>Fatturato lordo</div>
+                <div class="fs-4 fw-semibold" th:text="${@formati.euro(v.lordo())}">0</div>
+                <div class="small text-secondary" th:text="|${v.vendite()} vendite · ${v.pezzi()} pezzi|"></div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card shadow-sm h-100"><div class="card-body">
+                <div class="small text-secondary"><i class="bi bi-wallet2 me-1"></i>Netto incassato</div>
+                <div class="fs-4 fw-semibold" th:text="${@formati.euro(v.netto())}">0</div>
+                <div class="small text-secondary" th:text="|Costo merce ${@formati.euro(v.costoVenduto())}|"></div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card shadow-sm h-100"><div class="card-body">
+                <div class="small text-secondary"><i class="bi bi-graph-up-arrow me-1"></i>Profitto</div>
+                <div class="fs-4 fw-semibold" th:classappend="${@formati.classeSegno(v.profitto())}"
+                     th:text="${@formati.euro(v.profitto())}">0</div>
+                <div class="small text-secondary"
+                     th:text="|Netto dopo perdite e spese: ${@formati.euro(r.profittoNetto())}|"></div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card shadow-sm h-100"><div class="card-body">
+                <div class="small text-secondary"><i class="bi bi-percent me-1"></i>ROI medio</div>
+                <div class="fs-4 fw-semibold" th:classappend="${@formati.classeSegno(v.roi())}"
+                     th:text="${@formati.percentuale(v.roi())}">0</div>
+                <div class="small text-secondary" th:text="|Margine ${@formati.percentuale(v.margine())}|"></div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card shadow-sm h-100"><div class="card-body">
+                <div class="small text-secondary"><i class="bi bi-boxes me-1"></i>Valore magazzino</div>
+                <div class="fs-4 fw-semibold" th:text="${@formati.euro(m.valore())}">0</div>
+                <div class="small text-secondary" th:text="|${m.pezzi()} pezzi · ${m.articoli()} articoli (oggi)|"></div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card shadow-sm h-100"><div class="card-body">
+                <div class="small text-secondary"><i class="bi bi-cart-plus me-1"></i>Capitale investito</div>
+                <div class="fs-4 fw-semibold" th:text="${@formati.euro(r.acquistato())}">0</div>
+                <div class="small text-secondary">acquisti registrati nel periodo</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card shadow-sm h-100"><div class="card-body">
+                <div class="small text-secondary"><i class="bi bi-stopwatch me-1"></i>Tempo medio di vendita</div>
+                <div class="fs-4 fw-semibold"
+                     th:text="${d.tempoMedioVendita()} ? |${@formati.numero(d.tempoMedioVendita())} giorni| : '—'">0</div>
+                <div class="small text-secondary">dall'acquisto alla vendita</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card shadow-sm h-100"><div class="card-body">
+                <div class="small text-secondary"><i class="bi bi-hourglass-split me-1"></i>In arrivo / in grading</div>
+                <div class="fs-4 fw-semibold" th:text="|${m.inArrivo()} / ${m.inGrading()}|">0</div>
+                <div class="small text-secondary" th:text="|${m.inVendita()} pezzi messi in vendita|"></div>
+            </div></div>
+        </div>
+    </div>
+
+    <!--/* Grafici */-->
+    <div class="row g-3 mb-3">
+        <div class="col-12 col-xl-8">
             <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <div class="text-secondary small" th:text="${kpi}">KPI</div>
-                    <div class="fs-4 fw-semibold">—</div>
+                <div class="card-header fw-semibold">Andamento mensile</div>
+                <div class="card-body"><div class="grafico grafico-alto"><canvas id="grafico-mesi"></canvas></div></div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-xl-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header fw-semibold">Fatturato per piattaforma</div>
+                <div class="card-body"><div class="grafico"><canvas id="grafico-piattaforme"></canvas></div></div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-xl-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header fw-semibold">Fatturato per categoria</div>
+                <div class="card-body"><div class="grafico"><canvas id="grafico-categorie"></canvas></div></div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-8">
+            <div class="card shadow-sm h-100">
+                <div class="card-header fw-semibold">Profitto per brand</div>
+                <div class="card-body"><div class="grafico"><canvas id="grafico-brand"></canvas></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!--/* Hot items */-->
+    <h2 class="h5 mb-3"><i class="bi bi-fire text-danger me-1"></i>Hot items</h2>
+    <div class="row g-3 mb-3">
+        <div class="col-12 col-lg-4">
+            <div th:replace="~{::classifica('Più venduti', ${d.topPezzi()}, 'pezzi')}"></div>
+        </div>
+        <div class="col-12 col-lg-4">
+            <div th:replace="~{::classifica('Più redditizi', ${d.topProfitto()}, 'profitto')}"></div>
+        </div>
+        <div class="col-12 col-lg-4">
+            <div th:replace="~{::classifica('ROI più alto', ${d.topRoi()}, 'roi')}"></div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header fw-semibold">Top brand</div>
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Brand</th><th class="text-end">Pezzi</th><th class="text-end">Profitto</th></tr></thead>
+                    <tbody>
+                    <tr th:each="b : ${d.topBrand()}">
+                        <td th:text="${b.etichetta()}">Brand</td>
+                        <td class="text-end" th:text="${b.pezzi()}">0</td>
+                        <td class="text-end" th:classappend="${@formati.classeSegno(b.profitto())}" th:text="${@formati.euro(b.profitto())}">0</td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(d.topBrand())}"><td colspan="3" class="text-secondary text-center">Nessuna vendita</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-12 col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header fw-semibold">Categorie</div>
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Categoria</th><th class="text-end">Pezzi</th><th class="text-end">Profitto</th><th class="text-end">ROI</th></tr></thead>
+                    <tbody>
+                    <tr th:each="c : ${d.categorie()}">
+                        <td th:text="${c.etichetta()}">Categoria</td>
+                        <td class="text-end" th:text="${c.pezzi()}">0</td>
+                        <td class="text-end" th:classappend="${@formati.classeSegno(c.profitto())}" th:text="${@formati.euro(c.profitto())}">0</td>
+                        <td class="text-end" th:text="${@formati.percentuale(c.roi())}">0</td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(d.categorie())}"><td colspan="4" class="text-secondary text-center">Nessuna vendita</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-12 col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header fw-semibold">Velocità di vendita</div>
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Categoria</th><th class="text-end">Pezzi</th><th class="text-end">Giorni medi</th></tr></thead>
+                    <tbody>
+                    <tr th:each="c : ${d.velocitaCategorie()}">
+                        <td th:text="${c.etichetta()}">Categoria</td>
+                        <td class="text-end" th:text="${c.pezzi()}">0</td>
+                        <td class="text-end fw-semibold" th:text="${@formati.numero(c.giorniMedi())}">0</td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(d.velocitaCategorie())}"><td colspan="3" class="text-secondary text-center">Nessuna vendita</td></tr>
+                    </tbody>
+                </table>
+                <div class="card-body small border-top" th:unless="${#lists.isEmpty(d.articoliPiuVeloci())}">
+                    <div class="text-secondary mb-1">Articoli venduti più in fretta</div>
+                    <div th:each="a : ${d.articoliPiuVeloci()}" class="d-flex justify-content-between">
+                        <a th:href="@{/articoli/{id}(id=${a.chiave()})}" class="text-decoration-none text-truncate me-2" th:text="${a.etichetta()}">Articolo</a>
+                        <span class="text-nowrap" th:text="|${@formati.numero(a.giorniMedi())} gg|">0 gg</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle me-1"></i>
-        I KPI, i grafici e gli hot items arriveranno nella Fase 6. Per ora la dashboard è solo un segnaposto.
+    <!--/* Avvisi */-->
+    <h2 class="h5 mb-3"><i class="bi bi-bell text-warning me-1"></i>Avvisi</h2>
+    <div class="row g-3">
+        <div class="col-12 col-lg-6">
+            <div class="card shadow-sm h-100 border-warning">
+                <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <span class="fw-semibold" th:text="|Merce ferma da più di ${d.giorniFermo()} giorni|">Merce ferma</span>
+                    <form class="d-flex align-items-center gap-1" th:action="@{/dashboard}" method="get">
+                        <input type="hidden" name="da" th:value="${periodo.da}">
+                        <input type="hidden" name="a" th:value="${periodo.a}">
+                        <input type="hidden" name="tutto" th:value="${tutto}">
+                        <label class="small text-secondary" for="giorniFermo">Soglia</label>
+                        <select id="giorniFermo" name="giorniFermo" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                            <option th:each="g : ${ {30, 60, 90, 180, 365} }" th:value="${g}" th:text="|${g} giorni|"
+                                    th:selected="${g == d.giorniFermo()}"></option>
+                        </select>
+                    </form>
+                </div>
+                <div class="card-body pb-2" th:if="${d.articoliFermi() > 0}">
+                    <span class="fw-semibold" th:text="|${d.articoliFermi()} articoli|"></span>
+                    <span class="text-secondary" th:text="|per ${@formati.euro(d.valoreFermi())} a costo|"></span>
+                </div>
+                <table class="table table-sm mb-0" th:unless="${#lists.isEmpty(d.fermi())}">
+                    <tbody>
+                    <tr th:each="g : ${d.fermi()}">
+                        <td><a th:href="@{/articoli/{id}(id=${g.articoloId()})}" class="text-decoration-none" th:text="${g.nome()}">Articolo</a></td>
+                        <td class="text-end" th:text="|${g.pezzi()} pz|">1 pz</td>
+                        <td class="text-end" th:text="${@formati.euro(g.valore())}">0</td>
+                        <td class="text-end text-danger fw-semibold" th:text="|${g.giorniGiacenza()} gg|">0 gg</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="card-body text-secondary small" th:if="${#lists.isEmpty(d.fermi())}">
+                    <i class="bi bi-check-circle text-success me-1"></i>Nessun articolo fermo oltre la soglia.
+                </div>
+                <div class="card-footer small" th:if="${d.articoliFermi() > d.fermi().size()}">
+                    <a th:href="@{/magazzino(ordine='GIORNI',acquistatoPrima=${sogliaFermi})}">Vedi tutti</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-6">
+            <div class="card shadow-sm h-100 border-danger">
+                <div class="card-header fw-semibold">Vendite in perdita nel periodo</div>
+                <table class="table table-sm mb-0" th:unless="${#lists.isEmpty(d.inPerdita())}">
+                    <tbody>
+                    <tr th:each="p : ${d.inPerdita()}">
+                        <td><a th:href="@{/vendite/{id}(id=${p.id()})}" class="text-decoration-none" th:text="${@formati.data(p.data())}">01/01/2026</a></td>
+                        <td th:text="${p.articolo()}">Articolo</td>
+                        <td th:text="${p.piattaforma()}">eBay</td>
+                        <td class="text-end text-danger fw-semibold" th:text="${@formati.euro(p.profitto())}">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="card-body text-secondary small" th:if="${#lists.isEmpty(d.inPerdita())}">
+                    <i class="bi bi-check-circle text-success me-1"></i>Nessuna vendita in perdita.
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!--/* Classifica di articoli: titolo, voci, misura (pezzi | profitto | roi) */-->
+    <th:block th:if="${false}">
+        <div th:fragment="classifica(titolo, voci, misura)" class="card shadow-sm h-100">
+            <div class="card-header fw-semibold" th:text="${titolo}">Classifica</div>
+            <ol class="list-group list-group-flush list-group-numbered">
+                <li class="list-group-item d-flex justify-content-between align-items-start gap-2" th:each="a : ${voci}">
+                    <div class="me-auto text-truncate">
+                        <a th:href="@{/articoli/{id}(id=${a.chiave()})}" class="text-decoration-none" th:text="${a.etichetta()}">Articolo</a>
+                        <div class="small text-secondary" th:text="|${a.pezzi()} pz · ${@formati.euro(a.lordo())}|"></div>
+                    </div>
+                    <span class="badge rounded-pill text-bg-primary" th:if="${misura == 'pezzi'}" th:text="${a.pezzi()}">0</span>
+                    <span class="badge rounded-pill text-bg-success" th:if="${misura == 'profitto'}" th:text="${@formati.euro(a.profitto())}">0</span>
+                    <span class="badge rounded-pill text-bg-info" th:if="${misura == 'roi'}" th:text="${@formati.percentuale(a.roi())}">0</span>
+                </li>
+                <li class="list-group-item text-secondary small" th:if="${#lists.isEmpty(voci)}">Nessuna vendita nel periodo.</li>
+            </ol>
+        </div>
+    </th:block>
+
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            const grafici = /*[[${d.grafici()}]]*/ {};
+            const euro = v => new Intl.NumberFormat('it-IT', {style: 'currency', currency: 'EUR'}).format(v);
+            const colori = ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#6f42c1', '#20c997', '#fd7e14', '#6c757d'];
+            const tooltipEuro = {callbacks: {label: c => (c.dataset.label ? c.dataset.label + ': ' : '') + euro(c.parsed.y ?? c.parsed)}};
+            const vuoto = id => {
+                const canvas = document.getElementById(id);
+                canvas.parentElement.innerHTML = '<div class="text-secondary small text-center py-5">Nessun dato nel periodo</div>';
+            };
+            const crea = (id, serie, config) => {
+                if (!serie || !serie.etichette || serie.etichette.length === 0) { vuoto(id); return; }
+                new Chart(document.getElementById(id), config);
+            };
+
+            crea('grafico-mesi', grafici.mesi, {
+                data: {
+                    labels: grafici.mesi.etichette,
+                    datasets: [
+                        {type: 'bar', label: 'Fatturato', data: grafici.mesi.fatturato, backgroundColor: 'rgba(13,110,253,.35)', order: 2},
+                        {type: 'line', label: 'Profitto', data: grafici.mesi.profitto, borderColor: '#198754',
+                            backgroundColor: '#198754', tension: .3, order: 1}
+                    ]
+                },
+                options: {maintainAspectRatio: false, plugins: {tooltip: tooltipEuro},
+                    scales: {y: {ticks: {callback: v => euro(v)}}}}
+            });
+            const torta = (id, serie) => crea(id, serie, {
+                type: 'doughnut',
+                data: {labels: serie.etichette, datasets: [{data: serie.valori, backgroundColor: colori}]},
+                options: {maintainAspectRatio: false, plugins: {legend: {position: 'bottom'},
+                    tooltip: {callbacks: {label: c => c.label + ': ' + euro(c.parsed)}}}}
+            });
+            torta('grafico-piattaforme', grafici.piattaforme);
+            torta('grafico-categorie', grafici.categorie);
+            crea('grafico-brand', grafici.brand, {
+                type: 'bar',
+                data: {labels: grafici.brand.etichette, datasets: [{label: 'Profitto', data: grafici.brand.valori,
+                    backgroundColor: grafici.brand.valori.map(v => v >= 0 ? 'rgba(25,135,84,.7)' : 'rgba(220,53,69,.7)')}]},
+                options: {maintainAspectRatio: false, indexAxis: 'y', plugins: {legend: {display: false},
+                    tooltip: {callbacks: {label: c => euro(c.parsed.x)}}}, scales: {x: {ticks: {callback: v => euro(v)}}}}
+            });
+        });
+    </script>
 </main>
 </body>
 </html>

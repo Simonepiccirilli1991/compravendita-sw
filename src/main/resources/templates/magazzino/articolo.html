@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--/* Riepilogo compatto di un lotto, usato nei form di rettifica e grading */-->
+<div th:fragment="riepilogoLotto(lotto)" class="card shadow-sm mb-3">
+    <div class="card-body d-flex flex-wrap gap-4 align-items-center">
+        <div>
+            <div class="small text-secondary">Articolo</div>
+            <a th:href="@{/articoli/{id}(id=${lotto.articolo.id})}" class="fw-semibold text-decoration-none"
+               th:text="${lotto.articolo.nome}">Articolo</a>
+        </div>
+        <div>
+            <div class="small text-secondary">Acquisto</div>
+            <a th:href="@{/acquisti/{id}(id=${lotto.acquisto.id})}" class="text-decoration-none"
+               th:text="${@formati.data(lotto.acquisto.dataAcquisto)} + (${lotto.acquisto.fornitore} ? ' · ' + ${lotto.acquisto.fornitore} : '')">01/01/2026</a>
+        </div>
+        <div>
+            <div class="small text-secondary">Stato</div>
+            <span th:replace="~{magazzino/fragments :: stato(${lotto.stato})}"></span>
+        </div>
+        <div>
+            <div class="small text-secondary">Disponibili</div>
+            <span class="fw-semibold" th:text="|${lotto.quantitaResidua} / ${lotto.quantita}|">1 / 1</span>
+        </div>
+        <div>
+            <div class="small text-secondary">Costo unitario</div>
+            <span class="fw-semibold" th:text="${@formati.euro(lotto.costoUnitarioEffettivo)}">0</span>
+        </div>
+    </div>
+</div>
+
+<!--/* Movimenti di magazzino di un articolo, caricati via HTMX nella scheda articolo */-->
+<div th:fragment="movimenti" id="movimenti">
+    <div class="card shadow-sm mt-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span class="fw-semibold">Lotti e giacenza</span>
+            <a th:href="@{/acquisti/nuovo}" class="btn btn-sm btn-outline-primary"><i class="bi bi-cart-plus me-1"></i>Registra acquisto</a>
+        </div>
+        <div class="table-responsive" th:unless="${#lists.isEmpty(lotti)}">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>Acquisto</th>
+                    <th>Stato</th>
+                    <th class="text-end">Disponibili</th>
+                    <th class="text-end">Costo unit.</th>
+                    <th class="text-end">Valore</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="l : ${lotti}">
+                    <td><a th:href="@{/acquisti/{id}(id=${l.acquisto.id})}" class="text-decoration-none"
+                           th:text="${@formati.data(l.acquisto.dataAcquisto)}">01/01/2026</a>
+                        <span class="small text-secondary" th:text="${l.acquisto.fornitore}"></span></td>
+                    <td><span th:replace="~{magazzino/fragments :: stato(${l.stato})}"></span></td>
+                    <td class="text-end" th:text="|${l.quantitaResidua} / ${l.quantita}|">1 / 1</td>
+                    <td class="text-end" th:text="${@formati.euro(l.costoUnitarioEffettivo)}">0</td>
+                    <td class="text-end" th:text="${@formati.euro(l.valoreResiduo)}">0</td>
+                    <td class="text-end">
+                        <div th:replace="~{magazzino/fragments :: azioniLotto(${l}, ${'/articoli/' + articoloId})}"></div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card-body text-secondary small" th:if="${#lists.isEmpty(lotti)}">
+            Nessun acquisto registrato per questo articolo.
+        </div>
+    </div>
+
+    <div class="card shadow-sm mt-3" th:unless="${#lists.isEmpty(gradings)}">
+        <div class="card-header fw-semibold">Grading</div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex flex-wrap justify-content-between gap-2" th:each="g : ${gradings}">
+                <span>
+                    <span class="badge" th:classappend="${g.stato.classeBadge}" th:text="${g.stato.etichetta}">Stato</span>
+                    <span th:text="|${g.ente} · inviata il ${@formati.data(g.dataInvio)}|">PSA</span>
+                    <th:block th:if="${g.stato.name() == 'RIENTRATO'}">
+                        → <a th:href="@{/articoli/{id}(id=${g.rigaAcquisto.articolo.id})}"
+                             th:text="|voto ${@formati.numero(g.voto)} (${g.rigaAcquisto.articolo.nome})|">voto</a>
+                    </th:block>
+                </span>
+                <span class="text-secondary small" th:text="|Costo ${@formati.euro(g.costo)}|">Costo</span>
+            </li>
+        </ul>
+    </div>
+
+    <div class="card shadow-sm mt-3" th:unless="${#lists.isEmpty(rettifiche)}">
+        <div class="card-header fw-semibold">Rettifiche</div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex flex-wrap justify-content-between gap-2" th:each="r : ${rettifiche}">
+                <span th:text="|${@formati.data(r.dataRettifica)} · ${r.motivo.etichetta} · ${r.quantita} pz|">Rettifica</span>
+                <span class="text-danger small" th:text="|Perdita ${@formati.euro(r.perdita)}|">Perdita</span>
+            </li>
+        </ul>
+    </div>
+</div>
+
+</body>
+</html>

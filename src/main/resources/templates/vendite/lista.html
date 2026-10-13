@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Vendite · Compravendita</title>
+</head>
+<body>
+<main>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h1 class="h3 mb-0">Storico vendite</h1>
+        <a th:href="@{/vendite/nuova}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Registra vendita</a>
+    </div>
+
+    <form class="card card-body shadow-sm mb-3" th:action="@{/vendite}" method="get"
+          th:attr="hx-get=@{/vendite}" hx-target="#risultati" hx-swap="outerHTML"
+          hx-push-url="true" hx-trigger="input changed delay:300ms from:input[name='q'], change">
+        <div class="row g-2">
+            <div class="col-12 col-lg-4">
+                <input type="search" name="q" class="form-control" placeholder="Articolo, acquirente o n° ordine…"
+                       th:value="${filtro.q}" aria-label="Cerca">
+            </div>
+            <div class="col-6 col-lg-2">
+                <input type="date" name="da" class="form-control" th:value="${filtro.da}" aria-label="Dal" title="Dal">
+            </div>
+            <div class="col-6 col-lg-2">
+                <input type="date" name="a" class="form-control" th:value="${filtro.a}" aria-label="Al" title="Al">
+            </div>
+            <div class="col-6 col-lg-2">
+                <select name="stato" class="form-select" aria-label="Stato">
+                    <option value="">Tutti gli stati</option>
+                    <option th:each="s : ${stati}" th:value="${s}" th:text="${s.etichetta}"
+                            th:selected="${s == filtro.stato}"></option>
+                </select>
+            </div>
+            <div class="col-6 col-lg-2">
+                <select name="piattaformaId" class="form-select" aria-label="Piattaforma">
+                    <option value="">Tutte le piattaforme</option>
+                    <option th:each="p : ${piattaforme}" th:value="${p.id}" th:text="${p.nome}"
+                            th:selected="${p.id == filtro.piattaformaId}"></option>
+                </select>
+            </div>
+            <div class="col-6 col-lg-3">
+                <select name="categoria" class="form-select" aria-label="Categoria">
+                    <option value="">Tutte le categorie</option>
+                    <option th:each="c : ${categorie}" th:value="${c}" th:text="${c.etichetta}"
+                            th:selected="${c == filtro.categoria}"></option>
+                </select>
+            </div>
+            <div class="col-6 col-lg-3">
+                <select name="brandId" class="form-select" aria-label="Brand">
+                    <option value="">Tutti i brand</option>
+                    <option th:each="b : ${brands}" th:value="${b.id}" th:text="${b.nome}"
+                            th:selected="${b.id == filtro.brandId}"></option>
+                </select>
+            </div>
+        </div>
+        <noscript><button type="submit" class="btn btn-secondary mt-2">Filtra</button></noscript>
+    </form>
+
+    <div id="risultati" th:fragment="risultati">
+        <div class="d-flex justify-content-end gap-2 mb-2">
+            <a th:href="@{/export/vendite.xlsx(q=${filtro.q},da=${filtro.da},a=${filtro.a},stato=${filtro.stato},piattaformaId=${filtro.piattaformaId},categoria=${filtro.categoria},brandId=${filtro.brandId})}" class="btn btn-sm btn-outline-success"><i class="bi bi-file-earmark-excel me-1"></i>Excel</a>
+            <a th:href="@{/export/vendite.csv(q=${filtro.q},da=${filtro.da},a=${filtro.a},stato=${filtro.stato},piattaformaId=${filtro.piattaformaId},categoria=${filtro.categoria},brandId=${filtro.brandId})}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-filetype-csv me-1"></i>CSV</a>
+        </div>
+        <div class="row g-3 mb-3">
+            <div class="col-6 col-lg">
+                <div class="card shadow-sm h-100"><div class="card-body">
+                    <div class="small text-secondary">Vendite completate</div>
+                    <div class="fs-5 fw-semibold" th:text="${totali.vendite()}">0</div>
+                </div></div>
+            </div>
+            <div class="col-6 col-lg">
+                <div class="card shadow-sm h-100"><div class="card-body">
+                    <div class="small text-secondary">Fatturato merce</div>
+                    <div class="fs-5 fw-semibold" th:text="${@formati.euro(totali.lordo())}">0</div>
+                </div></div>
+            </div>
+            <div class="col-6 col-lg">
+                <div class="card shadow-sm h-100"><div class="card-body">
+                    <div class="small text-secondary">Netto incassato</div>
+                    <div class="fs-5 fw-semibold" th:text="${@formati.euro(totali.netto())}">0</div>
+                </div></div>
+            </div>
+            <div class="col-6 col-lg">
+                <div class="card shadow-sm h-100"><div class="card-body">
+                    <div class="small text-secondary">Costo della merce</div>
+                    <div class="fs-5 fw-semibold" th:text="${@formati.euro(totali.costoVenduto())}">0</div>
+                </div></div>
+            </div>
+            <div class="col-12 col-lg">
+                <div class="card shadow-sm h-100"><div class="card-body">
+                    <div class="small text-secondary">Profitto</div>
+                    <div class="fs-5 fw-semibold" th:classappend="${@formati.classeSegno(totali.profitto())}"
+                         th:text="${@formati.euro(totali.profitto())}">0</div>
+                    <div class="small text-secondary" th:if="${totali.costiResi().signum() > 0}"
+                         th:text="|di cui resi: −${@formati.euro(totali.costiResi())}|"></div>
+                </div></div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Data</th>
+                        <th>Piattaforma</th>
+                        <th>Articoli</th>
+                        <th class="text-end">Lordo</th>
+                        <th class="text-end">Netto</th>
+                        <th class="text-end">Costo</th>
+                        <th class="text-end">Profitto</th>
+                        <th class="text-end">ROI</th>
+                        <th>Stato</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="v : ${pagina.content}" th:classappend="${!v.completata} ? 'text-secondary'">
+                        <td><a th:href="@{/vendite/{id}(id=${v.id})}" class="fw-semibold text-decoration-none"
+                               th:text="${@formati.data(v.dataVendita)}">01/01/2026</a></td>
+                        <td>
+                            <span th:text="${v.piattaforma.nome}">eBay</span>
+                            <div class="small text-secondary" th:if="${v.acquirente}" th:text="${v.acquirente}"></div>
+                        </td>
+                        <td>
+                            <th:block th:unless="${#lists.isEmpty(v.righe)}">
+                                <span th:text="${v.righe[0].articolo.nome}">Articolo</span>
+                                <span class="small text-secondary" th:if="${v.righe.size() > 1}"
+                                      th:text="|+ altri ${v.righe.size() - 1}|"></span>
+                            </th:block>
+                            <div class="small text-secondary" th:text="|${v.totalePezzi} pz|"></div>
+                        </td>
+                        <td class="text-end" th:text="${@formati.euro(v.totaleLordo)}">0</td>
+                        <td class="text-end" th:text="${@formati.euro(v.netto)}">0</td>
+                        <td class="text-end" th:text="${@formati.euro(v.costoVenduto)}">0</td>
+                        <td class="text-end fw-semibold" th:classappend="${@formati.classeSegno(v.profitto)}"
+                            th:text="${@formati.euro(v.profitto)}">0</td>
+                        <td class="text-end" th:classappend="${@formati.classeSegno(v.roi)}"
+                            th:text="${@formati.percentuale(v.roi)}">0</td>
+                        <td><span th:replace="~{vendite/fragments :: stato(${v.stato})}"></span></td>
+                    </tr>
+                    <tr th:if="${pagina.empty}">
+                        <td colspan="9" class="text-center text-secondary py-4">Nessuna vendita trovata.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 gap-2" th:if="${pagina.totalElements > 0}">
+            <span class="small text-secondary"
+                  th:text="|${pagina.totalElements} vendite · pagina ${pagina.number + 1} di ${pagina.totalPages}|"></span>
+            <nav th:if="${pagina.totalPages > 1}" aria-label="Paginazione"
+                 th:with="base=@{/vendite(q=${filtro.q},da=${filtro.da},a=${filtro.a},stato=${filtro.stato},piattaformaId=${filtro.piattaformaId},categoria=${filtro.categoria},brandId=${filtro.brandId})}">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item" th:classappend="${pagina.first} ? 'disabled'">
+                        <a class="page-link" th:href="@{${base}(page=${pagina.number - 1})}">&laquo;</a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, pagina.totalPages - 1)}"
+                        th:classappend="${i == pagina.number} ? 'active'">
+                        <a class="page-link" th:text="${i + 1}" th:href="@{${base}(page=${i})}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${pagina.last} ? 'disabled'">
+                        <a class="page-link" th:href="@{${base}(page=${pagina.number + 1})}">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</main>
+</body>
+</html>

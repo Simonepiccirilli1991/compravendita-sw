@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Piattaforme · Compravendita</title>
+</head>
+<body>
+<main>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h1 class="h3 mb-0">Piattaforme di vendita</h1>
+        <a th:href="@{/piattaforme/nuova}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Nuova piattaforma</a>
+    </div>
+    <p class="small text-secondary">
+        Le commissioni configurate qui vengono calcolate in automatico su ogni vendita (sull'incasso: merce +
+        spedizione pagata dall'acquirente) e restano modificabili a mano nella singola vendita.
+    </p>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>Nome</th>
+                    <th class="text-end">Commissione</th>
+                    <th class="text-end">Pagamento</th>
+                    <th class="text-end">Vendite</th>
+                    <th>Stato</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="p : ${piattaforme}" th:classappend="${!p.attiva} ? 'text-secondary'">
+                    <td>
+                        <span class="fw-semibold" th:text="${p.nome}">eBay</span>
+                        <div class="small text-secondary" th:if="${p.note}" th:text="${p.note}"></div>
+                    </td>
+                    <td class="text-end" th:text="|${@formati.numero(p.feePercentuale)}% + ${@formati.euro(p.feeFissa)}|">0% + 0 €</td>
+                    <td class="text-end" th:text="|${@formati.numero(p.feePagamentoPercentuale)}% + ${@formati.euro(p.feePagamentoFissa)}|">0% + 0 €</td>
+                    <td class="text-end">
+                        <a th:href="@{/vendite(piattaformaId=${p.id})}" class="text-decoration-none"
+                           th:text="${conteggi[p.id]} ?: 0">0</a>
+                    </td>
+                    <td>
+                        <span class="badge text-bg-success" th:if="${p.attiva}">Attiva</span>
+                        <span class="badge text-bg-secondary" th:unless="${p.attiva}">Disattivata</span>
+                        <span class="badge text-bg-warning" th:if="${p.attiva and p.senzaCommissioni}"
+                              title="Nessuna commissione configurata">Senza commissioni</span>
+                    </td>
+                    <td class="text-end text-nowrap">
+                        <a th:href="@{/piattaforme/{id}/modifica(id=${p.id})}" class="btn btn-sm btn-outline-primary" title="Modifica">
+                            <i class="bi bi-pencil"></i></a>
+                        <form th:action="@{/piattaforme/{id}/elimina(id=${p.id})}" method="post" class="d-inline"
+                              th:unless="${conteggi[p.id]}"
+                              onsubmit="return confirm('Eliminare questa piattaforma?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Elimina"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+</body>
+</html>

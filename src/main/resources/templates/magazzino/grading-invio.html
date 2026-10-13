@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Invio a grading · Compravendita</title>
+</head>
+<body>
+<main>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/magazzino}">Magazzino</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/magazzino/grading}">Grading</a></li>
+            <li class="breadcrumb-item active">Invio</li>
+        </ol>
+    </nav>
+    <h1 class="h3 mb-3">Invia una carta a gradare</h1>
+
+    <div th:replace="~{magazzino/articolo :: riepilogoLotto(${lotto})}"></div>
+
+    <div class="alert alert-warning" th:unless="${inviabile}">
+        <i class="bi bi-exclamation-triangle me-1"></i>Da questo lotto non si possono inviare carte: servono carte singole
+        disponibili in magazzino o in vendita.
+    </div>
+
+    <form th:if="${inviabile}" th:action="@{/magazzino/lotti/{id}/grading(id=${lotto.id})}" th:object="${form}"
+          method="post" class="card shadow-sm" novalidate>
+        <div class="card-body">
+            <p class="small text-secondary" th:if="${lotto.quantita > 1}">
+                <i class="bi bi-info-circle me-1"></i>Il lotto ha più pezzi: una carta verrà separata in un lotto a sé,
+                con lo stesso costo unitario, e seguirà il grading.
+            </p>
+            <div class="row g-3">
+                <div class="col-12 col-sm-4">
+                    <label for="ente" class="form-label">Ente *</label>
+                    <select th:field="*{ente}" class="form-select" th:classappend="${#fields.hasErrors('ente')} ? 'is-invalid'">
+                        <option value="">Scegli…</option>
+                        <option th:each="e : ${enti}" th:value="${e}" th:text="${e}"></option>
+                    </select>
+                    <div class="invalid-feedback" th:errors="*{ente}"></div>
+                </div>
+                <div class="col-12 col-sm-4">
+                    <label for="servizio" class="form-label">Servizio / livello</label>
+                    <input type="text" th:field="*{servizio}" class="form-control" placeholder="es. Value, Regular, Express"
+                           th:classappend="${#fields.hasErrors('servizio')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:errors="*{servizio}"></div>
+                </div>
+                <div class="col-12 col-sm-4">
+                    <label for="numeroOrdine" class="form-label">N° ordine / submission</label>
+                    <input type="text" th:field="*{numeroOrdine}" class="form-control"
+                           th:classappend="${#fields.hasErrors('numeroOrdine')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:errors="*{numeroOrdine}"></div>
+                </div>
+                <div class="col-12 col-sm-4">
+                    <label for="dataInvio" class="form-label">Data invio *</label>
+                    <input type="date" th:field="*{dataInvio}" class="form-control"
+                           th:classappend="${#fields.hasErrors('dataInvio')} ? 'is-invalid'">
+                    <div class="invalid-feedback" th:errors="*{dataInvio}"></div>
+                </div>
+                <div class="col-12 col-sm-4">
+                    <label for="costoPrevisto" class="form-label">Costo previsto</label>
+                    <div class="input-group">
+                        <span class="input-group-text">€</span>
+                        <input type="number" min="0" step="0.01" th:field="*{costoPrevisto}" class="form-control"
+                               th:classappend="${#fields.hasErrors('costoPrevisto')} ? 'is-invalid'">
+                        <div class="invalid-feedback" th:errors="*{costoPrevisto}"></div>
+                    </div>
+                    <div class="form-text">Grading + spedizioni + assicurazione; lo confermi al rientro.</div>
+                </div>
+                <div class="col-12">
+                    <label for="note" class="form-label">Note</label>
+                    <textarea th:field="*{note}" class="form-control" rows="2"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer d-flex justify-content-end gap-2">
+            <a th:href="@{/magazzino/lotti}" class="btn btn-outline-secondary">Annulla</a>
+            <button type="submit" class="btn btn-warning"><i class="bi bi-send me-1"></i>Invia a grading</button>
+        </div>
+    </form>
+</main>
+</body>
+</html>
