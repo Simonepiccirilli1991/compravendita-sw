@@ -75,13 +75,26 @@
                    th:classappend="${activePage == 'import'} ? 'active'">
                     <i class="bi bi-upload me-2"></i>Importa</a>
             </li>
+            <!--/* Solo nella versione installata (installer Windows) */-->
+            <li class="nav-item" th:if="${@environment.containsProperty('app.desktop.pgsql-bin')}">
+                <a th:href="@{/backup}" class="nav-link text-white"
+                   th:classappend="${activePage == 'backup'} ? 'active'">
+                    <i class="bi bi-shield-check me-2"></i>Backup</a>
+            </li>
         </ul>
         <hr>
         <div class="d-flex align-items-center justify-content-between">
             <span class="small"><i class="bi bi-person-circle me-1"></i><span sec:authentication="name">utente</span></span>
-            <form th:action="@{/logout}" method="post">
-                <button type="submit" class="btn btn-sm btn-outline-light" title="Esci"><i class="bi bi-box-arrow-right"></i></button>
-            </form>
+            <div class="d-flex gap-1">
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn btn-sm btn-outline-light" title="Esci"><i class="bi bi-box-arrow-right"></i></button>
+                </form>
+                <form th:action="@{/chiudi-programma}" method="post"
+                      th:if="${@environment.containsProperty('app.desktop.pgsql-bin')}"
+                      onsubmit="return confirm('Chiudere il programma? Per riaprirlo usa l’icona sul desktop.');">
+                    <button type="submit" class="btn btn-sm btn-outline-warning" title="Chiudi programma"><i class="bi bi-power"></i></button>
+                </form>
+            </div>
         </div>
     </nav>
 

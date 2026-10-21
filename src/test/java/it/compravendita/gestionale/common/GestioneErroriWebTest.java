@@ -56,6 +56,15 @@ class GestioneErroriWebTest {
 			.andExpect(content().string(containsString("La pagina richiesta non esiste")));
 	}
 
+	/** Backup e chiusura del programma esistono solo nella versione installata. */
+	@Test
+	void pagineDellaVersioneInstallataAssenti() throws Exception {
+		mvc.perform(get("/backup")).andExpect(status().isNotFound());
+		mvc.perform(get("/dashboard"))
+			.andExpect(status().isOk())
+			.andExpect(content().string(not(containsString("chiudi-programma"))));
+	}
+
 	@Test
 	void parametroNonNumerico() throws Exception {
 		mvc.perform(get("/vendite/{id}", "abc"))

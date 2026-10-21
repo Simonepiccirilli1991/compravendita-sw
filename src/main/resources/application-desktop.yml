@@ -1,0 +1,21 @@
+# Profilo della versione installata (installer Windows), attivato da AvvioDesktop insieme a "prod".
+# Database, porta, credenziali e cartelle arrivano come proprietà di sistema da AvvioDesktop.
+spring:
+  main:
+    banner-mode: off
+  servlet:
+    multipart:
+      # i backup da ripristinare possono contenere molte foto
+      max-file-size: 2GB
+      max-request-size: 2GB
+
+server:
+  servlet:
+    session:
+      timeout: 12h
+
+logging:
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 10

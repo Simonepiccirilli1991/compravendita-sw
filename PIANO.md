@@ -130,3 +130,11 @@ Stesso gestionale, dedicato a tazze e articoli simili venduti sui marketplace (V
 - [x] Campo lingua tolto da form e scheda articolo
 - [x] Migrazione `V7__gestionale_tazze.sql`; dati demo con catalogo di tazze
 - [x] Docker separato: progetto `compravendita-sw-tazze` (container `compravendita-sw-tazze-db`/`-app`, volume proprio) che con `docker compose up -d --build` avvia database e applicazione; `docker-compose.dev.yml` con il solo database per lo sviluppo; script di backup e operazione pianificata con nomi propri
+
+## Versione installabile (branch `installer`, derivato da `tazze`)
+Installer Windows autonomo, un PC = un'installazione con i propri dati, senza Docker.
+- [x] `installer/crea-installer.ps1`: scarica PostgreSQL 16 (EDB), tiene solo i programmi necessari, crea l'`.exe` con jpackage + WiX (Java incluso, installazione per utente senza amministratore, collegamenti su desktop e menu Start, UUID di aggiornamento fisso)
+- [x] `AvvioDesktop`: istanza unica, prima configurazione (utente e password), PostgreSQL locale (initdb al primo avvio, porta libera solo su 127.0.0.1, password interna generata), Spring Boot su 127.0.0.1:8181, apertura del browser, finestra di avvio e icona nell'area di notifica
+- [x] Dati in `%LOCALAPPDATA%\GestionaleTazze`, impostazioni modificabili in `gestionale.properties`
+- [x] Pagina Backup (solo versione installata): backup zip con database e foto, automatico giornaliero (ultimi 14), download, ripristino da elenco o da file (anche `database.dump` della versione Docker) con copia di sicurezza e migrazioni Flyway
+- [x] Pulsante "Chiudi programma" nella barra laterale

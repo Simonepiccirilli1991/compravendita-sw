@@ -11,6 +11,37 @@ netto, ROI e dashboard.
 > quindi si avvia una versione alla volta, oppure si cambiano `APP_PORT` e `DB_PUBLISHED_PORT` nel file `.env`.
 > Il piano di sviluppo è in [PIANO.md](PIANO.md).
 
+## Versione installabile su Windows (branch `installer`)
+Un installer `.exe` contiene il gestionale, Java e PostgreSQL 16: chi lo usa non deve installare né Docker né
+altro. Ogni PC ha i propri dati.
+
+**Per chi usa il programma**
+- Doppio clic su `Gestionale Tazze-1.0.0.exe` e avanti fino alla fine (non servono permessi di amministratore).
+  Windows può mostrare "PC protetto da Windows": *Ulteriori informazioni → Esegui comunque* (l'installer non è
+  firmato digitalmente).
+- Si apre dall'icona **Gestionale Tazze** sul desktop o nel menu Start. Al primo avvio chiede utente e password,
+  poi apre il browser su `http://127.0.0.1:8181`. La pagina è raggiungibile solo da quel PC.
+- Il programma resta attivo finché non lo si chiude: pulsante **⏻** in basso nella barra laterale, oppure icona
+  della tazza vicino all'orologio → *Chiudi*. Riaprire l'icona mentre è già attivo apre solo il browser.
+- **Backup**: voce *Backup* nel menu. Uno automatico al giorno (gli ultimi 14) in `Documenti\Gestionale Tazze\Backup`,
+  più quelli creati a mano. Da lì si scaricano e si ripristinano; si può ripristinare anche un `database.dump`
+  creato dagli script della versione Docker, per passare dai container al programma installato.
+- **Dati**: `%LOCALAPPDATA%\GestionaleTazze` (database, foto, log, `gestionale.properties` con porta, credenziali
+  e cartella dei backup). Disinstallare o aggiornare il programma non li tocca.
+- **Aggiornamento**: chiudere il programma e installare la versione nuova sopra la vecchia.
+
+**Per creare l'installer** (solo sul PC di sviluppo): JDK 21+ in `JAVA_HOME` e WiX Toolset 5
+```powershell
+dotnet tool install --global wix --version 5.0.2
+wix extension add -g WixToolset.UI.wixext/5.0.2
+wix extension add -g WixToolset.Util.wixext/5.0.2
+powershell -ExecutionPolicy Bypass -File installer\crea-installer.ps1 -Versione 1.0.0   # -ConTest per eseguire anche i test
+```
+Lo script scarica una volta PostgreSQL 16 (binari ufficiali EDB, in `installer/cache`), ne tiene solo i file
+necessari e crea `dist\Gestionale Tazze-<versione>.exe` con `jpackage`. Per un aggiornamento aumentare `-Versione`.
+Il codice della versione installata è nel package `desktop` (`AvvioDesktop` avvia PostgreSQL, Spring Boot con i
+profili `prod,desktop`, il browser e l'icona di notifica).
+
 ## Avvio rapido (tutto in Docker)
 Serve solo Docker Desktop avviato. Dalla cartella del progetto:
 ```bash

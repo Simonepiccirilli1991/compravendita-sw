@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Backup · Gestionale Tazze</title>
+</head>
+<body>
+<main>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <div>
+            <h1 class="h3 mb-0">Backup</h1>
+            <p class="small text-secondary mb-0">Ogni backup contiene il database e le foto degli articoli. Ne viene creato
+                uno automatico al giorno, all'apertura del programma (si tengono gli ultimi 14).</p>
+        </div>
+        <form th:action="@{/backup}" method="post">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-shield-check me-1"></i>Crea backup ora</button>
+        </form>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-12 col-xl-8">
+            <div class="card shadow-sm">
+                <div class="card-header small">
+                    <i class="bi bi-folder2-open me-1"></i>Cartella: <span class="font-monospace" th:text="${cartella}">C:\…</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Data</th>
+                            <th>Tipo</th>
+                            <th class="text-end">Dimensione</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="b : ${backup}">
+                            <td th:text="${#temporals.format(b.data(), 'dd/MM/yyyy HH:mm')}">21/10/2026 09:30</td>
+                            <td>
+                                <span class="badge text-bg-secondary" th:if="${b.automatico()}">automatico</span>
+                                <span class="badge text-bg-warning" th:if="${#strings.contains(b.nome(), 'prima-del-ripristino')}">prima del ripristino</span>
+                                <span class="badge text-bg-primary" th:if="${#strings.contains(b.nome(), '-manuale-')}">manuale</span>
+                            </td>
+                            <td class="text-end" th:text="|${#numbers.formatDecimal(b.dimensione() / 1048576.0, 1, 'POINT', 1, 'COMMA')} MB|">1,2 MB</td>
+                            <td class="text-end text-nowrap">
+                                <a th:href="@{/backup/{n}(n=${b.nome()})}" class="btn btn-sm btn-outline-secondary" title="Scarica">
+                                    <i class="bi bi-download"></i></a>
+                                <form th:action="@{/backup/{n}/ripristina(n=${b.nome()})}" method="post" class="d-inline"
+                                      onsubmit="return confirm('Ripristinare questo backup? I dati attuali verranno sostituiti (prima ne viene salvata una copia).');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Ripristina">
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i>Ripristina</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(backup)}">
+                            <td colspan="4" class="text-center text-secondary py-4">Nessun backup ancora.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-4">
+            <form th:action="@{/backup/ripristina}" method="post" enctype="multipart/form-data" class="card shadow-sm"
+                  onsubmit="return confirm('Ripristinare il backup scelto? I dati attuali verranno sostituiti (prima ne viene salvata una copia).');">
+                <div class="card-body">
+                    <label for="file" class="form-label fw-semibold">Ripristina da un file</label>
+                    <input type="file" id="file" name="file" class="form-control" accept=".zip,.dump">
+                    <div class="form-text">Un backup <code>.zip</code> creato da questo programma (anche su un altro PC),
+                        oppure il <code>database.dump</code> creato dagli script della versione Docker.</div>
+                </div>
+                <div class="card-footer text-end">
+                    <button type="submit" class="btn btn-outline-danger"><i class="bi bi-upload me-1"></i>Ripristina</button>
+                </div>
+            </form>
+            <p class="small text-secondary mt-3">Per spostare il gestionale su un altro PC: crea un backup, copialo
+                sull'altro PC e ripristinalo da questa pagina.</p>
+        </div>
+    </div>
+</main>
+</body>
+</html>
