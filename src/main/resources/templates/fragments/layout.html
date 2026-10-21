@@ -66,6 +66,11 @@
                     <i class="bi bi-receipt me-2"></i>Spese</a>
             </li>
             <li class="nav-item">
+                <a th:href="@{/prezzi}" class="nav-link text-white"
+                   th:classappend="${activePage == 'prezzi'} ? 'active'">
+                    <i class="bi bi-tags me-2"></i>Prezzi e tasse</a>
+            </li>
+            <li class="nav-item">
                 <a th:href="@{/report}" class="nav-link text-white"
                    th:classappend="${activePage == 'report'} ? 'active'">
                     <i class="bi bi-graph-up-arrow me-2"></i>Report</a>

@@ -24,6 +24,7 @@ import it.compravendita.gestionale.catalogo.ElencoArticoli;
 import it.compravendita.gestionale.common.FileStorage.FileNonValidoException;
 import it.compravendita.gestionale.common.OperazioneNonConsentitaException;
 import it.compravendita.gestionale.magazzino.StatoOggetto;
+import it.compravendita.gestionale.prezzi.PrezziService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
@@ -35,9 +36,13 @@ public class AcquistoController {
 
 	private final ElencoArticoli elencoArticoli;
 
-	public AcquistoController(AcquistoService acquistoService, ElencoArticoli elencoArticoli) {
+	private final PrezziService prezziService;
+
+	public AcquistoController(AcquistoService acquistoService, ElencoArticoli elencoArticoli,
+			PrezziService prezziService) {
 		this.acquistoService = acquistoService;
 		this.elencoArticoli = elencoArticoli;
+		this.prezziService = prezziService;
 	}
 
 	@ModelAttribute("activePage")
@@ -69,6 +74,7 @@ public class AcquistoController {
 		Acquisto acquisto = acquistoService.trova(id);
 		model.addAttribute("acquisto", acquisto);
 		model.addAttribute("bloccate", acquistoService.righeBloccate(acquisto));
+		model.addAttribute("calcoloPrezzi", prezziService.calcolo());
 		return "acquisti/dettaglio";
 	}
 
@@ -119,6 +125,7 @@ public class AcquistoController {
 	@GetMapping("/anteprima")
 	String anteprima(@ModelAttribute("form") AcquistoForm form, Model model) {
 		model.addAttribute("anteprima", acquistoService.anteprima(form));
+		model.addAttribute("calcoloPrezzi", prezziService.calcolo());
 		return "acquisti/form :: anteprima";
 	}
 
@@ -161,6 +168,7 @@ public class AcquistoController {
 		model.addAttribute("stati", StatoOggetto.iniziali());
 		model.addAttribute("opzioniArticoli", elencoArticoli.opzioni());
 		model.addAttribute("anteprima", acquistoService.anteprima(form));
+		model.addAttribute("calcoloPrezzi", prezziService.calcolo());
 		return "acquisti/form";
 	}
 

@@ -1,5 +1,7 @@
 package it.compravendita.gestionale.magazzino;
 
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -19,6 +21,7 @@ import it.compravendita.gestionale.acquisti.RigaAcquisto;
 import it.compravendita.gestionale.catalogo.BrandService;
 import it.compravendita.gestionale.catalogo.Categoria;
 import it.compravendita.gestionale.common.OperazioneNonConsentitaException;
+import it.compravendita.gestionale.prezzi.PrezziService;
 import jakarta.validation.Valid;
 
 @Controller
@@ -29,9 +32,13 @@ public class MagazzinoController {
 
 	private final BrandService brandService;
 
-	public MagazzinoController(MagazzinoService magazzinoService, BrandService brandService) {
+	private final PrezziService prezziService;
+
+	public MagazzinoController(MagazzinoService magazzinoService, BrandService brandService,
+			PrezziService prezziService) {
 		this.magazzinoService = magazzinoService;
 		this.brandService = brandService;
+		this.prezziService = prezziService;
 	}
 
 	@ModelAttribute("activePage")
@@ -58,6 +65,7 @@ public class MagazzinoController {
 			@RequestHeader(value = "HX-Request", required = false) String htmx, Model model) {
 		model.addAttribute("pagina", magazzinoService.lotti(filtro, pageable));
 		model.addAttribute("sezione", "lotti");
+		model.addAttribute("calcoloPrezzi", prezziService.calcolo());
 		if (htmx != null) {
 			return "magazzino/lotti :: risultati";
 		}
@@ -124,8 +132,11 @@ public class MagazzinoController {
 	/** Frammento HTMX per la scheda articolo: lotti e rettifiche dell'articolo. */
 	@GetMapping("/articoli/{articoloId}")
 	String movimentiArticolo(@PathVariable Long articoloId, Model model) {
+		List<RigaAcquisto> lotti = magazzinoService.lottiArticolo(articoloId);
 		model.addAttribute("articoloId", articoloId);
-		model.addAttribute("lotti", magazzinoService.lottiArticolo(articoloId));
+		model.addAttribute("lotti", lotti);
+		model.addAttribute("lottoPrezzi", lottoPrezzi(lotti));
+		model.addAttribute("calcoloPrezzi", prezziService.calcolo());
 		model.addAttribute("rettifiche", magazzinoService.rettificheArticolo(articoloId));
 		return "magazzino/articolo :: movimenti";
 	}
@@ -149,6 +160,20 @@ public class MagazzinoController {
 			return predefinito;
 		}
 		return ritorno;
+	}
+
+	/**
+	 * Lotto su cui basare i prezzi suggeriti dell'articolo: il prossimo che verrà venduto (il più vecchio
+	 * ancora disponibile, come nello scarico FIFO) o, se è tutto esaurito, l'ultimo acquistato.
+	 */
+	static RigaAcquisto lottoPrezzi(List<RigaAcquisto> lotti) {
+		// i lotti arrivano dal più recente al più vecchio
+		for (int i = lotti.size() - 1; i >= 0; i--) {
+			if (lotti.get(i).getQuantitaResidua() > 0) {
+				return lotti.get(i);
+			}
+		}
+		return lotti.isEmpty() ? null : lotti.get(0);
 	}
 
 }

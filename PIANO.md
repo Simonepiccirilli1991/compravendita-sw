@@ -130,3 +130,4 @@ Stesso gestionale, dedicato a tazze e articoli simili venduti sui marketplace (V
 - [x] Campo lingua tolto da form e scheda articolo
 - [x] Migrazione `V7__gestionale_tazze.sql`; dati demo con catalogo di tazze
 - [x] Docker separato: progetto `compravendita-sw-tazze` (container `compravendita-sw-tazze-db`/`-app`, volume proprio) che con `docker compose up -d --build` avvia database e applicazione; `docker-compose.dev.yml` con il solo database per lo sviluppo; script di backup e operazione pianificata con nomi propri
+- [x] Prezzi suggeriti per il regime forfettario agevolato: prezzo minimo (in pari a fine anno, con la quota dei contributi INPS fissi) e consigliato (più il margine) per ogni riga d'acquisto, nel form, nel dettaglio e nei lotti; valori INPS 2026 dalla circolare n. 14/2026 con riduzione del 35%; parametri, simulazione e conteggio annuo in *Prezzi e tasse* (migrazione `V8__parametri_prezzo.sql`)
