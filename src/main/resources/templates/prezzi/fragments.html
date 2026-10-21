@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Intestazioni delle due colonne dei prezzi suggeriti -->
+<th:block th:fragment="intestazioni">
+    <th class="text-end" title="Prezzo per pezzo sotto il quale, a fine anno, la vendita non copre tasse e costi fissi">Prezzo minimo</th>
+    <th class="text-end" title="Prezzo per pezzo con il margine desiderato">Prezzo consigliato</th>
+</th:block>
+
+<!-- Celle con prezzo minimo e consigliato per un costo unitario -->
+<th:block th:fragment="celle(calcolo, costo)" th:with="p=${calcolo.calcola(costo)}">
+    <td class="text-end text-nowrap" th:text="${p} ? ${@formati.euro(p.minimo())} : '—'"
+        th:title="${p} ? |In pari: imposta e contributi ${@formati.euro(p.alMinimo().tasse())}, quota costi fissi ${@formati.euro(p.alMinimo().costiFissi())}, commissioni ${@formati.euro(p.alMinimo().commissioni())}, imballaggio e spedizione ${@formati.euro(p.alMinimo().spese())}|">0</td>
+    <td class="text-end text-nowrap fw-semibold text-success" th:text="${p} ? ${@formati.euro(p.consigliato())} : '—'"
+        th:title="${p} ? |Guadagno netto ${@formati.euro(p.alConsigliato().guadagno())} dopo imposta e contributi ${@formati.euro(p.alConsigliato().tasse())}, quota costi fissi ${@formati.euro(p.alConsigliato().costiFissi())}, commissioni ${@formati.euro(p.alConsigliato().commissioni())}, imballaggio e spedizione ${@formati.euro(p.alConsigliato().spese())}|">0</td>
+</th:block>
+
+<!-- Nota sotto le tabelle con il riferimento ai parametri usati -->
+<p th:fragment="nota(calcolo)" class="small text-secondary mb-0 px-3 py-2 border-top">
+    <i class="bi bi-tags me-1"></i>Prezzi per pezzo nel regime forfettario: imposta e contributi
+    <span th:text="${@formati.numero(calcolo.caricoMarginalePercentuale())} + '%'">2%</span> del prezzo, costi fissi
+    (contributi INPS sul minimale e altri) <span th:text="${@formati.numero(calcolo.anno().quotaFissiPercentuale())} + '%'">28,5%</span>,
+    <span th:text="${calcolo.piattaforma()} ? |commissioni ${calcolo.piattaforma()}| : 'nessuna commissione'">commissioni</span>,
+    margine <span th:text="${@formati.numero(calcolo.marginePercentuale())} + '%'">30%</span>.
+    <a th:href="@{/prezzi}">Modifica i parametri</a>
+</p>
+
+</body>
+</html>

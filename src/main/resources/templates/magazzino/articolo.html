@@ -32,6 +32,31 @@
 
 <!--/* Movimenti di magazzino di un articolo, caricati via HTMX nella scheda articolo */-->
 <div th:fragment="movimenti" id="movimenti">
+    <div class="card shadow-sm mt-3 border-success" th:if="${lottoPrezzi}"
+         th:with="p=${calcoloPrezzi.calcola(lottoPrezzi.costoUnitarioEffettivo)}">
+        <div class="card-header fw-semibold"><i class="bi bi-tags me-1"></i>Prezzi di vendita suggeriti</div>
+        <div class="card-body" th:if="${p}">
+            <div class="row g-3 text-center">
+                <div class="col-6">
+                    <div class="small text-secondary">Prezzo minimo (in pari)</div>
+                    <div class="fs-4 fw-semibold" th:text="${@formati.euro(p.minimo())}">0</div>
+                </div>
+                <div class="col-6">
+                    <div class="small text-secondary">Prezzo consigliato</div>
+                    <div class="fs-4 fw-semibold text-success" th:text="${@formati.euro(p.consigliato())}">0</div>
+                    <div class="small text-secondary" th:text="|guadagno netto ${@formati.euro(p.alConsigliato().guadagno())}|">guadagno</div>
+                </div>
+            </div>
+            <p class="small text-secondary mb-0 mt-2"
+               th:text="|Per pezzo, sul costo unitario di ${@formati.euro(lottoPrezzi.costoUnitarioEffettivo)} del lotto del ${@formati.data(lottoPrezzi.acquisto.dataAcquisto)}${lottoPrezzi.quantitaResidua > 0 ? ' (il prossimo da vendere)' : ' (ultimo acquisto)'}.|">Riferimento</p>
+        </div>
+        <div class="card-body small text-danger" th:unless="${p}">
+            Con i parametri attuali gli incassi previsti non coprono i costi fissi: controlla la pagina
+            <a th:href="@{/prezzi}">Prezzi e tasse</a>.
+        </div>
+        <p th:replace="~{prezzi/fragments :: nota(${calcoloPrezzi})}"></p>
+    </div>
+
     <div class="card shadow-sm mt-3">
         <div class="card-header d-flex justify-content-between align-items-center">
             <span class="fw-semibold">Lotti e giacenza</span>
@@ -45,6 +70,7 @@
                     <th>Stato</th>
                     <th class="text-end">Disponibili</th>
                     <th class="text-end">Costo unit.</th>
+                    <th:block th:replace="~{prezzi/fragments :: intestazioni}"></th:block>
                     <th class="text-end">Valore</th>
                     <th></th>
                 </tr>
@@ -57,6 +83,7 @@
                     <td><span th:replace="~{magazzino/fragments :: stato(${l.stato})}"></span></td>
                     <td class="text-end" th:text="|${l.quantitaResidua} / ${l.quantita}|">1 / 1</td>
                     <td class="text-end" th:text="${@formati.euro(l.costoUnitarioEffettivo)}">0</td>
+                    <th:block th:replace="~{prezzi/fragments :: celle(${calcoloPrezzi}, ${l.costoUnitarioEffettivo})}"></th:block>
                     <td class="text-end" th:text="${@formati.euro(l.valoreResiduo)}">0</td>
                     <td class="text-end">
                         <div th:replace="~{magazzino/fragments :: azioniLotto(${l}, ${'/articoli/' + articoloId})}"></div>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
+<head>
+    <title>Prezzi e tasse · Gestionale Tazze</title>
+</head>
+<body>
+<main>
+    <h1 class="h3 mb-1">Prezzi e tasse</h1>
+    <p class="text-secondary mb-3">
+        Per ogni acquisto il gestionale suggerisce due prezzi di vendita per pezzo: il <strong>minimo</strong> per
+        andare in pari a fine anno e il <strong>consigliato</strong> con il margine che vuoi guadagnare.
+        I valori iniziali sono quelli 2026 di un commerciante in regime forfettario agevolato
+        (circolare INPS n. 14 del 9 febbraio 2026): verificali con il tuo commercialista.
+    </p>
+
+    <form id="form-prezzi" th:action="@{/prezzi}" th:object="${form}" method="post" novalidate>
+        <div class="row g-3">
+            <div class="col-12 col-xl-7">
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header fw-semibold">Regime forfettario</div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label for="coefficienteRedditivita" class="form-label">Coefficiente di redditività</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" min="0" max="100" th:field="*{coefficienteRedditivita}"
+                                           class="form-control" th:classappend="${#fields.hasErrors('coefficienteRedditivita')} ? 'is-invalid'">
+                                    <span class="input-group-text">%</span>
+                                    <div class="invalid-feedback" th:errors="*{coefficienteRedditivita}"></div>
+                                </div>
+                                <div class="form-text">40% per il commercio (codici ATECO 45-47): il reddito è il 40% di quanto incassi.</div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="aliquotaImposta" class="form-label">Imposta sostitutiva</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" min="0" max="100" th:field="*{aliquotaImposta}"
+                                           class="form-control" th:classappend="${#fields.hasErrors('aliquotaImposta')} ? 'is-invalid'">
+                                    <span class="input-group-text">%</span>
+                                    <div class="invalid-feedback" th:errors="*{aliquotaImposta}"></div>
+                                </div>
+                                <div class="form-text">5% per i primi 5 anni di attività, poi 15%. Si calcola sul reddito meno i contributi versati.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header fw-semibold">Contributi INPS commercianti</div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-6 col-md-3">
+                                <label for="aliquotaContributi" class="form-label">Aliquota</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" min="0" max="100" th:field="*{aliquotaContributi}"
+                                           class="form-control" th:classappend="${#fields.hasErrors('aliquotaContributi')} ? 'is-invalid'">
+                                    <span class="input-group-text">%</span>
+                                    <div class="invalid-feedback" th:errors="*{aliquotaContributi}"></div>
+                                </div>
+                                <div class="form-text">24,48% nel 2026.</div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label for="riduzioneContributi" class="form-label">Riduzione</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" min="0" max="100" th:field="*{riduzioneContributi}"
+                                           class="form-control" th:classappend="${#fields.hasErrors('riduzioneContributi')} ? 'is-invalid'">
+                                    <span class="input-group-text">%</span>
+                                    <div class="invalid-feedback" th:errors="*{riduzioneContributi}"></div>
+                                </div>
+                                <div class="form-text">35% nel regime agevolato dei forfettari, 0 se non richiesto.</div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label for="minimaleInps" class="form-label">Minimale di reddito</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" min="0" th:field="*{minimaleInps}" class="form-control"
+                                           th:classappend="${#fields.hasErrors('minimaleInps')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:errors="*{minimaleInps}"></div>
+                                </div>
+                                <div class="form-text">18.808 € nel 2026: i contributi su questa cifra sono dovuti comunque.</div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label for="contributoMaternita" class="form-label">Maternità annua</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" min="0" th:field="*{contributoMaternita}" class="form-control"
+                                           th:classappend="${#fields.hasErrors('contributoMaternita')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:errors="*{contributoMaternita}"></div>
+                                </div>
+                                <div class="form-text">0,62 € al mese, non ridotto.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header fw-semibold">Attività</div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label for="ricaviAnnuiPrevisti" class="form-label">Incassi previsti in un anno</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" min="1" th:field="*{ricaviAnnuiPrevisti}" class="form-control"
+                                           th:classappend="${#fields.hasErrors('ricaviAnnuiPrevisti')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:errors="*{ricaviAnnuiPrevisti}"></div>
+                                </div>
+                                <div class="form-text">
+                                    Servono a dividere i costi fissi sulle vendite.
+                                    <span th:text="|Vendite degli ultimi 12 mesi: ${@formati.euro(ricaviUltimoAnno)}.|"></span>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="altriCostiFissi" class="form-label">Altri costi fissi annui</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" min="0" th:field="*{altriCostiFissi}" class="form-control"
+                                           th:classappend="${#fields.hasErrors('altriCostiFissi')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:errors="*{altriCostiFissi}"></div>
+                                </div>
+                                <div class="form-text">
+                                    Commercialista, abbonamenti, conto, diritto camerale...
+                                    <span th:text="|Spese generali degli ultimi 12 mesi: ${@formati.euro(speseUltimoAnno)}.|"></span>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="piattaformaId" class="form-label">Piattaforma di riferimento</label>
+                                <select th:field="*{piattaformaId}" class="form-select">
+                                    <option value="">Nessuna commissione</option>
+                                    <option th:each="p : ${piattaforme}" th:value="${p.id}"
+                                            th:text="${p.nome} + (${p.senzaCommissioni} ? ' (commissioni non configurate)' : '')">eBay</option>
+                                </select>
+                                <div class="form-text">Le sue commissioni entrano nel prezzo.</div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label for="costoImballaggio" class="form-label">Imballaggio</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" min="0" th:field="*{costoImballaggio}" class="form-control"
+                                           th:classappend="${#fields.hasErrors('costoImballaggio')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:errors="*{costoImballaggio}"></div>
+                                </div>
+                                <div class="form-text">Per pezzo.</div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label for="costoSpedizione" class="form-label">Spedizione</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">€</span>
+                                    <input type="number" step="0.01" min="0" th:field="*{costoSpedizione}" class="form-control"
+                                           th:classappend="${#fields.hasErrors('costoSpedizione')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:errors="*{costoSpedizione}"></div>
+                                </div>
+                                <div class="form-text">A tuo carico; 0 se la paga l'acquirente.</div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="margineDesiderato" class="form-label">Margine desiderato</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" min="0" th:field="*{margineDesiderato}" class="form-control"
+                                           th:classappend="${#fields.hasErrors('margineDesiderato')} ? 'is-invalid'">
+                                    <span class="input-group-text">%</span>
+                                    <div class="invalid-feedback" th:errors="*{margineDesiderato}"></div>
+                                </div>
+                                <div class="form-text">Guadagno netto sul costo d'acquisto, dopo tasse e costi fissi.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mb-3">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Salva parametri</button>
+                </div>
+            </div>
+
+            <div class="col-12 col-xl-5">
+                <div class="card shadow-sm">
+                    <div class="card-header fw-semibold">Simulazione</div>
+                    <div class="card-body">
+                        <label for="costo" class="form-label">Costo d'acquisto di un pezzo</label>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">€</span>
+                            <input type="number" step="0.01" min="0" id="costo" name="costo" class="form-control"
+                                   th:value="${costo}">
+                        </div>
+                        <div id="simulazione" th:fragment="simulazione" th:attr="hx-get=@{/prezzi/simulazione}"
+                             hx-include="#form-prezzi" hx-swap="outerHTML"
+                             hx-trigger="change from:#form-prezzi, keyup changed delay:500ms from:#form-prezzi"
+                             th:with="p=${calcolo} ? ${calcolo.calcola(costo)} : null, a=${calcolo} ? ${calcolo.anno()} : null">
+                            <div th:if="${calcolo == null}" class="text-secondary">Completa i parametri per vedere la simulazione.</div>
+                            <div th:if="${calcolo != null and p == null}" class="alert alert-danger mb-0">
+                                Commissioni, tasse e costi fissi superano il 100% del prezzo: con questi incassi previsti
+                                l'attività non può andare in pari. Controlla i parametri.
+                            </div>
+                            <div th:if="${p}">
+                                <div class="row g-2 mb-3 text-center">
+                                    <div class="col-6">
+                                        <div class="border rounded p-2 h-100">
+                                            <div class="small text-secondary">Prezzo minimo (in pari)</div>
+                                            <div class="fs-4 fw-semibold" th:text="${@formati.euro(p.minimo())}">0</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="border border-success rounded p-2 h-100">
+                                            <div class="small text-secondary">Prezzo consigliato</div>
+                                            <div class="fs-4 fw-semibold text-success" th:text="${@formati.euro(p.consigliato())}">0</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <table class="table table-sm mb-0">
+                                    <thead>
+                                    <tr><th></th><th class="text-end">Minimo</th><th class="text-end">Consigliato</th></tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td>Prezzo di vendita</td>
+                                        <td class="text-end" th:text="${@formati.euro(p.alMinimo().prezzo())}">0</td>
+                                        <td class="text-end" th:text="${@formati.euro(p.alConsigliato().prezzo())}">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>− Costo d'acquisto</td>
+                                        <td class="text-end" th:text="${@formati.euro(p.costo())}">0</td>
+                                        <td class="text-end" th:text="${@formati.euro(p.costo())}">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td th:text="${calcolo.piattaforma()} ? |− Commissioni ${calcolo.piattaforma()}| : '− Commissioni'">− Commissioni</td>
+                                        <td class="text-end" th:text="${@formati.euro(p.alMinimo().commissioni())}">0</td>
+                                        <td class="text-end" th:text="${@formati.euro(p.alConsigliato().commissioni())}">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>− Imballaggio e spedizione</td>
+                                        <td class="text-end" th:text="${@formati.euro(p.alMinimo().spese())}">0</td>
+                                        <td class="text-end" th:text="${@formati.euro(p.alConsigliato().spese())}">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>− Imposta e contributi sulla vendita</td>
+                                        <td class="text-end" th:text="${@formati.euro(p.alMinimo().tasse())}">0</td>
+                                        <td class="text-end" th:text="${@formati.euro(p.alConsigliato().tasse())}">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>− Quota costi fissi <span class="text-secondary small">(INPS sul minimale e altri)</span></td>
+                                        <td class="text-end" th:text="${@formati.euro(p.alMinimo().costiFissi())}">0</td>
+                                        <td class="text-end" th:text="${@formati.euro(p.alConsigliato().costiFissi())}">0</td>
+                                    </tr>
+                                    <tr class="fw-semibold">
+                                        <td>= Guadagno netto</td>
+                                        <td class="text-end" th:text="${@formati.euro(p.alMinimo().guadagno())}">0</td>
+                                        <td class="text-end text-success" th:text="${@formati.euro(p.alConsigliato().guadagno())}">0</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <p class="small text-secondary mt-2 mb-0">
+                                    Il consigliato è arrotondato per eccesso ai 50 centesimi. Sotto il minimo, a fine anno
+                                    la vendita non copre la sua parte di tasse e costi fissi.
+                                </p>
+                            </div>
+
+                            <div th:if="${a}" class="mt-4">
+                                <h2 class="h6 fw-semibold">Conteggio dell'anno con gli incassi previsti</h2>
+                                <table class="table table-sm mb-0">
+                                    <tbody>
+                                    <tr>
+                                        <td>Incassi previsti</td>
+                                        <td class="text-end" th:text="${@formati.euro(a.ricavi())}">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Reddito imponibile (coefficiente)</td>
+                                        <td class="text-end" th:text="${@formati.euro(a.reddito())}">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Contributi INPS sul minimale <span class="text-secondary small">(dovuti comunque, maternità compresa)</span></td>
+                                        <td class="text-end" th:text="${@formati.euro(a.contributiMinimale())}">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Contributi INPS oltre il minimale
+                                            <span class="text-secondary small" th:text="|(${@formati.numero(a.aliquotaContributiPercentuale())}%)|"></span></td>
+                                        <td class="text-end" th:text="${@formati.euro(a.contributiEccedenza())}">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Imposta sostitutiva</td>
+                                        <td class="text-end" th:text="${@formati.euro(a.imposta())}">0</td>
+                                    </tr>
+                                    <tr class="fw-semibold">
+                                        <td>Totale imposta e contributi</td>
+                                        <td class="text-end" th:text="${@formati.euro(a.tasse())}">0</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <p class="small text-secondary mt-2 mb-0">
+                                    Ogni euro venduto in più costa il
+                                    <strong th:text="${@formati.numero(a.caricoMarginalePercentuale())} + '%'">2%</strong>
+                                    in imposta e contributi<span th:unless="${a.sopraMinimale()}">, perché il reddito previsto
+                                    resta sotto il minimale INPS e i contributi sono già coperti da quelli fissi</span>.
+                                    I costi fissi (<span th:text="${@formati.euro(a.costiFissi())}">0</span>) pesano il
+                                    <strong th:text="${@formati.numero(a.quotaFissiPercentuale())} + '%'">28,5%</strong>
+                                    di ogni prezzo: più vendi, più si riducono.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</main>
+</body>
+</html>
