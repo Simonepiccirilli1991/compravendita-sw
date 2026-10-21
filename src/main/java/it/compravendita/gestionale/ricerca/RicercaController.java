@@ -17,7 +17,7 @@ import it.compravendita.gestionale.vendite.VenditaService;
 
 /**
  * Ricerca rapida da qualsiasi pagina: articoli (nome e attributi come n° certificato, n° set,
- * numero carta), acquisti (fornitore, canale, articoli) e vendite (acquirente, n° ordine, articoli).
+ * numero carta), acquisti (fornitore, canale, articoli) e vendite (acquirente, numero, articoli).
  */
 @Controller
 public class RicercaController {

@@ -49,8 +49,8 @@ public class AcquistoService {
 
 	public Page<Acquisto> cerca(FiltroAcquisti filtro, Pageable pageable) {
 		Page<Acquisto> pagina = acquistoRepository.findAll(filtro.toSpecification(), pageable);
-		// le righe servono alla lista per i totali (caricate a blocchi grazie a @BatchSize)
-		pagina.forEach(a -> a.getRighe().size());
+		// righe e articoli servono alla lista per totali e nomi (caricati a blocchi grazie a @BatchSize)
+		pagina.forEach(a -> a.getRighe().forEach(r -> r.getArticolo().getNome()));
 		return pagina;
 	}
 

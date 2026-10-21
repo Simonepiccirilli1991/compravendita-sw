@@ -110,6 +110,40 @@ class VenditeWebTest {
 	}
 
 	@Test
+	void numeroProgressivoAutomatico() throws Exception {
+		mvc.perform(get("/vendite/nuova"))
+			.andExpect(status().isOk())
+			.andExpect(content().string(not(containsString("riferimentoOrdine"))));
+
+		Long primaId = registra(vendita("1", "20"));
+		Long secondaId = registra(vendita("1", "22"));
+		Long primo = venditaRepository.findById(primaId).orElseThrow().getNumero();
+		Long secondo = venditaRepository.findById(secondaId).orElseThrow().getNumero();
+		assertThat(primo).isNotNull();
+		assertThat(secondo).isGreaterThan(primo);
+
+		mvc.perform(get("/vendite/{id}", secondaId))
+			.andExpect(status().isOk())
+			.andExpect(content().string(containsString("Vendita n° " + secondo)));
+		mvc.perform(get("/vendite").param("q", "#" + secondo))
+			.andExpect(status().isOk())
+			.andExpect(model().attribute("pagina", org.hamcrest.Matchers.hasProperty("totalElements", org.hamcrest.Matchers.is(1L))));
+
+		// la modifica non cambia il numero
+		mvc.perform(post("/vendite/{id}", secondaId).with(csrf())
+			.param("dataVendita", "2026-04-02")
+			.param("piattaformaId", ebay.getId().toString())
+			.param("commissioniAutomatiche", "true")
+			.param("righe[0].articoloEtichetta", elencoArticoli.etichetta(carta))
+			.param("righe[0].quantita", "1")
+			.param("righe[0].prezzoUnitario", "23"))
+			.andExpect(status().is3xxRedirection());
+		em.flush();
+		em.clear();
+		assertThat(venditaRepository.findById(secondaId).orElseThrow().getNumero()).isEqualTo(secondo);
+	}
+
+	@Test
 	void lottoSceltoACommissioniManuali() throws Exception {
 		Long id = registra(vendita("1", "30")
 			.param("righe[0].lottoId", lottoNuovo.getId().toString())

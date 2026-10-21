@@ -38,8 +38,9 @@ public class FiltroVendite {
 		Specification<Vendita> spec = (root, query, cb) -> cb.conjunction();
 		if (q != null && !q.isBlank()) {
 			String like = "%" + q.trim().toLowerCase() + "%";
+			Long numero = numero(q);
 			spec = spec.and((root, query, cb) -> cb.or(cb.like(cb.lower(root.get("acquirente")), like),
-					cb.like(cb.lower(root.get("riferimentoOrdine")), like),
+					numero != null ? cb.equal(root.get("numero"), numero) : cb.disjunction(),
 					conArticolo(root, query, cb, articolo -> cb.like(cb.lower(articolo.get("nome")), like))));
 		}
 		if (categoria != null) {
@@ -63,6 +64,15 @@ public class FiltroVendite {
 			spec = spec.and((root, query, cb) -> cb.equal(root.get("stato"), stato));
 		}
 		return spec;
+	}
+
+	/** Numero di vendita cercato ("12" o "#12"), oppure null se il testo non è un numero. */
+	private static Long numero(String testo) {
+		String cifre = testo.trim().replaceFirst("^#", "");
+		if (cifre.isEmpty() || cifre.length() > 18 || !cifre.chars().allMatch(Character::isDigit)) {
+			return null;
+		}
+		return Long.valueOf(cifre);
 	}
 
 	/** Vendite con almeno una riga il cui articolo soddisfa la condizione. */

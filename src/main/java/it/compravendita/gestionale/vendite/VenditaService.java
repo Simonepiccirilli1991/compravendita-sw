@@ -212,7 +212,6 @@ public class VenditaService {
 		vendita.setDataVendita(form.getDataVendita());
 		vendita.setPiattaforma(piattaforma);
 		vendita.setAcquirente(vuotoComeNull(form.getAcquirente()));
-		vendita.setRiferimentoOrdine(vuotoComeNull(form.getRiferimentoOrdine()));
 		vendita.setNote(vuotoComeNull(form.getNote()));
 		vendita.setSpedizioneIncassata(form.getSpedizioneIncassata());
 		vendita.setCostoSpedizione(form.getCostoSpedizione());

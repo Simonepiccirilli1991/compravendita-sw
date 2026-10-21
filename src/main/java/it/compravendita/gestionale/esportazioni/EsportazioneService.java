@@ -96,7 +96,7 @@ public class EsportazioneService {
 	public Tabella vendite(FiltroVendite filtro) {
 		Tabella tabella = new Tabella("Vendite")
 			.intero("N. vendita").data("Data").testo("Stato").testo("Piattaforma").testo("Acquirente")
-			.testo("N. ordine").testo("Articoli").intero("Pezzi").importo("Lordo").importo("Spedizione incassata")
+			.testo("Articoli").intero("Pezzi").importo("Lordo").importo("Spedizione incassata")
 			.importo("Commissione piattaforma").importo("Commissione pagamento").importo("Spedizione")
 			.importo("Imballaggio").importo("Altri costi").importo("Netto").importo("Costo merce")
 			.importo("Costi reso").importo("Profitto").colonna("ROI %", Tabella.Tipo.PERCENTUALE)
@@ -105,8 +105,8 @@ public class EsportazioneService {
 			String articoli = v.getRighe().stream()
 				.map(r -> r.getQuantita() + " x " + r.getArticolo().getNome())
 				.collect(Collectors.joining(", "));
-			tabella.riga(v.getId(), v.getDataVendita(), v.getStato().getEtichetta(), v.getPiattaforma().getNome(),
-					v.getAcquirente(), v.getRiferimentoOrdine(), articoli, v.getTotalePezzi(), v.getTotaleLordo(),
+			tabella.riga(v.getNumero(), v.getDataVendita(), v.getStato().getEtichetta(), v.getPiattaforma().getNome(),
+					v.getAcquirente(), articoli, v.getTotalePezzi(), v.getTotaleLordo(),
 					v.getSpedizioneIncassata(), v.getCommissioniPiattaforma(), v.getCommissioniPagamento(),
 					v.getCostoSpedizione(), v.getCostoImballaggio(), v.getAltriCosti(), v.getNetto(),
 					v.isCompletata() ? v.getCostoVenduto() : null, v.getCostiReso(), v.getProfitto(), v.getRoi(),
@@ -124,7 +124,7 @@ public class EsportazioneService {
 		for (Vendita v : venditaRepository.findAll(filtro.toSpecification(), Sort.by("dataVendita", "id"))) {
 			for (RigaVendita r : v.getRighe()) {
 				Articolo a = r.getArticolo();
-				tabella.riga(v.getId(), v.getDataVendita(), v.getStato().getEtichetta(), v.getPiattaforma().getNome(),
+				tabella.riga(v.getNumero(), v.getDataVendita(), v.getStato().getEtichetta(), v.getPiattaforma().getNome(),
 						a.getNome(), a.getCategoria().getEtichetta(), brand(a), r.getQuantita(), r.getPrezzoUnitario(),
 						r.getTotale(), r.getCostoVenduto());
 			}

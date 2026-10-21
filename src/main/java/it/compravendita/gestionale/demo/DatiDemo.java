@@ -303,7 +303,6 @@ public class DatiDemo {
 		VenditaForm form = new VenditaForm();
 		form.setDataVendita(data);
 		form.setPiattaformaId(piattaforma.getId());
-		form.setRiferimentoOrdine(nomePiattaforma.substring(0, 2).toUpperCase() + "-" + (10000 + caso.nextInt(90000)));
 		switch (nomePiattaforma) {
 			case "eBay" -> spedizione(form, "5.90", carta ? "2.50" : "6.90");
 			case "Cardmarket" -> spedizione(form, carta ? "1.30" : "9.90", carta ? "1.15" : "8.50");

@@ -196,7 +196,7 @@ class ImportExportWebTest {
 		try (XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(xlsx))) {
 			assertThat(workbook.getNumberOfSheets()).isEqualTo(2);
 			assertThat(workbook.getSheet("Vendite").getPhysicalNumberOfRows()).isEqualTo(3);
-			assertThat(workbook.getSheet("Vendite").getRow(1).getCell(8).getNumericCellValue()).isEqualTo(25.0);
+			assertThat(workbook.getSheet("Vendite").getRow(1).getCell(7).getNumericCellValue()).isEqualTo(25.0);
 		}
 
 		mvc.perform(get("/export/magazzino.csv"))

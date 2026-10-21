@@ -14,7 +14,7 @@
             <li class="breadcrumb-item active" th:text="${vendita} ? 'Modifica' : 'Nuova'">Nuova</li>
         </ol>
     </nav>
-    <h1 class="h3 mb-3" th:text="${vendita} ? 'Modifica vendita' : 'Registra vendita'">Registra vendita</h1>
+    <h1 class="h3 mb-3" th:text="${vendita} ? |Modifica vendita n° ${vendita.numero}| : 'Registra vendita'">Registra vendita</h1>
 
     <form id="form-vendita" th:action="${vendita} ? @{/vendite/{id}(id=${vendita.id})} : @{/vendite}"
           th:object="${form}" method="post" novalidate>
@@ -42,17 +42,11 @@
                                 </select>
                                 <div class="invalid-feedback" th:errors="*{piattaformaId}"></div>
                             </div>
-                            <div class="col-12 col-sm-6">
+                            <div class="col-12">
                                 <label for="acquirente" class="form-label">Acquirente</label>
                                 <input type="text" th:field="*{acquirente}" class="form-control" maxlength="255"
                                        th:classappend="${#fields.hasErrors('acquirente')} ? 'is-invalid'">
                                 <div class="invalid-feedback" th:errors="*{acquirente}"></div>
-                            </div>
-                            <div class="col-12 col-sm-6">
-                                <label for="riferimentoOrdine" class="form-label">N° ordine</label>
-                                <input type="text" th:field="*{riferimentoOrdine}" class="form-control" maxlength="100"
-                                       th:classappend="${#fields.hasErrors('riferimentoOrdine')} ? 'is-invalid'">
-                                <div class="invalid-feedback" th:errors="*{riferimentoOrdine}"></div>
                             </div>
                             <div class="col-12">
                                 <label for="note" class="form-label">Note</label>

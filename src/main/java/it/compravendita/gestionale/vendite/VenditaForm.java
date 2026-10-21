@@ -29,9 +29,6 @@ public class VenditaForm {
 	@Size(max = 255, message = "Massimo 255 caratteri")
 	private String acquirente;
 
-	@Size(max = 100, message = "Massimo 100 caratteri")
-	private String riferimentoOrdine;
-
 	@PositiveOrZero(message = "Non può essere negativo")
 	private BigDecimal spedizioneIncassata;
 
@@ -70,7 +67,6 @@ public class VenditaForm {
 		form.dataVendita = vendita.getDataVendita();
 		form.piattaformaId = vendita.getPiattaforma().getId();
 		form.acquirente = vendita.getAcquirente();
-		form.riferimentoOrdine = vendita.getRiferimentoOrdine();
 		form.spedizioneIncassata = vendita.getSpedizioneIncassata();
 		form.costoSpedizione = vendita.getCostoSpedizione();
 		form.costoImballaggio = vendita.getCostoImballaggio();
@@ -121,14 +117,6 @@ public class VenditaForm {
 
 	public void setAcquirente(String acquirente) {
 		this.acquirente = acquirente;
-	}
-
-	public String getRiferimentoOrdine() {
-		return riferimentoOrdine;
-	}
-
-	public void setRiferimentoOrdine(String riferimentoOrdine) {
-		this.riferimentoOrdine = riferimentoOrdine;
 	}
 
 	public BigDecimal getSpedizioneIncassata() {

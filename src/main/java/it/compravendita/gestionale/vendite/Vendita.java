@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Generated;
 
 import it.compravendita.gestionale.common.AuditedEntity;
 import it.compravendita.gestionale.common.Importi;
@@ -40,8 +41,10 @@ public class Vendita extends AuditedEntity {
 
 	private String acquirente;
 
-	@Column(name = "riferimento_ordine", length = 100)
-	private String riferimentoOrdine;
+	/** Numero progressivo assegnato dal database alla creazione (sequenza vendita_numero_seq). */
+	@Generated
+	@Column(name = "numero", insertable = false, updatable = false)
+	private Long numero;
 
 	@Column(name = "totale_lordo", nullable = false, precision = 12, scale = 2)
 	private BigDecimal totaleLordo = BigDecimal.ZERO;
@@ -234,12 +237,8 @@ public class Vendita extends AuditedEntity {
 		this.acquirente = acquirente;
 	}
 
-	public String getRiferimentoOrdine() {
-		return riferimentoOrdine;
-	}
-
-	public void setRiferimentoOrdine(String riferimentoOrdine) {
-		this.riferimentoOrdine = riferimentoOrdine;
+	public Long getNumero() {
+		return numero;
 	}
 
 	public BigDecimal getTotaleLordo() {

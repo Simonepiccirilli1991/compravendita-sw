@@ -16,7 +16,7 @@
           hx-push-url="true" hx-trigger="input changed delay:300ms from:input[name='q'], change">
         <div class="row g-2">
             <div class="col-12 col-lg-4">
-                <input type="search" name="q" class="form-control" placeholder="Articolo, acquirente o n° ordine…"
+                <input type="search" name="q" class="form-control" placeholder="Articolo, acquirente o n° vendita…"
                        th:value="${filtro.q}" aria-label="Cerca">
             </div>
             <div class="col-6 col-lg-2">
@@ -103,6 +103,7 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                     <tr>
+                        <th>N°</th>
                         <th>Data</th>
                         <th>Piattaforma</th>
                         <th>Articoli</th>
@@ -117,7 +118,8 @@
                     <tbody>
                     <tr th:each="v : ${pagina.content}" th:classappend="${!v.completata} ? 'text-secondary'">
                         <td><a th:href="@{/vendite/{id}(id=${v.id})}" class="fw-semibold text-decoration-none"
-                               th:text="${@formati.data(v.dataVendita)}">01/01/2026</a></td>
+                               th:text="${v.numero}">1</a></td>
+                        <td th:text="${@formati.data(v.dataVendita)}">01/01/2026</td>
                         <td>
                             <span th:text="${v.piattaforma.nome}">eBay</span>
                             <div class="small text-secondary" th:if="${v.acquirente}" th:text="${v.acquirente}"></div>
@@ -140,7 +142,7 @@
                         <td><span th:replace="~{vendite/fragments :: stato(${v.stato})}"></span></td>
                     </tr>
                     <tr th:if="${pagina.empty}">
-                        <td colspan="9" class="text-center text-secondary py-4">Nessuna vendita trovata.</td>
+                        <td colspan="10" class="text-center text-secondary py-4">Nessuna vendita trovata.</td>
                     </tr>
                     </tbody>
                 </table>

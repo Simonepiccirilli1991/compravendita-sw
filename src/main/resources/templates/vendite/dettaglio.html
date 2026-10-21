@@ -2,26 +2,25 @@
 <html lang="it" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
 <head>
-    <title th:text="|Vendita del ${@formati.data(vendita.dataVendita)} · Compravendita|">Vendita</title>
+    <title th:text="|Vendita n° ${vendita.numero} del ${@formati.data(vendita.dataVendita)} · Compravendita|">Vendita</title>
 </head>
 <body>
 <main>
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a th:href="@{/vendite}">Vendite</a></li>
-            <li class="breadcrumb-item active" th:text="|Vendita del ${@formati.data(vendita.dataVendita)}|">Vendita</li>
+            <li class="breadcrumb-item active" th:text="|Vendita n° ${vendita.numero} del ${@formati.data(vendita.dataVendita)}|">Vendita</li>
         </ol>
     </nav>
 
     <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
         <div>
             <h1 class="h3 mb-1">
-                <span th:text="|Vendita del ${@formati.data(vendita.dataVendita)}|">Vendita</span>
+                <span th:text="|Vendita n° ${vendita.numero} del ${@formati.data(vendita.dataVendita)}|">Vendita</span>
                 <span th:replace="~{vendite/fragments :: stato(${vendita.stato})}"></span>
             </h1>
             <span class="badge text-bg-light border" th:text="${vendita.piattaforma.nome}">eBay</span>
             <span class="text-secondary ms-1" th:if="${vendita.acquirente}" th:text="${vendita.acquirente}">Acquirente</span>
-            <span class="text-secondary ms-1" th:if="${vendita.riferimentoOrdine}" th:text="|· ordine ${vendita.riferimentoOrdine}|"></span>
         </div>
         <div class="d-flex flex-wrap gap-2">
             <th:block th:if="${vendita.completata}">

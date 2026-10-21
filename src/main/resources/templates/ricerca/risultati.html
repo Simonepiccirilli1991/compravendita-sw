@@ -61,7 +61,7 @@
                 <a th:each="v : ${vendite.content}" th:href="@{/vendite/{id}(id=${v.id})}"
                    class="list-group-item list-group-item-action d-flex justify-content-between gap-2">
                     <span>
-                        <span th:text="|${@formati.data(v.dataVendita)} · ${v.piattaforma.nome}|">Vendita</span>
+                        <span th:text="|n° ${v.numero} · ${@formati.data(v.dataVendita)} · ${v.piattaforma.nome}|">Vendita</span>
                         <span class="small text-secondary" th:if="${v.acquirente}" th:text="|· ${v.acquirente}|"></span>
                         <span class="small text-secondary" th:unless="${#lists.isEmpty(v.righe)}"
                               th:text="|· ${v.righe[0].articolo.nome}|"></span>

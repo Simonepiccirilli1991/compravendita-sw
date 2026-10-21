@@ -46,6 +46,7 @@
                     <thead class="table-light">
                     <tr>
                         <th>Data</th>
+                        <th>Articoli</th>
                         <th>Fornitore</th>
                         <th>Canale</th>
                         <th class="text-end">Righe</th>
@@ -58,6 +59,15 @@
                     <tr th:each="a : ${pagina.content}">
                         <td><a th:href="@{/acquisti/{id}(id=${a.id})}" class="fw-semibold text-decoration-none"
                                th:text="${@formati.data(a.dataAcquisto)}">01/01/2026</a></td>
+                        <td>
+                            <div th:each="r, it : ${a.righe}" th:if="${it.index < 3}" class="text-truncate" style="max-width: 22rem">
+                                <a th:href="@{/articoli/{id}(id=${r.articolo.id})}" class="text-decoration-none"
+                                   th:text="${r.articolo.nome}" th:title="${r.articolo.nome}">Articolo</a>
+                                <span class="text-secondary small" th:if="${r.quantita > 1}" th:text="|× ${r.quantita}|">× 2</span>
+                            </div>
+                            <div th:if="${a.righe.size() > 3}" class="small text-secondary"
+                                 th:text="|e altri ${a.righe.size() - 3}…|">e altri 2…</div>
+                        </td>
                         <td th:text="${a.fornitore} ?: '—'">Fornitore</td>
                         <td th:text="${a.canale} ?: '—'">Canale</td>
                         <td class="text-end" th:text="${a.righe.size()}">1</td>
@@ -66,7 +76,7 @@
                         <td class="text-end fw-semibold" th:text="${@formati.euro(a.totale)}">0</td>
                     </tr>
                     <tr th:if="${pagina.empty}">
-                        <td colspan="7" class="text-center text-secondary py-4">Nessun acquisto trovato.</td>
+                        <td colspan="8" class="text-center text-secondary py-4">Nessun acquisto trovato.</td>
                     </tr>
                     </tbody>
                 </table>

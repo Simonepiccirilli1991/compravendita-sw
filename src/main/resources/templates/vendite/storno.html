@@ -10,7 +10,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a th:href="@{/vendite}">Vendite</a></li>
             <li class="breadcrumb-item"><a th:href="@{/vendite/{id}(id=${vendita.id})}"
-                                           th:text="|Vendita del ${@formati.data(vendita.dataVendita)}|">Vendita</a></li>
+                                           th:text="|Vendita n° ${vendita.numero} del ${@formati.data(vendita.dataVendita)}|">Vendita</a></li>
             <li class="breadcrumb-item active" th:text="${tipo == 'reso'} ? 'Reso' : 'Annulla'">Annulla</li>
         </ol>
     </nav>
