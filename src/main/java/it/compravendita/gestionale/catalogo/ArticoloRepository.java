@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 public interface ArticoloRepository extends JpaRepository<Articolo, Long>, JpaSpecificationExecutor<Articolo> {
 
@@ -34,9 +33,5 @@ public interface ArticoloRepository extends JpaRepository<Articolo, Long>, JpaSp
 	/** Coppie [brandId, numero articoli]. */
 	@Query("select a.brand.id, count(a) from Articolo a where a.brand is not null group by a.brand.id")
 	List<Object[]> contaPerBrand();
-
-	/** Vero se l'articolo è la carta di partenza di un grading. */
-	@Query("select count(g) > 0 from Grading g where g.articoloOriginale.id = :articoloId")
-	boolean usatoInGrading(@Param("articoloId") Long articoloId);
 
 }

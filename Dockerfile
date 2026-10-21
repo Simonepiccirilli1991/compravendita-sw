@@ -1,5 +1,5 @@
 # Immagine dell'applicazione: build con il wrapper Maven, esecuzione su JRE 21.
-# Uso tipico: docker compose --profile app up -d --build   (vedi README)
+# Uso tipico: docker compose up -d --build   (vedi README)
 
 FROM eclipse-temurin:21-jdk AS build
 WORKDIR /src

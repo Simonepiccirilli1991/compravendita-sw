@@ -107,7 +107,7 @@ class SpeseWebTest {
 	void modificaConArticoloCollegatoEdElimina() throws Exception {
 		Spesa spesa = spesaRepository.save(new Spesa(LocalDate.of(2031, 3, 10), CategoriaSpesa.SPEDIZIONE,
 				"Assicurazione spedizione", new BigDecimal("8")));
-		Articolo articolo = articoloRepository.save(new Articolo("Charizard PSA 10", Categoria.CARTA_GRADATA, null));
+		Articolo articolo = articoloRepository.save(new Articolo("Tazza Darth Vader 3D", Categoria.TAZZA, null));
 
 		mvc.perform(get("/spese/{id}/modifica", spesa.getId()))
 			.andExpect(status().isOk())

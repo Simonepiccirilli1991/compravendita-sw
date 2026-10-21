@@ -9,7 +9,7 @@ import it.compravendita.gestionale.common.Importi;
  * Andamento economico di un acquisto (lotto o lotto misto): quanto è stato speso, quanto è
  * già rientrato dalle vendite e quanto resta in magazzino.
  *
- * @param investito totale dell'acquisto più i costi aggiunti dopo (es. grading)
+ * @param investito totale dell'acquisto più i costi aggiunti dopo (es. spese collegate)
  * @param ricavoNetto quota del netto delle vendite completate attribuita ai pezzi di questo acquisto
  * @param costoVenduto costo dei pezzi venduti
  * @param perditeRettifiche valore dei pezzi persi o danneggiati, meno quanto recuperato

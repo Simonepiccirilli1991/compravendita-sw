@@ -13,8 +13,6 @@
             <i class="bi bi-stack me-1"></i>Lotti</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" th:href="@{/magazzino/grading}" th:classappend="${sezione == 'grading'} ? 'active'">
-            <i class="bi bi-award me-1"></i>Grading</a>
     </li>
     <li class="nav-item">
         <a class="nav-link" th:href="@{/magazzino/rettifiche}" th:classappend="${sezione == 'rettifiche'} ? 'active'">
@@ -25,10 +23,10 @@
 <!--/* Badge con lo stato di un lotto */-->
 <span th:fragment="stato(stato)" class="badge" th:classappend="${stato.classeBadge}" th:text="${stato.etichetta}">Stato</span>
 
-<!--/* Menu azioni di un lotto: cambi di stato, rettifica, grading. ritorno = pagina a cui tornare */-->
+<!--/* Menu azioni di un lotto: cambi di stato, vendita, rettifica. ritorno = pagina a cui tornare */-->
 <th:block th:fragment="azioniLotto(lotto, ritorno)"
-          th:with="transizioni=${lotto.stato.transizioniManuali()}, rettificabile=${lotto.quantitaResidua > 0 and lotto.stato.name() != 'IN_GRADING'}, gradabile=${@gradingService.puoInviare(lotto)}, vendibile=${lotto.quantitaResidua > 0 and lotto.stato.name() != 'IN_GRADING'}">
-<div class="dropdown" th:if="${!#lists.isEmpty(transizioni) or rettificabile or gradabile or vendibile}">
+          th:with="transizioni=${lotto.stato.transizioniManuali()}, rettificabile=${lotto.quantitaResidua > 0}, vendibile=${lotto.quantitaResidua > 0}">
+<div class="dropdown" th:if="${!#lists.isEmpty(transizioni) or rettificabile or vendibile}">
     <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
             data-bs-popper-config='{"strategy":"fixed"}' aria-expanded="false">Azioni</button>
     <ul class="dropdown-menu dropdown-menu-end">
@@ -44,10 +42,6 @@
         <li th:if="${vendibile}">
             <a class="dropdown-item" th:href="@{/vendite/nuova(lottoId=${lotto.id})}">
                 <i class="bi bi-cash-coin me-1"></i>Vendi da questo lotto</a>
-        </li>
-        <li th:if="${gradabile}">
-            <a class="dropdown-item" th:href="@{/magazzino/lotti/{id}/grading(id=${lotto.id})}">
-                <i class="bi bi-award me-1"></i>Invia a grading</a>
         </li>
         <li th:if="${rettificabile}">
             <a class="dropdown-item" th:href="@{/magazzino/lotti/{id}/rettifica(id=${lotto.id})}">

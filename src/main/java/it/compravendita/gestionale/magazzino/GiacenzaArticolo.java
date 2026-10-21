@@ -14,7 +14,7 @@ import it.compravendita.gestionale.common.Importi;
  * @param primoAcquisto data del lotto più vecchio ancora in giacenza
  */
 public record GiacenzaArticolo(Long articoloId, String nome, Categoria categoria, String brand, Long pezzi,
-		Long inArrivo, Long inGrading, Long inVendita, BigDecimal valore, LocalDate primoAcquisto) {
+		Long inArrivo, Long inVendita, BigDecimal valore, LocalDate primoAcquisto) {
 
 	public BigDecimal costoMedio() {
 		return pezzi == null || pezzi == 0 ? BigDecimal.ZERO

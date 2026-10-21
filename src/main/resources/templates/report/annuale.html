@@ -2,7 +2,7 @@
 <html lang="it" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
 <head>
-    <title>Riepilogo annuale · Compravendita</title>
+    <title>Riepilogo annuale · Gestionale Tazze</title>
 </head>
 <body>
 <main>
@@ -22,7 +22,7 @@
     <p class="small text-secondary">
         Totali per anno solare (dal 1° gennaio al 31 dicembre) come base per la contabilità o la dichiarazione:
         verificali con il tuo commercialista. Le rimanenze sono i pezzi in giacenza a fine anno, valutati al costo
-        d'acquisto attuale (grading compreso).
+        d'acquisto attuale (spese collegate comprese).
     </p>
 
     <div class="card shadow-sm">
@@ -39,10 +39,6 @@
                 <tr>
                     <td>Acquisti (merce e costi accessori)</td>
                     <td class="text-end" th:each="c : ${conti}" th:text="${@formati.euro(c.acquistato())}">0</td>
-                </tr>
-                <tr>
-                    <td>Costi di grading</td>
-                    <td class="text-end" th:each="c : ${conti}" th:text="${@formati.euro(c.costiGrading())}">0</td>
                 </tr>
                 <tr class="table-group-divider"><th th:attr="colspan=${conti.size() + 1}" class="small text-secondary text-uppercase">Vendite completate</th></tr>
                 <tr>

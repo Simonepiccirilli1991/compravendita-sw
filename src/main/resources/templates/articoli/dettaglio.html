@@ -2,7 +2,7 @@
 <html lang="it" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
 <head>
-    <title th:text="|${articolo.nome} · Compravendita|">Articolo</title>
+    <title th:text="|${articolo.nome} · Gestionale Tazze|">Articolo</title>
 </head>
 <body>
 <main>
@@ -41,8 +41,6 @@
                     <dl class="row mb-0">
                         <dt class="col-sm-4">Condizione</dt>
                         <dd class="col-sm-8" th:text="${articolo.condizione?.etichetta} ?: '—'">—</dd>
-                        <dt class="col-sm-4">Lingua</dt>
-                        <dd class="col-sm-8" th:text="${articolo.lingua} ?: '—'">—</dd>
                         <th:block th:each="c : ${campi}">
                             <dt class="col-sm-4" th:text="${c.etichetta()}">Attributo</dt>
                             <dd class="col-sm-8"

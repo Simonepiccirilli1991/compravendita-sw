@@ -1,21 +1,13 @@
 package it.compravendita.gestionale.catalogo;
 
-import static it.compravendita.gestionale.catalogo.AttributiArticolo.ANNO;
-import static it.compravendita.gestionale.catalogo.AttributiArticolo.COMPLETEZZA;
-import static it.compravendita.gestionale.catalogo.AttributiArticolo.CONSOLE;
-import static it.compravendita.gestionale.catalogo.AttributiArticolo.EDIZIONE;
-import static it.compravendita.gestionale.catalogo.AttributiArticolo.ENTE_GRADING;
-import static it.compravendita.gestionale.catalogo.AttributiArticolo.NUMERO_CARTA;
-import static it.compravendita.gestionale.catalogo.AttributiArticolo.NUMERO_CERTIFICATO;
-import static it.compravendita.gestionale.catalogo.AttributiArticolo.NUMERO_SET;
-import static it.compravendita.gestionale.catalogo.AttributiArticolo.RARITA;
-import static it.compravendita.gestionale.catalogo.AttributiArticolo.REGIONE;
-import static it.compravendita.gestionale.catalogo.AttributiArticolo.RETRO;
-import static it.compravendita.gestionale.catalogo.AttributiArticolo.SET;
-import static it.compravendita.gestionale.catalogo.AttributiArticolo.STATO_SCATOLA;
-import static it.compravendita.gestionale.catalogo.AttributiArticolo.TEMA;
-import static it.compravendita.gestionale.catalogo.AttributiArticolo.TIPO_PRODOTTO;
-import static it.compravendita.gestionale.catalogo.AttributiArticolo.VOTO;
+import static it.compravendita.gestionale.catalogo.AttributiArticolo.CAPACITA;
+import static it.compravendita.gestionale.catalogo.AttributiArticolo.COLORE;
+import static it.compravendita.gestionale.catalogo.AttributiArticolo.CONTENUTO;
+import static it.compravendita.gestionale.catalogo.AttributiArticolo.FORMA;
+import static it.compravendita.gestionale.catalogo.AttributiArticolo.MATERIALE;
+import static it.compravendita.gestionale.catalogo.AttributiArticolo.NUMERO_PEZZI;
+import static it.compravendita.gestionale.catalogo.AttributiArticolo.SOGGETTO;
+import static it.compravendita.gestionale.catalogo.AttributiArticolo.TIPO_ACCESSORIO;
 
 import java.math.BigDecimal;
 import java.util.EnumMap;
@@ -39,36 +31,31 @@ public class SchemaAttributi {
 	private final Map<Categoria, List<CampoAttributo>> campi = new EnumMap<>(Categoria.class);
 
 	public SchemaAttributi() {
-		CampoAttributo set = CampoAttributo.testo(SET, "Set / espansione");
-		CampoAttributo numeroCarta = CampoAttributo.testo(NUMERO_CARTA, "Numero carta");
+		CampoAttributo materiale = CampoAttributo.scelta(MATERIALE, "Materiale", "Ceramica", "Porcellana", "Gres",
+				"Vetro", "Acciaio inox", "Smalto", "Plastica", "Bambù", "Altro");
+		CampoAttributo capacita = CampoAttributo.intero(CAPACITA, "Capacità (ml)", 10, 5000);
+		CampoAttributo colore = CampoAttributo.testo(COLORE, "Colore");
+		CampoAttributo soggetto = CampoAttributo.testo(SOGGETTO, "Soggetto / tema");
 
-		campi.put(Categoria.CARTA_SINGOLA, List.of(
-				set,
-				numeroCarta,
-				CampoAttributo.testo(RARITA, "Rarità"),
-				CampoAttributo.testo(EDIZIONE, "Edizione")));
-		campi.put(Categoria.CARTA_GRADATA, List.of(
-				CampoAttributo.scelta(ENTE_GRADING, "Ente di grading", "PSA", "BGS", "CGC", "SGC", "ACE", "Altro")
+		campi.put(Categoria.TAZZA, List.of(
+				materiale,
+				capacita,
+				colore,
+				soggetto,
+				CampoAttributo.scelta(FORMA, "Forma", "Classica", "Mug grande", "Espresso", "Sagomata / 3D",
+						"Con coperchio", "Altro")));
+		campi.put(Categoria.TAZZA_TERMICA, List.of(materiale, capacita, colore, soggetto));
+		campi.put(Categoria.BICCHIERE, List.of(materiale, capacita, colore, soggetto));
+		campi.put(Categoria.SET_REGALO, List.of(
+				CampoAttributo.intero(NUMERO_PEZZI, "N° pezzi", 1, 100),
+				CampoAttributo.testo(CONTENUTO, "Contenuto"),
+				soggetto));
+		campi.put(Categoria.ACCESSORIO, List.of(
+				CampoAttributo.scelta(TIPO_ACCESSORIO, "Tipo", "Sottobicchiere", "Cucchiaino", "Coperchio", "Infusore",
+						"Espositore", "Altro")
 					.richiesto(),
-				CampoAttributo.decimale(VOTO, "Voto", 1, 10).richiesto(),
-				CampoAttributo.testo(NUMERO_CERTIFICATO, "N° certificato").richiesto(),
-				set,
-				numeroCarta));
-		campi.put(Categoria.SEALED_TCG, List.of(
-				CampoAttributo.scelta(TIPO_PRODOTTO, "Tipo prodotto", "Booster box", "Display", "Booster pack",
-						"Elite Trainer Box", "Collection box", "Tin", "Starter deck", "Altro")
-					.richiesto(),
-				set));
-		campi.put(Categoria.VIDEOGIOCO, List.of(
-				CampoAttributo.testo(CONSOLE, "Console").richiesto(),
-				CampoAttributo.scelta(REGIONE, "Regione", "PAL", "NTSC-U", "NTSC-J"),
-				CampoAttributo.scelta(COMPLETEZZA, "Completezza", "Loose", "CIB", "Sigillato"),
-				CampoAttributo.siNo(RETRO, "Retro")));
-		campi.put(Categoria.LEGO, List.of(
-				CampoAttributo.testo(NUMERO_SET, "Numero set").richiesto(),
-				CampoAttributo.testo(TEMA, "Tema"),
-				CampoAttributo.intero(ANNO, "Anno", 1949, 2100),
-				CampoAttributo.scelta(STATO_SCATOLA, "Stato scatola", "Perfetta", "Buona", "Danneggiata")));
+				materiale,
+				soggetto));
 		campi.put(Categoria.ALTRO, List.of());
 	}
 
@@ -109,7 +96,7 @@ public class SchemaAttributi {
 		return valori;
 	}
 
-	/** Breve descrizione degli attributi principali, per le liste (es. "PSA · 10 · 12345678"). */
+	/** Breve descrizione degli attributi principali, per le liste (es. "Ceramica · 350 · Bianca"). */
 	public String riepilogo(Articolo articolo) {
 		return campi(articolo.getCategoria()).stream()
 			.map(campo -> {

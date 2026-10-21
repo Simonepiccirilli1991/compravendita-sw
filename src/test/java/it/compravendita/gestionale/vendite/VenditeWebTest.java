@@ -83,7 +83,7 @@ class VenditeWebTest {
 		ebay = piattaformaRepository.findByNomeIgnoreCase("eBay").orElseThrow();
 		ebay.setFeePercentuale(new BigDecimal("10"));
 		ebay.setFeeFissa(new BigDecimal("0.35"));
-		carta = articoloRepository.save(new Articolo("Blastoise Base Set", Categoria.CARTA_SINGOLA, null));
+		carta = articoloRepository.save(new Articolo("Blastoise Base Set", Categoria.TAZZA, null));
 		lottoVecchio = lotto(LocalDate.of(2026, 1, 10), 1, "10");
 		lottoNuovo = lotto(LocalDate.of(2026, 3, 10), 3, "14");
 		em.flush();
@@ -229,7 +229,7 @@ class VenditeWebTest {
 			// totali: solo la vendita completata (40 - 4,35 di commissioni - 14 di costo) meno 6 di reso
 			.andExpect(model().attribute("totali", org.hamcrest.Matchers.hasToString(containsString("vendite=1"))))
 			.andExpect(content().string(containsString("15,65")));
-		mvc.perform(get("/vendite").param("categoria", "LEGO").header("HX-Request", "true"))
+		mvc.perform(get("/vendite").param("categoria", "TAZZA_TERMICA").header("HX-Request", "true"))
 			.andExpect(content().string(containsString("Nessuna vendita trovata")))
 			.andExpect(content().string(not(containsString("<html"))));
 

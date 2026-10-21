@@ -63,8 +63,8 @@ class AcquistiWebTest {
 
 	@Test
 	void registraAcquistoMistoConRipartizioneDeiCosti() throws Exception {
-		Articolo carta = articoloRepository.save(new Articolo("Pikachu Promo", Categoria.CARTA_SINGOLA, null));
-		Articolo lego = articoloRepository.save(new Articolo("Millennium Falcon", Categoria.LEGO, null));
+		Articolo carta = articoloRepository.save(new Articolo("Pikachu Promo", Categoria.TAZZA, null));
+		Articolo lego = articoloRepository.save(new Articolo("Millennium Falcon", Categoria.TAZZA_TERMICA, null));
 		MockMultipartFile ricevuta = new MockMultipartFile("allegato", "ricevuta.pdf", "application/pdf",
 				new byte[] { 37, 80, 68, 70 });
 
@@ -155,8 +155,8 @@ class AcquistiWebTest {
 
 	@Test
 	void modificaRiripartisceIConservaLeRigheMovimentate() throws Exception {
-		Articolo carta = articoloRepository.save(new Articolo("Mew", Categoria.CARTA_SINGOLA, null));
-		Articolo gioco = articoloRepository.save(new Articolo("Zelda", Categoria.VIDEOGIOCO, null));
+		Articolo carta = articoloRepository.save(new Articolo("Mew", Categoria.TAZZA, null));
+		Articolo gioco = articoloRepository.save(new Articolo("Zelda", Categoria.BICCHIERE, null));
 		Acquisto acquisto = new Acquisto(LocalDate.of(2026, 4, 1));
 		RigaAcquisto venduta = new RigaAcquisto(carta, 2, new BigDecimal("10.00"));
 		RigaAcquisto libera = new RigaAcquisto(gioco, 1, new BigDecimal("10.00"));
@@ -211,7 +211,7 @@ class AcquistiWebTest {
 
 	@Test
 	void eliminaAcquistoSenzaMovimentiEFiltraLista() throws Exception {
-		Articolo gioco = articoloRepository.save(new Articolo("Chrono Trigger", Categoria.VIDEOGIOCO, null));
+		Articolo gioco = articoloRepository.save(new Articolo("Chrono Trigger", Categoria.BICCHIERE, null));
 		Acquisto acquisto = new Acquisto(LocalDate.of(2026, 3, 1));
 		acquisto.setFornitore("Negozio Retro");
 		acquisto.aggiungiRiga(new RigaAcquisto(gioco, 1, new BigDecimal("80")));

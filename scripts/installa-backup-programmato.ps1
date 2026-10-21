@@ -3,7 +3,7 @@
     Installa (o rimuove) il backup automatico giornaliero nell'Utilità di pianificazione di Windows.
 
 .DESCRIPTION
-    Crea l'operazione "Gestionale Compravendita - Backup" per l'utente corrente: ogni giorno all'ora
+    Crea l'operazione "Gestionale Tazze - Backup" per l'utente corrente: ogni giorno all'ora
     indicata esegue backup-programmato.ps1. Se a quell'ora il PC è spento, il backup parte appena
     possibile. L'operazione gira solo con l'utente collegato (serve Docker Desktop avviato).
 
@@ -33,7 +33,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$nome = "Gestionale Compravendita - Backup"
+$nome = "Gestionale Tazze - Backup"
 
 if ($Rimuovi) {
     if (Get-ScheduledTask -TaskName $nome -ErrorAction SilentlyContinue) {
@@ -58,7 +58,7 @@ $utente = New-ScheduledTaskPrincipal -UserId ([System.Security.Principal.Windows
     -LogonType Interactive -RunLevel Limited
 
 Register-ScheduledTask -TaskName $nome -Action $azione -Trigger $trigger -Settings $impostazioni -Principal $utente `
-    -Description "Backup giornaliero di database e foto del gestionale compravendita" -Force | Out-Null
+    -Description "Backup giornaliero di database e foto del gestionale tazze" -Force | Out-Null
 
 Write-Host "Backup automatico installato: ogni giorno alle $Ora, in $Destinazione (ultimi $Conserva)."
 Write-Host "Esito di ogni backup: $(Join-Path $Destinazione 'backup.log')"

@@ -2,7 +2,7 @@
 <html lang="it" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
 <head>
-    <title th:text="${piattaforma} ? 'Modifica piattaforma · Compravendita' : 'Nuova piattaforma · Compravendita'">Piattaforma</title>
+    <title th:text="${piattaforma} ? 'Modifica piattaforma · Gestionale Tazze' : 'Nuova piattaforma · Gestionale Tazze'">Piattaforma</title>
 </head>
 <body>
 <main>
@@ -78,7 +78,7 @@
                 <div class="col-12">
                     <label for="note" class="form-label">Note</label>
                     <textarea th:field="*{note}" class="form-control" rows="2"
-                              placeholder="Es. tariffe aggiornate a ottobre 2026, categoria carte collezionabili"></textarea>
+                              placeholder="Es. tariffe aggiornate a ottobre 2026, categoria casa e cucina"></textarea>
                 </div>
             </div>
         </div>

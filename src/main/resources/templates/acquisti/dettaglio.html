@@ -2,7 +2,7 @@
 <html lang="it" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
 <head>
-    <title th:text="|Acquisto del ${@formati.data(acquisto.dataAcquisto)} · Compravendita|">Acquisto</title>
+    <title th:text="|Acquisto del ${@formati.data(acquisto.dataAcquisto)} · Gestionale Tazze|">Acquisto</title>
 </head>
 <body>
 <main>
@@ -108,7 +108,7 @@
         </div>
     </div>
     <p class="small text-secondary mt-3" th:unless="${#sets.isEmpty(bloccate)}">
-        <i class="bi bi-lock me-1"></i>Alcune righe hanno movimenti (vendite, grading, rettifiche): puoi ancora
+        <i class="bi bi-lock me-1"></i>Alcune righe hanno movimenti (vendite, rettifiche): puoi ancora
         modificare i dati e i costi dell'acquisto, ma non quelle righe, e l'acquisto non può essere eliminato.
     </p>
 </main>

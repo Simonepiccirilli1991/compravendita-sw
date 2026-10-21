@@ -117,3 +117,16 @@ La cartella di progetto `compravendita-sw` è vuota: si parte da zero.
 > vendita Cardmarket netto 33,88 €, profitto 17,38 €; LEGO su eBay netto 237,15 €, profitto 72,15 €, ROI 43,7%;
 > dopo l'annullamento giacenza carte tornata a 10 e KPI ricalcolati; carta gradata PSA 9 con costo 30,50 €
 > (5,50 + 25 di grading), venduta a 120 € con profitto 73,55 € e ROI 241,1%. Backup e ripristino provati.
+
+---
+
+## Versione tazze (branch `tazze`)
+Stesso gestionale, dedicato a tazze e articoli simili venduti sui marketplace (Vinted, eBay, Etsy, Subito, …).
+- [x] Categorie: Tazza, Tazza termica / Borraccia, Bicchiere, Set / Confezione regalo, Accessori, Altro
+- [x] Attributi: materiale, capacità (ml), colore, soggetto/tema, forma (tazze), n° pezzi e contenuto (set), tipo (accessori)
+- [x] Condizioni da marketplace generalista (nuovo con/senza confezione, come nuovo, ottimo, buono, con difetti)
+- [x] Brand/licenze iniziali (Disney, Harry Potter, Marvel, Star Wars, Pokémon, Hello Kitty, Friends, Thun, Ikea, Senza licenza); Etsy al posto di Cardmarket
+- [x] Grading rimosso (pagine, stato "In grading", tabella, voce nel conto annuale); spesa "Pubblicità / promozioni" al posto di "Grading"
+- [x] Campo lingua tolto da form e scheda articolo
+- [x] Migrazione `V7__gestionale_tazze.sql`; dati demo con catalogo di tazze
+- [x] Docker separato: progetto `compravendita-sw-tazze` (container `compravendita-sw-tazze-db`/`-app`, volume proprio) che con `docker compose up -d --build` avvia database e applicazione; `docker-compose.dev.yml` con il solo database per lo sviluppo; script di backup e operazione pianificata con nomi propri

@@ -14,9 +14,9 @@ import it.compravendita.gestionale.magazzino.StatoOggetto;
 
 class RipartizioneCostiTest {
 
-	private final Articolo carta = new Articolo("Pikachu", Categoria.CARTA_SINGOLA, null);
+	private final Articolo carta = new Articolo("Pikachu", Categoria.TAZZA, null);
 
-	private final Articolo lego = new Articolo("Millennium Falcon", Categoria.LEGO, null);
+	private final Articolo lego = new Articolo("Millennium Falcon", Categoria.TAZZA_TERMICA, null);
 
 	@Test
 	void ripartizioneProporzionaleAlPrezzo() {

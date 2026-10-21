@@ -88,7 +88,7 @@ public class RigaAcquisto extends AuditedEntity {
 		ricalcolaCostoUnitarioEffettivo();
 	}
 
-	/** Aggiunge un costo sostenuto dopo l'acquisto (es. grading) al costo della riga. */
+	/** Aggiunge un costo sostenuto dopo l'acquisto (es. una spesa collegata) al costo della riga. */
 	public void aggiungiCostoAggiuntivo(BigDecimal importo) {
 		this.costiAggiuntivi = Importi.importo(costiAggiuntivi.add(Importi.nonNullo(importo)));
 		ricalcolaCostoUnitarioEffettivo();
@@ -127,7 +127,7 @@ public class RigaAcquisto extends AuditedEntity {
 	}
 
 	/**
-	 * Vero se il lotto ha avuto movimenti dopo l'acquisto (vendite, rettifiche, grading,
+	 * Vero se il lotto ha avuto movimenti dopo l'acquisto (vendite, rettifiche,
 	 * costi aggiuntivi): in quel caso articolo, quantità e prezzo non sono più modificabili.
 	 * Non considera i collegamenti registrati in altre tabelle, verificati dal repository.
 	 */
@@ -188,11 +188,6 @@ public class RigaAcquisto extends AuditedEntity {
 
 	public Articolo getArticolo() {
 		return articolo;
-	}
-
-	/** Cambia l'articolo del lotto, ad esempio quando una carta rientra dal grading. */
-	public void setArticolo(Articolo articolo) {
-		this.articolo = articolo;
 	}
 
 	/** Valore a costo dei pezzi ancora disponibili. */

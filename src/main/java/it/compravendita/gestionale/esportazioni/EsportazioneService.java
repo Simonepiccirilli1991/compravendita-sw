@@ -156,7 +156,6 @@ public class EsportazioneService {
 		Tabella tabella = new Tabella("Riepilogo annuale").testo("Voce");
 		conti.forEach(c -> tabella.importo(String.valueOf(c.anno())));
 		voce(tabella, "Acquisti (merce e costi accessori)", conti, ContoAnnuale::acquistato);
-		voce(tabella, "Costi di grading", conti, ContoAnnuale::costiGrading);
 		voce(tabella, "Fatturato merce", conti, c -> c.vendite().lordo());
 		voce(tabella, "Spedizioni incassate", conti, ContoAnnuale::spedizioniIncassate);
 		voce(tabella, "Commissioni", conti, ContoAnnuale::commissioni);

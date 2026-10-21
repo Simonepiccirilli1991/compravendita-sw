@@ -20,7 +20,7 @@ param(
 
 # "Continue": in PowerShell 5.1 lo stderr dei comandi nativi con "Stop" diventerebbe un errore
 $ErrorActionPreference = "Continue"
-$container = "compravendita-db"
+$container = "compravendita-sw-tazze-db"
 New-Item -ItemType Directory -Force $Destinazione | Out-Null
 $log = Join-Path $Destinazione "backup.log"
 

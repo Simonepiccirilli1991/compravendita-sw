@@ -9,7 +9,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
 /**
- * Canale di vendita (eBay, Vinted, Cardmarket, fiera, ...) con le relative commissioni:
+ * Canale di vendita (eBay, Vinted, Etsy, fiera, ...) con le relative commissioni:
  * una parte percentuale sul transato e una fissa per ordine, sia per la piattaforma
  * sia per il sistema di pagamento.
  */

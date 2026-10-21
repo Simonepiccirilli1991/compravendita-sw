@@ -102,10 +102,10 @@ class CalcoloEconomicoTest {
 
 	@BeforeEach
 	void scenario() {
-		Articolo carta = articoloRepository.save(new Articolo("Mewtwo", Categoria.CARTA_SINGOLA,
+		Articolo carta = articoloRepository.save(new Articolo("Mewtwo", Categoria.TAZZA,
 				brandRepository.findByNomeIgnoreCase("Pokémon").orElseThrow()));
-		Articolo lego = articoloRepository.save(new Articolo("Colosseo", Categoria.LEGO,
-				brandRepository.findByNomeIgnoreCase("LEGO").orElseThrow()));
+		Articolo lego = articoloRepository.save(new Articolo("Colosseo", Categoria.TAZZA_TERMICA,
+				brandRepository.findByNomeIgnoreCase("Disney").orElseThrow()));
 		Articolo omaggio = articoloRepository.save(new Articolo("Bustine vuote", Categoria.ALTRO, null));
 		Piattaforma ebay = piattaformaRepository.findByNomeIgnoreCase("eBay").orElseThrow();
 		Piattaforma vinted = piattaformaRepository.findByNomeIgnoreCase("Vinted").orElseThrow();
@@ -196,9 +196,9 @@ class CalcoloEconomicoTest {
 	void venditaConPiuArticoliRipartitaPerCategoria() {
 		List<Risultato> categorie = calcolo.per(Dimensione.CATEGORIA, Periodo.sempre());
 
-		assertThat(categorie).extracting(Risultato::chiave).containsExactly("CARTA_SINGOLA", "LEGO", "ALTRO");
+		assertThat(categorie).extracting(Risultato::chiave).containsExactly("TAZZA", "TAZZA_TERMICA", "ALTRO");
 		Risultato carte = categorie.get(0);
-		assertThat(carte.etichetta()).isEqualTo("Carta singola");
+		assertThat(carte.etichetta()).isEqualTo("Tazza");
 		// netto 300 ripartito 150/350 alle carte e 200/350 al LEGO
 		assertThat(carte.netto()).isEqualByComparingTo("128.57");
 		assertThat(carte.costoVenduto()).isEqualByComparingTo("59");
@@ -218,7 +218,7 @@ class CalcoloEconomicoTest {
 	void perBrandPiattaformaArticoloEMese() {
 		assertThat(calcolo.per(Dimensione.BRAND, Periodo.sempre()))
 			.extracting(Risultato::etichetta)
-			.containsExactly("Pokémon", "LEGO", "Senza brand");
+			.containsExactly("Pokémon", "Disney", "Senza brand");
 
 		List<Risultato> piattaforme = calcolo.per(Dimensione.PIATTAFORMA, Periodo.sempre());
 		assertThat(piattaforme).extracting(Risultato::etichetta).containsExactly("eBay", "Vinted");

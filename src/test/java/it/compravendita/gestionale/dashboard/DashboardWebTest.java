@@ -77,9 +77,9 @@ class DashboardWebTest {
 
 	@BeforeEach
 	void scenario() {
-		Articolo carta = articoloRepository.save(new Articolo("Gengar", Categoria.CARTA_SINGOLA, null));
-		Articolo lego = articoloRepository.save(new Articolo("Batmobile", Categoria.LEGO, null));
-		Articolo vecchio = articoloRepository.save(new Articolo("Console impolverata", Categoria.VIDEOGIOCO, null));
+		Articolo carta = articoloRepository.save(new Articolo("Gengar", Categoria.TAZZA, null));
+		Articolo lego = articoloRepository.save(new Articolo("Batmobile", Categoria.TAZZA_TERMICA, null));
+		Articolo vecchio = articoloRepository.save(new Articolo("Console impolverata", Categoria.BICCHIERE, null));
 		RigaAcquisto carte = lotto(carta, oggi.minusDays(100), 4, "10");
 		RigaAcquisto legoLotto = lotto(lego, oggi.minusDays(60), 1, "100");
 		lotto(vecchio, oggi.minusDays(200), 1, "50");
@@ -111,7 +111,7 @@ class DashboardWebTest {
 		assertThat(d.topPezzi()).extracting(Risultato::etichetta).containsExactly("Gengar", "Batmobile");
 		assertThat(d.topProfitto()).extracting(Risultato::etichetta).containsExactly("Gengar", "Batmobile");
 		assertThat(d.topRoi().getFirst().roi()).isEqualByComparingTo("200");
-		assertThat(d.velocitaCategorie()).extracting(Velocita::etichetta).containsExactly("LEGO", "Carta singola");
+		assertThat(d.velocitaCategorie()).extracting(Velocita::etichetta).containsExactly("Tazza termica / Borraccia", "Tazza");
 		assertThat(d.velocitaCategorie().getFirst().giorniMedi()).isEqualByComparingTo("30");
 
 		// fermi oltre 90 giorni: la carta rimasta e la console

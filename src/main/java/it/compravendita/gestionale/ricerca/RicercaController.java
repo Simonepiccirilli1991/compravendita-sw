@@ -16,8 +16,8 @@ import it.compravendita.gestionale.vendite.FiltroVendite;
 import it.compravendita.gestionale.vendite.VenditaService;
 
 /**
- * Ricerca rapida da qualsiasi pagina: articoli (nome e attributi come n° certificato, n° set,
- * numero carta), acquisti (fornitore, canale, articoli) e vendite (acquirente, numero, articoli).
+ * Ricerca rapida da qualsiasi pagina: articoli (nome e attributi come materiale, colore,
+ * soggetto), acquisti (fornitore, canale, articoli) e vendite (acquirente, numero, articoli).
  */
 @Controller
 public class RicercaController {

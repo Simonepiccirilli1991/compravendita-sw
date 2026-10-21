@@ -62,33 +62,35 @@ class PersistenzaModelloTest {
 
 	@Test
 	void datiInizialiPresenti() {
-		assertThat(brandRepository.findByNomeIgnoreCase("pokémon")).isPresent();
-		assertThat(brandRepository.findByNomeIgnoreCase("LEGO")).isPresent();
+		assertThat(brandRepository.findByNomeIgnoreCase("disney")).isPresent();
+		assertThat(brandRepository.findByNomeIgnoreCase("Harry Potter")).isPresent();
+		assertThat(brandRepository.findByNomeIgnoreCase("LEGO")).isEmpty();
 		assertThat(piattaformaRepository.findByAttivaTrueOrderByNomeAsc())
 			.extracting(Piattaforma::getNome)
-			.contains("eBay", "Vinted", "Cardmarket");
+			.contains("eBay", "Vinted", "Etsy")
+			.doesNotContain("Cardmarket");
 	}
 
 	@Test
 	void attributiJsonbSalvatiERiletti() {
 		Brand pokemon = brandRepository.findByNomeIgnoreCase("Pokémon").orElseThrow();
-		Articolo carta = new Articolo("Pikachu Illustrator", Categoria.CARTA_GRADATA, pokemon);
-		carta.setAttributo(AttributiArticolo.ENTE_GRADING, "PSA");
-		carta.setAttributo(AttributiArticolo.VOTO, 9.5);
-		carta.setAttributo(AttributiArticolo.NUMERO_CERTIFICATO, "12345678");
-		Long id = articoloRepository.saveAndFlush(carta).getId();
+		Articolo tazza = new Articolo("Tazza Pikachu", Categoria.TAZZA, pokemon);
+		tazza.setAttributo(AttributiArticolo.MATERIALE, "Ceramica");
+		tazza.setAttributo(AttributiArticolo.CAPACITA, 350);
+		tazza.setAttributo(AttributiArticolo.SOGGETTO, "Pikachu");
+		Long id = articoloRepository.saveAndFlush(tazza).getId();
 		em.clear();
 
 		Articolo riletto = articoloRepository.findById(id).orElseThrow();
-		assertThat(riletto.getAttributo(AttributiArticolo.ENTE_GRADING)).isEqualTo("PSA");
-		assertThat(riletto.getAttributo(AttributiArticolo.VOTO)).isEqualTo(9.5);
+		assertThat(riletto.getAttributo(AttributiArticolo.MATERIALE)).isEqualTo("Ceramica");
+		assertThat(riletto.getAttributo(AttributiArticolo.CAPACITA)).isEqualTo(350);
 		assertThat(riletto.getCreatoIl()).isNotNull();
 	}
 
 	@Test
 	void flussoAcquistoVenditaConFifo() {
-		Brand lego = brandRepository.findByNomeIgnoreCase("LEGO").orElseThrow();
-		Articolo set = articoloRepository.save(new Articolo("Millennium Falcon 75192", Categoria.LEGO, lego));
+		Brand lego = brandRepository.findByNomeIgnoreCase("Disney").orElseThrow();
+		Articolo set = articoloRepository.save(new Articolo("Millennium Falcon 75192", Categoria.TAZZA_TERMICA, lego));
 
 		Acquisto primo = new Acquisto(LocalDate.of(2026, 1, 10));
 		primo.aggiungiRiga(new RigaAcquisto(set, 1, new BigDecimal("600.00")));

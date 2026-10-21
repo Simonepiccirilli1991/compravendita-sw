@@ -1,7 +1,23 @@
-# Gestionale Compravendita
+# Gestionale Tazze
 
-Gestionale per tracciare acquisti, magazzino e vendite di carte (Pokémon, One Piece – singole, gradate, sealed),
-videogiochi, LEGO e altri oggetti, con calcolo di netto, ROI e dashboard. Il piano di sviluppo è in [PIANO.md](PIANO.md).
+Gestionale per tracciare acquisti, magazzino e vendite di tazze e articoli simili (tazze termiche e borracce,
+bicchieri, set e confezioni regalo, accessori) sui marketplace (Vinted, eBay, Etsy, Subito, …), con calcolo di
+netto, ROI e dashboard.
+
+> Versione del branch `tazze`, derivata dal gestionale carte/videogiochi/LEGO (branch `main`): stesse funzioni di
+> catalogo, acquisti, magazzino, vendite e dashboard, senza il grading. Usa un progetto Docker separato
+> (`compravendita-sw-tazze`, container `compravendita-sw-tazze-db` / `compravendita-sw-tazze-app`, volume
+> proprio): i dati delle due versioni non si mescolano mai. Le porte predefinite sono le stesse (8080 e 5432),
+> quindi si avvia una versione alla volta, oppure si cambiano `APP_PORT` e `DB_PUBLISHED_PORT` nel file `.env`.
+> Il piano di sviluppo è in [PIANO.md](PIANO.md).
+
+## Avvio rapido (tutto in Docker)
+Serve solo Docker Desktop avviato. Dalla cartella del progetto:
+```bash
+docker compose up -d --build     # database + applicazione su http://localhost:8080 (admin / admin)
+```
+In Docker Desktop compare il progetto **compravendita-sw-tazze**: da lì si ferma e si riavvia con i pulsanti
+Stop/Play. Il `--build` serve solo la prima volta e dopo ogni modifica al codice.
 
 ## Stack
 - Java 21, Spring Boot 4.1, Spring Data JPA, Flyway, Spring Security
@@ -19,39 +35,39 @@ Maven non serve: si usa il wrapper `mvnw` incluso.
 ./mvnw spring-boot:run          # Windows: mvnw.cmd spring-boot:run
 ```
 Con il profilo `dev` (predefinito) Spring Boot avvia da solo il container PostgreSQL definito in
-`docker-compose.yml` e lo lascia acceso alla chiusura. In alternativa:
+`docker-compose.dev.yml` (solo database, stesso volume della versione in Docker) e lo lascia acceso alla
+chiusura. In alternativa:
 ```bash
-docker compose up -d            # solo database
-docker compose --profile tools up -d   # database + pgAdmin su http://localhost:5050
+docker compose -f docker-compose.dev.yml up -d   # solo database
+docker compose --profile tools up -d             # tutto + pgAdmin su http://localhost:5050
 ```
 Applicazione: <http://localhost:8080> — credenziali predefinite `admin` / `admin`.
 
 ## Configurazione
 I valori predefiniti si sovrascrivono con variabili d'ambiente o con un file `.env` nella cartella del progetto
 (vedi `.env.example`): `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `APP_USERNAME`, `APP_PASSWORD`,
-`APP_PORT`, `APP_UPLOAD_DIR`.
+`APP_PORT`, `APP_UPLOAD_DIR`, `DB_PUBLISHED_PORT` (porta del database sul PC), `PGADMIN_PORT`.
 
 ## Dati demo
-Per provare l'applicazione con un anno di attività di esempio (acquisti, vendite su più piattaforme, grading,
+Per provare l'applicazione con un anno di attività di esempio (acquisti, vendite su più piattaforme,
 resi, rettifiche e spese):
 ```bash
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev,demo
 ```
 I dati demo stanno nello schema PostgreSQL `demo`, separato dai dati reali (schema `public`), e vengono creati
 solo se lo schema è vuoto. Per ripartire da zero: `drop schema demo cascade;` (es. da pgAdmin). Il profilo demo
-imposta anche commissioni indicative su eBay e Cardmarket, sempre e solo nello schema `demo`.
+imposta anche commissioni indicative su eBay ed Etsy, sempre e solo nello schema `demo`.
 
 ## Esecuzione in Docker
-L'immagine dell'applicazione si costruisce dal `Dockerfile`; il servizio `app` di `docker-compose.yml` è nel
-profilo `app`, quindi non parte durante lo sviluppo:
+L'immagine dell'applicazione si costruisce dal `Dockerfile`; `docker-compose.yml` avvia database e applicazione:
 ```bash
-docker compose --profile app up -d --build      # database + applicazione su http://localhost:8080
-docker compose --profile app logs -f app
-docker compose --profile app down               # ferma tutto (i dati restano nel volume pgdata)
+docker compose up -d --build     # database + applicazione su http://localhost:8080
+docker compose logs -f app
+docker compose down              # ferma tutto (i dati restano nel volume pgdata)
 ```
 Nel container l'app usa il profilo `prod`. Credenziali, porta e database si impostano nel file `.env`
 (vedi `.env.example`); foto e ricevute restano in `data/uploads`, quindi gli script di backup funzionano allo
-stesso modo. Per la demo in container: `SPRING_PROFILES_ACTIVE=prod,demo docker compose --profile app up -d`.
+stesso modo. Per la demo in container: `SPRING_PROFILES_ACTIVE=prod,demo docker compose up -d`.
 
 ## Spese generali
 Abbonamenti, materiali, fiere e altri costi dell'attività si registrano in *Spese* (barra laterale). Entrano nel
@@ -66,7 +82,7 @@ Excel/CSV come le altre liste.
   caricalo: l'anteprima segnala gli errori riga per riga e non viene importato nulla finché non sono tutti corretti.
 
 ## Backup e ripristino
-Gli script salvano il database (con `pg_dump` dentro il container `compravendita-db`) e la cartella
+Gli script salvano il database (con `pg_dump` dentro il container `compravendita-sw-tazze-db`) e la cartella
 `data/uploads` con foto e ricevute. Il container deve essere avviato.
 
 Windows (PowerShell):
@@ -96,7 +112,7 @@ Installa un backup giornaliero nell'Utilità di pianificazione di Windows (una v
 .\scripts\installa-backup-programmato.ps1                       # ogni giorno alle 21:00, ultimi 30 backup
 .\scripts\installa-backup-programmato.ps1 -Ora 13:00 -Conserva 60 -Destinazione "D:\Backup gestionale"
 .\scripts\installa-backup-programmato.ps1 -Rimuovi              # disattiva
-Start-ScheduledTask -TaskName "Gestionale Compravendita - Backup"  # prova subito
+Start-ScheduledTask -TaskName "Gestionale Tazze - Backup"  # prova subito
 ```
 Se a quell'ora il PC è spento, il backup parte appena possibile. Docker Desktop deve essere avviato; il database
 può anche essere fermo (viene acceso per il backup e poi rispento). L'esito di ogni esecuzione è in

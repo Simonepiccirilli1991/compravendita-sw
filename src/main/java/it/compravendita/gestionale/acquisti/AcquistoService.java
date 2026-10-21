@@ -59,7 +59,7 @@ public class AcquistoService {
 	}
 
 	/**
-	 * Righe che hanno avuto movimenti (vendite, rettifiche, grading, spese collegate):
+	 * Righe che hanno avuto movimenti (vendite, rettifiche, spese collegate):
 	 * non si possono modificare né eliminare.
 	 */
 	public Set<Long> righeBloccate(Acquisto acquisto) {
@@ -179,7 +179,7 @@ public class AcquistoService {
 		Acquisto acquisto = trova(id);
 		if (!righeBloccate(acquisto).isEmpty()) {
 			throw new OperazioneNonConsentitaException(
-					"L'acquisto ha merce già venduta, rettificata o in grading e non può essere eliminato");
+					"L'acquisto ha merce già venduta o rettificata e non può essere eliminato");
 		}
 		acquistoRepository.delete(acquisto);
 		fileStorage.elimina(acquisto.getAllegatoPath());

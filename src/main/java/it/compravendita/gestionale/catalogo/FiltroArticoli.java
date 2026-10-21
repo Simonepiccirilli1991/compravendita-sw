@@ -19,7 +19,7 @@ public class FiltroArticoli {
 		Specification<Articolo> spec = (root, query, cb) -> cb.conjunction();
 		if (q != null && !q.isBlank()) {
 			String like = "%" + q.trim().toLowerCase() + "%";
-			// nome oppure uno qualsiasi degli attributi (n. certificato, n. set, numero carta, ...)
+			// nome oppure uno qualsiasi degli attributi (materiale, colore, soggetto, ...)
 			spec = spec.and((root, query, cb) -> cb.or(cb.like(cb.lower(root.get("nome")), like),
 					cb.like(cb.lower(cb.function("attributi_testo", String.class, root.get("attributi"))), like)));
 		}

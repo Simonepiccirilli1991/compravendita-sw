@@ -187,17 +187,19 @@ public class ImportazioneService {
 	/** File di esempio con tutte le colonne riconosciute. */
 	public byte[] modello() {
 		String[][] righe = {
-				{ "nome", "categoria", "brand", "lingua", "condizione", "quantita", "prezzo_unitario", "data_acquisto",
-						"fornitore", "stato", "note", "set", "numeroCarta", "enteGrading", "voto", "numeroCertificato",
-						"tipoProdotto", "console", "regione", "completezza", "numeroSet" },
-				{ "Pikachu Illustrator", "Carta singola", "Pokémon", "JAP", "Near Mint", "2", "15,50", "15/01/2026",
-						"Mario Rossi", "In magazzino", "", "Promo", "025", "", "", "", "", "", "", "", "" },
-				{ "Charizard Base Set PSA 9", "Carta gradata", "Pokémon", "ENG", "", "1", "450", "20/02/2026",
-						"Asta eBay", "In vendita", "", "Base Set", "4/102", "PSA", "9", "12345678", "", "", "", "", "" },
-				{ "Super Mario 64", "Videogioco", "Nintendo", "", "Good", "3", "25", "20/02/2026", "Asta eBay",
-						"In magazzino", "Retro", "", "", "", "", "", "", "N64", "PAL", "CIB", "" },
-				{ "Millennium Falcon", "LEGO", "LEGO", "", "Sigillato", "1", "650", "", "", "", "", "", "", "", "", "",
-						"", "", "", "", "75192" } };
+				{ "nome", "categoria", "brand", "condizione", "quantita", "prezzo_unitario", "data_acquisto", "fornitore",
+						"stato", "note", "materiale", "capacita", "colore", "soggetto", "forma", "numeroPezzi",
+						"contenuto", "tipoAccessorio" },
+				{ "Tazza Topolino vintage", "Tazza", "Disney", "Come nuovo", "2", "6,50", "15/01/2026", "Mercatino",
+						"In magazzino", "", "Ceramica", "300", "Bianca", "Topolino", "Classica", "", "", "" },
+				{ "Tazza termica Hogwarts", "Tazza termica / Borraccia", "Harry Potter", "Nuovo con confezione", "4",
+						"9", "20/02/2026", "Ingrosso", "In vendita", "", "Acciaio inox", "450", "Nera", "Hogwarts", "",
+						"", "", "" },
+				{ "Set colazione Hello Kitty", "Set / Confezione regalo", "Hello Kitty", "Nuovo con confezione", "1",
+						"12", "20/02/2026", "Ingrosso", "In magazzino", "", "", "", "", "Hello Kitty", "", "3",
+						"Tazza, piattino e cucchiaino", "" },
+				{ "Sottobicchieri in sughero", "Accessori", "", "Nuovo senza confezione", "10", "0,80", "", "", "",
+						"", "Altro", "", "", "", "", "", "", "Sottobicchiere" } };
 		StringBuilder csv = new StringBuilder("﻿");
 		for (String[] riga : righe) {
 			List<String> campi = new ArrayList<>();
@@ -377,7 +379,7 @@ public class ImportazioneService {
 		}
 	}
 
-	/** Valore di un enum dal nome (CARTA_SINGOLA) o dall'etichetta (Carta singola), senza badare a maiuscole. */
+	/** Valore di un enum dal nome (SET_REGALO) o dall'etichetta (Set / Confezione regalo), senza badare a maiuscole. */
 	static <E extends Enum<E>> E enumDa(E[] valori, String testo, Function<E, String> etichetta) {
 		String cercato = normalizza(testo);
 		for (E valore : valori) {

@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,13 +27,9 @@ import it.compravendita.gestionale.catalogo.BrandRepository;
 import it.compravendita.gestionale.catalogo.Categoria;
 import it.compravendita.gestionale.catalogo.Condizione;
 import it.compravendita.gestionale.catalogo.SchemaAttributi;
-import it.compravendita.gestionale.magazzino.Grading;
-import it.compravendita.gestionale.magazzino.GradingService;
-import it.compravendita.gestionale.magazzino.InvioGradingForm;
 import it.compravendita.gestionale.magazzino.MagazzinoService;
 import it.compravendita.gestionale.magazzino.MotivoRettifica;
 import it.compravendita.gestionale.magazzino.RettificaForm;
-import it.compravendita.gestionale.magazzino.RientroGradingForm;
 import it.compravendita.gestionale.magazzino.StatoOggetto;
 import it.compravendita.gestionale.piattaforme.Piattaforma;
 import it.compravendita.gestionale.piattaforme.PiattaformaRepository;
@@ -47,8 +42,8 @@ import it.compravendita.gestionale.vendite.VenditaForm;
 import it.compravendita.gestionale.vendite.VenditaService;
 
 /**
- * Genera un anno di attività di esempio (catalogo, acquisti, vendite, grading, resi, rettifiche
- * e spese) passando dai servizi dell'applicazione, così i dati rispettano le stesse regole di
+ * Genera un anno di attività di esempio (catalogo, acquisti, vendite, resi, rettifiche e
+ * spese) passando dai servizi dell'applicazione, così i dati rispettano le stesse regole di
  * quelli inseriti a mano. I numeri casuali hanno un seme fisso: ogni caricamento è identico.
  */
 @Component
@@ -57,7 +52,7 @@ public class DatiDemo {
 	private static final Logger log = LoggerFactory.getLogger(DatiDemo.class);
 
 	private static final List<String> FORNITORI = List.of("Vinted", "Subito", "Mercatino dell'usato",
-			"Collezionista privato", "Fiera del fumetto", "eBay", "Negozio locale");
+			"Ingrosso Casalinghi", "Svuota cantine", "eBay", "Negozio locale");
 
 	private final AcquistoRepository acquistoRepository;
 
@@ -71,8 +66,6 @@ public class DatiDemo {
 
 	private final VenditaService venditaService;
 
-	private final GradingService gradingService;
-
 	private final MagazzinoService magazzinoService;
 
 	private final SpesaRepository spesaRepository;
@@ -82,7 +75,7 @@ public class DatiDemo {
 	public DatiDemo(AcquistoRepository acquistoRepository, AcquistoService acquistoService,
 			ArticoloService articoloService, BrandRepository brandRepository,
 			PiattaformaRepository piattaformaRepository, VenditaService venditaService,
-			GradingService gradingService, MagazzinoService magazzinoService, SpesaRepository spesaRepository,
+			MagazzinoService magazzinoService, SpesaRepository spesaRepository,
 			SchemaAttributi schemaAttributi) {
 		this.acquistoRepository = acquistoRepository;
 		this.acquistoService = acquistoService;
@@ -90,7 +83,6 @@ public class DatiDemo {
 		this.brandRepository = brandRepository;
 		this.piattaformaRepository = piattaformaRepository;
 		this.venditaService = venditaService;
-		this.gradingService = gradingService;
 		this.magazzinoService = magazzinoService;
 		this.spesaRepository = spesaRepository;
 		this.schemaAttributi = schemaAttributi;
@@ -136,8 +128,8 @@ public class DatiDemo {
 		Vendita daRendere = create.get(create.size() / 3);
 		StornoForm reso = new StornoForm();
 		reso.setData(daRendere.getDataVendita().plusDays(9));
-		reso.setMotivo("Acquirente: articolo non conforme alla descrizione");
-		reso.setCostiReso(new BigDecimal("6.50"));
+		reso.setMotivo("Acquirente: tazza arrivata scheggiata");
+		reso.setCostiReso(new BigDecimal("4.90"));
 		venditaService.reso(daRendere.getId(), reso);
 		Vendita daAnnullare = create.get(create.size() / 2);
 		StornoForm annullamento = new StornoForm();
@@ -145,7 +137,6 @@ public class DatiDemo {
 		annullamento.setMotivo("L'acquirente non ha pagato");
 		venditaService.annulla(daAnnullare.getId(), annullamento);
 
-		vendite += scenarioGrading(oggi, catalogo);
 		scenariMagazzino(oggi, catalogo);
 		spese(oggi);
 		log.info("Dati demo caricati: {} articoli, {} lotti, {} vendite", catalogo.size(), lotti.size(), vendite);
@@ -154,7 +145,7 @@ public class DatiDemo {
 	/** Commissioni indicative, solo per vedere netto e ROI realistici nella demo. */
 	private void configuraCommissioni() {
 		commissioni("eBay", "8.00", "0.35", "0", "0");
-		commissioni("Cardmarket", "5.00", "0", "0", "0");
+		commissioni("Etsy", "6.50", "0.20", "4.00", "0.30");
 		commissioni("Vinted", "0", "0", "0", "0");
 		commissioni("Subito", "0", "0", "0", "0");
 	}
@@ -173,64 +164,58 @@ public class DatiDemo {
 
 	private Map<String, Modello> creaCatalogo() {
 		Map<String, Modello> catalogo = new LinkedHashMap<>();
-		carta(catalogo, "Charizard ex 199/165", "Pokémon", "151", "199/165", "Special Illustration Rare", "95", 2);
-		carta(catalogo, "Mew ex 151/165", "Pokémon", "151", "151/165", "Ultra Rare", "12", 4);
-		carta(catalogo, "Umbreon VMAX 215/203", "Pokémon", "Evolving Skies", "215/203", "Secret Rare", "380", 1);
-		carta(catalogo, "Pikachu VMAX 044/185", "Pokémon", "Vivid Voltage", "044/185", "Ultra Rare", "8", 4);
-		carta(catalogo, "Giratina V 186/196", "Pokémon", "Lost Origin", "186/196", "Alternate Art", "160", 1);
-		carta(catalogo, "Monkey D. Luffy OP01-024", "One Piece", "Romance Dawn", "OP01-024", "Super Rare", "18", 3);
-		carta(catalogo, "Shanks OP01-120", "One Piece", "Romance Dawn", "OP01-120", "Secret Rare", "45", 2);
-		carta(catalogo, "Yamato OP04-112", "One Piece", "Kingdoms of Intrigue", "OP04-112", "Secret Rare", "22", 3);
+		tazza(catalogo, "Tazza Topolino vintage", "Disney", "Ceramica", 300, "Bianca", "Topolino", "Classica", "6", 4);
+		tazza(catalogo, "Tazza Stitch sagomata", "Disney", "Ceramica", 450, "Azzurra", "Stitch", "Sagomata / 3D", "11", 6);
+		tazza(catalogo, "Mug Hogwarts stemmi", "Harry Potter", "Ceramica", 400, "Nera", "Case di Hogwarts",
+				"Mug grande", "8", 6);
+		tazza(catalogo, "Tazza Avengers logo", "Marvel", "Ceramica", 350, "Rossa", "Avengers", "Classica", "5.50", 6);
+		tazza(catalogo, "Tazza Darth Vader 3D", "Star Wars", "Ceramica", 500, "Nera", "Darth Vader", "Sagomata / 3D",
+				"14", 3);
+		tazza(catalogo, "Tazza Pikachu con coperchio", "Pokémon", "Ceramica", 350, "Gialla", "Pikachu", "Con coperchio",
+				"9", 5);
+		tazza(catalogo, "Tazza Central Perk", "Friends", "Ceramica", 400, "Bianca", "Central Perk", "Mug grande", "7",
+				6);
+		tazza(catalogo, "Tazza Thun angioletti", "Thun", "Porcellana", 250, "Bianca", "Angioletti", "Classica", "12", 3);
+		tazza(catalogo, "Tazzine espresso Ikea (vintage)", "Ikea", "Gres", 90, "Verde", null, "Espresso", "2.50", 8);
 
-		modello(catalogo, "Booster box Pokémon 151 (JP)", Categoria.SEALED_TCG, "Pokémon", "110", 3,
-				Condizione.SIGILLATO, Map.of(AttributiArticolo.TIPO_PRODOTTO, "Booster box", AttributiArticolo.SET, "151"));
-		modello(catalogo, "Elite Trainer Box Paldean Fates", Categoria.SEALED_TCG, "Pokémon", "48", 4,
-				Condizione.SIGILLATO,
-				Map.of(AttributiArticolo.TIPO_PRODOTTO, "Elite Trainer Box", AttributiArticolo.SET, "Paldean Fates"));
-		modello(catalogo, "Booster box One Piece OP-05", Categoria.SEALED_TCG, "One Piece", "95", 2,
-				Condizione.SIGILLATO,
-				Map.of(AttributiArticolo.TIPO_PRODOTTO, "Booster box", AttributiArticolo.SET, "Awakening of the New Era"));
-
-		gioco(catalogo, "Super Mario 64", "Nintendo", "Nintendo 64", "CIB", true, "45");
-		gioco(catalogo, "The Legend of Zelda: Ocarina of Time", "Nintendo", "Nintendo 64", "Loose", true, "25");
-		gioco(catalogo, "Pokémon Rosso", "Nintendo", "Game Boy", "CIB", true, "70");
-		gioco(catalogo, "Final Fantasy VII", "Sony PlayStation", "PlayStation", "CIB", true, "30");
-		gioco(catalogo, "Sonic the Hedgehog 2", "Sega", "Mega Drive", "CIB", true, "15");
-		gioco(catalogo, "Zelda: Tears of the Kingdom", "Nintendo", "Nintendo Switch", "Sigillato", false, "42");
-
-		lego(catalogo, "LEGO Titanic", "10294", "Icons", 2021, "560");
-		lego(catalogo, "LEGO Razor Crest", "75292", "Star Wars", 2020, "110");
-		lego(catalogo, "LEGO Casa sull'albero", "21318", "Ideas", 2019, "190");
-
-		modello(catalogo, "Console Game Boy Color", Categoria.ALTRO, "Nintendo", "45", 2, Condizione.GOOD, Map.of());
-		// usato solo dallo scenario grading
-		carta(catalogo, "Charizard Base Set 4/102", "Pokémon", "Base Set", "4/102", "Holo Rare", "180", 0);
+		modello(catalogo, "Tazza termica Hogwarts", Categoria.TAZZA_TERMICA, "Harry Potter", "9", 5,
+				Condizione.NUOVO_CONFEZIONATO, Map.of(AttributiArticolo.MATERIALE, "Acciaio inox",
+						AttributiArticolo.CAPACITA, "450", AttributiArticolo.SOGGETTO, "Hogwarts"));
+		modello(catalogo, "Borraccia Stitch", Categoria.TAZZA_TERMICA, "Disney", "7.50", 6,
+				Condizione.NUOVO_CONFEZIONATO, Map.of(AttributiArticolo.MATERIALE, "Acciaio inox",
+						AttributiArticolo.CAPACITA, "500", AttributiArticolo.COLORE, "Azzurra"));
+		modello(catalogo, "Bicchieri Star Wars (set da 2)", Categoria.BICCHIERE, "Star Wars", "6", 4,
+				Condizione.NUOVO_CONFEZIONATO, Map.of(AttributiArticolo.MATERIALE, "Vetro", AttributiArticolo.CAPACITA,
+						"300", AttributiArticolo.SOGGETTO, "Personaggi"));
+		modello(catalogo, "Bicchiere Nutella vintage", Categoria.BICCHIERE, "Senza licenza", "1.50", 10,
+				Condizione.OTTIMO, Map.of(AttributiArticolo.MATERIALE, "Vetro", AttributiArticolo.CAPACITA, "200"));
+		modello(catalogo, "Set colazione Hello Kitty", Categoria.SET_REGALO, "Hello Kitty", "12", 3,
+				Condizione.NUOVO_CONFEZIONATO, Map.of(AttributiArticolo.NUMERO_PEZZI, "3", AttributiArticolo.CONTENUTO,
+						"Tazza, piattino e cucchiaino", AttributiArticolo.SOGGETTO, "Hello Kitty"));
+		modello(catalogo, "Confezione regalo Marvel tazza + calzini", Categoria.SET_REGALO, "Marvel", "10", 4,
+				Condizione.NUOVO_CONFEZIONATO,
+				Map.of(AttributiArticolo.NUMERO_PEZZI, "2", AttributiArticolo.CONTENUTO, "Tazza e calzini"));
+		modello(catalogo, "Sottobicchieri in sughero (6 pz)", Categoria.ACCESSORIO, "Senza licenza", "3", 6,
+				Condizione.NUOVO_CONFEZIONATO, Map.of(AttributiArticolo.TIPO_ACCESSORIO, "Sottobicchiere"));
+		modello(catalogo, "Infusore per tè a forma di sub", Categoria.ACCESSORIO, "Senza licenza", "2", 8,
+				Condizione.NUOVO, Map.of(AttributiArticolo.TIPO_ACCESSORIO, "Infusore", AttributiArticolo.MATERIALE,
+						"Acciaio inox"));
+		modello(catalogo, "Lotto tazze spaiate", Categoria.ALTRO, "Senza licenza", "4", 3, Condizione.BUONO, Map.of());
 		return catalogo;
 	}
 
-	private void carta(Map<String, Modello> catalogo, String nome, String brand, String set, String numero,
-			String rarita, String prezzo, int maxPezzi) {
-		modello(catalogo, nome, Categoria.CARTA_SINGOLA, brand, prezzo, maxPezzi, Condizione.NEAR_MINT,
-				Map.of(AttributiArticolo.SET, set, AttributiArticolo.NUMERO_CARTA, numero, AttributiArticolo.RARITA,
-						rarita));
-	}
-
-	private void gioco(Map<String, Modello> catalogo, String nome, String brand, String console,
-			String completezza, boolean retro, String prezzo) {
-		Map<String, String> attributi = new HashMap<>(Map.of(AttributiArticolo.CONSOLE, console,
-				AttributiArticolo.REGIONE, "PAL", AttributiArticolo.COMPLETEZZA, completezza));
-		if (retro) {
-			attributi.put(AttributiArticolo.RETRO, "true");
+	private void tazza(Map<String, Modello> catalogo, String nome, String brand, String materiale, int capacita,
+			String colore, String soggetto, String forma, String prezzo, int maxPezzi) {
+		Map<String, String> attributi = new LinkedHashMap<>();
+		attributi.put(AttributiArticolo.MATERIALE, materiale);
+		attributi.put(AttributiArticolo.CAPACITA, String.valueOf(capacita));
+		attributi.put(AttributiArticolo.COLORE, colore);
+		if (soggetto != null) {
+			attributi.put(AttributiArticolo.SOGGETTO, soggetto);
 		}
-		modello(catalogo, nome, Categoria.VIDEOGIOCO, brand, prezzo, 2,
-				completezza.equals("Sigillato") ? Condizione.SIGILLATO : Condizione.GOOD, attributi);
-	}
-
-	private void lego(Map<String, Modello> catalogo, String nome, String numeroSet, String tema, int anno,
-			String prezzo) {
-		modello(catalogo, nome, Categoria.LEGO, "LEGO", prezzo, 1, Condizione.SIGILLATO,
-				Map.of(AttributiArticolo.NUMERO_SET, numeroSet, AttributiArticolo.TEMA, tema, AttributiArticolo.ANNO,
-						String.valueOf(anno), AttributiArticolo.STATO_SCATOLA, "Perfetta"));
+		attributi.put(AttributiArticolo.FORMA, forma);
+		modello(catalogo, nome, Categoria.TAZZA, brand, prezzo, maxPezzi,
+				nome.contains("vintage") ? Condizione.OTTIMO : Condizione.NUOVO_CONFEZIONATO, attributi);
 	}
 
 	private void modello(Map<String, Modello> catalogo, String nome, Categoria categoria, String brand,
@@ -240,7 +225,6 @@ public class DatiDemo {
 		form.setCategoria(categoria);
 		form.setBrandId(brandRepository.findByNomeIgnoreCase(brand).orElseThrow().getId());
 		form.setCondizione(condizione);
-		form.setLingua(categoria == Categoria.SEALED_TCG && nome.contains("(JP)") ? "Giapponese" : "Italiano");
 		SchemaAttributi.Risultato validati = schemaAttributi.valida(categoria, attributi);
 		if (!validati.valido()) {
 			throw new IllegalStateException("Attributi demo non validi per " + nome + ": " + validati.errori());
@@ -299,16 +283,17 @@ public class DatiDemo {
 	private Vendita vendita(Modello modello, Long lottoId, LocalDate data, String nomePiattaforma,
 			BigDecimal prezzo, Random caso) {
 		Piattaforma piattaforma = piattaformaRepository.findByNomeIgnoreCase(nomePiattaforma).orElseThrow();
-		boolean carta = modello.categoria() == Categoria.CARTA_SINGOLA || modello.categoria() == Categoria.CARTA_GRADATA;
+		boolean piccolo = modello.categoria() == Categoria.ACCESSORIO;
 		VenditaForm form = new VenditaForm();
 		form.setDataVendita(data);
 		form.setPiattaformaId(piattaforma.getId());
 		switch (nomePiattaforma) {
-			case "eBay" -> spedizione(form, "5.90", carta ? "2.50" : "6.90");
-			case "Cardmarket" -> spedizione(form, carta ? "1.30" : "9.90", carta ? "1.15" : "8.50");
+			case "eBay" -> spedizione(form, "6.90", piccolo ? "3.50" : "6.50");
+			case "Etsy" -> spedizione(form, "5.90", piccolo ? "3.50" : "6.50");
 			default -> spedizione(form, "0", "0");
 		}
-		form.setCostoImballaggio(new BigDecimal(carta ? "0.40" : "1.50"));
+		// le tazze viaggiano con pluriball e scatola rinforzata
+		form.setCostoImballaggio(new BigDecimal(piccolo ? "0.40" : "1.20"));
 		VenditaForm.RigaForm riga = new VenditaForm.RigaForm();
 		riga.setArticoloId(modello.id());
 		riga.setQuantita(1);
@@ -326,65 +311,28 @@ public class DatiDemo {
 	private static String piattaforma(Categoria categoria, Random caso) {
 		double x = caso.nextDouble();
 		return switch (categoria) {
-			case CARTA_SINGOLA -> x < 0.6 ? "Cardmarket" : x < 0.85 ? "eBay" : "Vinted";
-			case CARTA_GRADATA -> x < 0.7 ? "eBay" : "Fiera";
-			case SEALED_TCG -> x < 0.5 ? "Cardmarket" : x < 0.8 ? "eBay" : "Fiera";
-			case VIDEOGIOCO -> x < 0.4 ? "eBay" : x < 0.7 ? "Vinted" : "Subito";
-			case LEGO -> x < 0.5 ? "eBay" : x < 0.8 ? "Subito" : "Privato";
-			case ALTRO -> x < 0.5 ? "Subito" : "eBay";
+			case TAZZA -> x < 0.5 ? "Vinted" : x < 0.75 ? "eBay" : x < 0.9 ? "Etsy" : "Subito";
+			case TAZZA_TERMICA, BICCHIERE -> x < 0.6 ? "Vinted" : x < 0.85 ? "eBay" : "Subito";
+			case SET_REGALO -> x < 0.4 ? "Vinted" : x < 0.7 ? "Etsy" : x < 0.9 ? "eBay" : "Fiera";
+			case ACCESSORIO -> x < 0.7 ? "Vinted" : "Etsy";
+			case ALTRO -> x < 0.5 ? "Subito" : "Vinted";
 		};
-	}
-
-	/** Una carta mandata a PSA e venduta gradata, più un grading ancora in corso. */
-	private int scenarioGrading(LocalDate oggi, Map<String, Modello> catalogo) {
-		Modello charizard = catalogo.get("Charizard Base Set 4/102");
-		Lotto lotto = acquistoSingolo(oggi.minusDays(230), charizard, "180.00", "Collezionista privato",
-				StatoOggetto.IN_STOCK);
-
-		InvioGradingForm invio = new InvioGradingForm();
-		invio.setEnte("PSA");
-		invio.setServizio("Value");
-		invio.setDataInvio(oggi.minusDays(220));
-		invio.setCostoPrevisto(new BigDecimal("25.00"));
-		Grading grading = gradingService.invia(lotto.id(), invio);
-
-		RientroGradingForm rientro = new RientroGradingForm();
-		rientro.setDataRientro(oggi.minusDays(150));
-		rientro.setNomeArticolo("Charizard Base Set 4/102 PSA 9");
-		rientro.setVoto(new BigDecimal("9"));
-		rientro.setNumeroCertificato("84512377");
-		rientro.setCosto(new BigDecimal("32.00"));
-		Articolo gradata = gradingService.rientro(grading.getId(), rientro);
-
-		Modello modelloGradata = new Modello(gradata.getId(), gradata.getNome(), Categoria.CARTA_GRADATA,
-				new BigDecimal("212"), 0);
-		vendita(modelloGradata, grading.getRigaAcquisto().getId(), oggi.minusDays(120), "eBay",
-				new BigDecimal("540.00"), new Random(7));
-
-		Lotto umbreon = acquistoSingolo(oggi.minusDays(60), catalogo.get("Umbreon VMAX 215/203"), "360.00",
-				"Collezionista privato", StatoOggetto.IN_STOCK);
-		InvioGradingForm inCorso = new InvioGradingForm();
-		inCorso.setEnte("CGC");
-		inCorso.setDataInvio(oggi.minusDays(25));
-		inCorso.setCostoPrevisto(new BigDecimal("28.00"));
-		gradingService.invia(umbreon.id(), inCorso);
-		return 1;
 	}
 
 	/** Una rettifica per merce danneggiata, un articolo fermo da mesi e merce ancora in arrivo. */
 	private void scenariMagazzino(LocalDate oggi, Map<String, Modello> catalogo) {
-		Lotto mew = acquistoSingolo(oggi.minusDays(170), catalogo.get("Mew ex 151/165"), "11.00", "Vinted",
+		Lotto thun = acquistoSingolo(oggi.minusDays(170), catalogo.get("Tazza Thun angioletti"), "11.00", "Vinted",
 				StatoOggetto.IN_VENDITA);
 		RettificaForm rettifica = new RettificaForm();
 		rettifica.setData(oggi.minusDays(160));
 		rettifica.setQuantita(1);
 		rettifica.setMotivo(MotivoRettifica.DANNEGGIATO);
-		rettifica.setNote("Angolo piegato durante la spedizione");
-		magazzinoService.registraRettifica(mew.id(), rettifica);
+		rettifica.setNote("Manico rotto durante la spedizione");
+		magazzinoService.registraRettifica(thun.id(), rettifica);
 
-		acquistoSingolo(oggi.minusDays(280), catalogo.get("LEGO Titanic"), "520.00", "Negozio locale",
+		acquistoSingolo(oggi.minusDays(280), catalogo.get("Tazza Darth Vader 3D"), "13.00", "Negozio locale",
 				StatoOggetto.IN_VENDITA);
-		acquistoSingolo(oggi.minusDays(3), catalogo.get("Booster box One Piece OP-05"), "92.00", "eBay",
+		acquistoSingolo(oggi.minusDays(3), catalogo.get("Set colazione Hello Kitty"), "11.50", "Ingrosso Casalinghi",
 				StatoOggetto.IN_ARRIVO);
 	}
 
@@ -407,12 +355,14 @@ public class DatiDemo {
 			LocalDate data = oggi.minusMonths(mese).withDayOfMonth(1);
 			spesaRepository.save(new Spesa(data, CategoriaSpesa.ABBONAMENTO, "Abbonamento negozio eBay",
 					new BigDecimal("19.50")));
+			spesaRepository.save(new Spesa(data.plusDays(15), CategoriaSpesa.PUBBLICITA, "Annunci in evidenza Vinted",
+					new BigDecimal("6.95")));
 			if (mese % 2 == 0) {
 				spesaRepository.save(new Spesa(data.plusDays(9), CategoriaSpesa.MATERIALI,
-						"Bustine, toploader e scatole", new BigDecimal("34.80")));
+						"Pluriball, scatole e carta da pacchi", new BigDecimal("28.40")));
 			}
 		}
-		spesaRepository.save(new Spesa(oggi.minusMonths(5), CategoriaSpesa.FIERA, "Tavolo alla fiera del fumetto",
+		spesaRepository.save(new Spesa(oggi.minusMonths(5), CategoriaSpesa.FIERA, "Banco al mercatino di Natale",
 				new BigDecimal("80.00")));
 	}
 

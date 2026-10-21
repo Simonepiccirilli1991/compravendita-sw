@@ -13,7 +13,7 @@ import it.compravendita.gestionale.common.Importi;
  * @param pezzi pezzi venduti nelle vendite completate
  * @param lordo prezzo della merce venduta
  * @param netto quanto resta dopo commissioni e costi di spedizione/imballaggio
- * @param costoVenduto costo d'acquisto della merce venduta (FIFO, costi accessori e grading inclusi)
+ * @param costoVenduto costo d'acquisto della merce venduta (FIFO, costi accessori inclusi)
  * @param costiResi costi rimasti a carico per i resi
  */
 public record Risultato(String chiave, String etichetta, long vendite, long pezzi, BigDecimal lordo, BigDecimal netto,

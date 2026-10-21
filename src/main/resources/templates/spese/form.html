@@ -2,7 +2,7 @@
 <html lang="it" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
 <head>
-    <title th:text="${spesa} ? 'Modifica spesa · Compravendita' : 'Nuova spesa · Compravendita'">Spesa</title>
+    <title th:text="${spesa} ? 'Modifica spesa · Gestionale Tazze' : 'Nuova spesa · Gestionale Tazze'">Spesa</title>
 </head>
 <body>
 <main>
@@ -45,7 +45,7 @@
                 <div class="col-12">
                     <label for="descrizione" class="form-label">Descrizione *</label>
                     <input type="text" th:field="*{descrizione}" class="form-control" maxlength="255"
-                           placeholder="Es. abbonamento negozio eBay, toploader e bustine, tavolo in fiera"
+                           placeholder="Es. abbonamento negozio eBay, pluriball e scatole, banco al mercatino"
                            th:classappend="${#fields.hasErrors('descrizione')} ? 'is-invalid'">
                     <div class="invalid-feedback" th:errors="*{descrizione}"></div>
                 </div>

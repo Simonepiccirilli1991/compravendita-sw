@@ -2,9 +2,9 @@ package it.compravendita.gestionale.spese;
 
 public enum CategoriaSpesa {
 
-	GRADING("Grading"),
 	MATERIALI("Materiali e imballaggi"),
 	SPEDIZIONE("Spedizione"),
+	PUBBLICITA("Pubblicità / promozioni"),
 	ABBONAMENTO("Abbonamento"),
 	FIERA("Fiera / evento"),
 	ALTRO("Altro");

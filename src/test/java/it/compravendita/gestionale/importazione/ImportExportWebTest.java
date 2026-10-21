@@ -108,32 +108,32 @@ class ImportExportWebTest {
 		ImportazioneService.Esito esito = importazioneService.importa(modello);
 		assertThat(esito.righe()).isEqualTo(4);
 		assertThat(esito.articoliCreati()).isEqualTo(4);
-		Articolo gradata = articoloRepository.findByNomeIgnoreCaseAndCategoria("Charizard Base Set PSA 9",
-				Categoria.CARTA_GRADATA).getFirst();
-		assertThat(gradata.getAttributo(AttributiArticolo.NUMERO_CERTIFICATO)).isEqualTo("12345678");
-		assertThat(gradata.getBrand().getNome()).isEqualTo("Pokémon");
+		Articolo termica = articoloRepository.findByNomeIgnoreCaseAndCategoria("Tazza termica Hogwarts",
+				Categoria.TAZZA_TERMICA).getFirst();
+		assertThat(termica.getAttributo(AttributiArticolo.CAPACITA)).isEqualTo(450);
+		assertThat(termica.getBrand().getNome()).isEqualTo("Harry Potter");
 	}
 
 	@Test
 	void anteprimaConErroriPoiImportConArticoloEsistenteEBrandNuovo() throws Exception {
-		Articolo esistente = articoloRepository.save(new Articolo("Zelda Ocarina of Time", Categoria.VIDEOGIOCO,
-				brandRepository.findByNomeIgnoreCase("Nintendo").orElseThrow()));
-		String errato = "nome;categoria;quantita;prezzo\nCarta;Figurina;1;2\nBox;Carta gradata;1;10\nX;Altro;0;abc\n";
+		Articolo esistente = articoloRepository.save(new Articolo("Tazza Topolino vintage", Categoria.TAZZA,
+				brandRepository.findByNomeIgnoreCase("Disney").orElseThrow()));
+		String errato = "nome;categoria;quantita;prezzo\nPiatto;Piatti;1;2\nCucchiaino;Accessori;1;10\nX;Altro;0;abc\n";
 
 		mvc.perform(multipart("/import/anteprima")
 				.file(new MockMultipartFile("file", "errato.csv", "text/csv", errato.getBytes(StandardCharsets.UTF_8)))
 				.with(csrf()))
 			.andExpect(status().isOk())
-			.andExpect(content().string(containsString("Categoria &quot;Figurina&quot; non riconosciuta")))
-			.andExpect(content().string(containsString("Ente di grading: campo obbligatorio")))
+			.andExpect(content().string(containsString("Categoria &quot;Piatti&quot; non riconosciuta")))
+			.andExpect(content().string(containsString("Tipo: campo obbligatorio")))
 			.andExpect(content().string(containsString("Quantità non valida")))
 			.andExpect(content().string(containsString("3 righe con errori")))
 			.andExpect(content().string(not(containsString("/import/conferma"))));
 
 		String valido = """
-				Nome;Categoria;Brand;Quantità;Prezzo unitario;Data acquisto;Fornitore;console;Colonna strana
-				Zelda Ocarina of Time;Videogioco;nintendo;2;30,00;10/01/2026;Mercatino;N64;x
-				Sonic Adventure;Videogioco;Sega Nuova;1;12;10/01/2026;mercatino;Dreamcast;
+				Nome;Categoria;Brand;Quantità;Prezzo unitario;Data acquisto;Fornitore;materiale;Colonna strana
+				Tazza Topolino vintage;Tazza;disney;2;30,00;10/01/2026;Mercatino;Ceramica;x
+				Tazza Snoopy;Tazza;Peanuts Nuovo;1;12;10/01/2026;mercatino;Porcellana;
 				""";
 		mvc.perform(multipart("/import/anteprima")
 				.file(new MockMultipartFile("file", "ok.csv", "text/csv", valido.getBytes(StandardCharsets.UTF_8)))
@@ -157,12 +157,12 @@ class ImportExportWebTest {
 			assertThat(a.getTotale()).isEqualByComparingTo("72");
 			assertThat(a.getRighe().getFirst().getArticolo().getId()).isEqualTo(esistente.getId());
 		});
-		assertThat(brandRepository.findByNomeIgnoreCase("sega nuova")).isPresent();
+		assertThat(brandRepository.findByNomeIgnoreCase("peanuts nuovo")).isPresent();
 	}
 
 	@Test
 	void exportCsvExcelERiepilogoAnnuale() throws Exception {
-		Articolo carta = articoloRepository.save(new Articolo("Lugia", Categoria.CARTA_SINGOLA, null));
+		Articolo carta = articoloRepository.save(new Articolo("Lugia", Categoria.TAZZA, null));
 		RigaAcquisto lotto = lotto(carta, LocalDate.of(2025, 6, 1), 4, "10");
 		lotto.getAcquisto().setFornitore("Fiera di Verona");
 		Piattaforma ebay = piattaformaRepository.findByNomeIgnoreCase("eBay").orElseThrow();
@@ -216,20 +216,20 @@ class ImportExportWebTest {
 
 	@Test
 	void ricercaGlobaleNegliAttributi() throws Exception {
-		Articolo psa = new Articolo("Blastoise", Categoria.CARTA_GRADATA, null);
-		psa.setAttributo(AttributiArticolo.ENTE_GRADING, "PSA");
-		psa.setAttributo(AttributiArticolo.NUMERO_CERTIFICATO, "98765432");
-		articoloRepository.save(psa);
-		Articolo lego = new Articolo("Castello", Categoria.LEGO, null);
-		lego.setAttributo(AttributiArticolo.NUMERO_SET, "10305");
-		articoloRepository.save(lego);
+		Articolo tazza = new Articolo("Blastoise", Categoria.TAZZA, null);
+		tazza.setAttributo(AttributiArticolo.MATERIALE, "Porcellana");
+		tazza.setAttributo(AttributiArticolo.SOGGETTO, "Squirtle e Wartortle");
+		articoloRepository.save(tazza);
+		Articolo termica = new Articolo("Castello", Categoria.TAZZA_TERMICA, null);
+		termica.setAttributo(AttributiArticolo.COLORE, "Verde smeraldo");
+		articoloRepository.save(termica);
 		em.flush();
 
-		mvc.perform(get("/cerca").param("q", "8765"))
+		mvc.perform(get("/cerca").param("q", "wartort"))
 			.andExpect(status().isOk())
 			.andExpect(content().string(containsString("Blastoise")))
 			.andExpect(content().string(not(containsString("Castello"))));
-		mvc.perform(get("/articoli").param("q", "10305").header("HX-Request", "true"))
+		mvc.perform(get("/articoli").param("q", "smeraldo").header("HX-Request", "true"))
 			.andExpect(content().string(containsString("Castello")));
 		mvc.perform(get("/cerca").param("q", "zzzzz"))
 			.andExpect(content().string(containsString("Nessun risultato")));

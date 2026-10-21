@@ -1,18 +1,16 @@
 package it.compravendita.gestionale.catalogo;
 
 /**
- * Condizione dell'oggetto, sulla scala usata dai principali marketplace di carte.
+ * Condizione dell'oggetto, sulla scala usata dai marketplace generalisti (Vinted, eBay, Subito).
  */
 public enum Condizione {
 
-	SIGILLATO("Sigillato"),
-	MINT("Mint"),
-	NEAR_MINT("Near Mint"),
-	EXCELLENT("Excellent"),
-	GOOD("Good"),
-	LIGHT_PLAYED("Light Played"),
-	PLAYED("Played"),
-	POOR("Poor");
+	NUOVO_CONFEZIONATO("Nuovo con confezione"),
+	NUOVO("Nuovo senza confezione"),
+	COME_NUOVO("Come nuovo"),
+	OTTIMO("Ottimo"),
+	BUONO("Buono"),
+	CON_DIFETTI("Con difetti");
 
 	private final String etichetta;
 

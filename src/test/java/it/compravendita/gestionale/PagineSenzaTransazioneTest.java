@@ -26,8 +26,6 @@ import it.compravendita.gestionale.catalogo.ArticoloRepository;
 import it.compravendita.gestionale.catalogo.BrandRepository;
 import it.compravendita.gestionale.common.AbstractEntity;
 import it.compravendita.gestionale.demo.DatiDemo;
-import it.compravendita.gestionale.magazzino.GradingRepository;
-import it.compravendita.gestionale.magazzino.StatoGrading;
 import it.compravendita.gestionale.piattaforme.PiattaformaRepository;
 import it.compravendita.gestionale.report.Dimensione;
 import it.compravendita.gestionale.spese.SpesaRepository;
@@ -72,9 +70,6 @@ class PagineSenzaTransazioneTest {
 	PiattaformaRepository piattaformaRepository;
 
 	@Autowired
-	GradingRepository gradingRepository;
-
-	@Autowired
 	SpesaRepository spesaRepository;
 
 	@BeforeAll
@@ -88,10 +83,10 @@ class PagineSenzaTransazioneTest {
 	void pagineGenerali() throws Exception {
 		List<String> pagine = new ArrayList<>(List.of("/dashboard", "/dashboard?tutto=true",
 				"/dashboard?giorniFermo=30", "/articoli", "/articoli/nuovo", "/brand", "/acquisti", "/acquisti/nuovo",
-				"/magazzino", "/magazzino/lotti", "/magazzino/rettifiche", "/magazzino/grading", "/vendite",
+				"/magazzino", "/magazzino/lotti", "/magazzino/rettifiche", "/vendite",
 				"/vendite/nuova", "/piattaforme", "/piattaforme/nuova", "/spese", "/spese/nuova", "/report",
-				"/report/annuale", "/import", "/import/modello.csv", "/cerca?q=charizard", "/cerca?q=84512377",
-				"/acquisti/elenco-articoli", "/vendite/elenco-articoli", "/articoli/campi?categoria=LEGO",
+				"/report/annuale", "/import", "/import/modello.csv", "/cerca?q=stitch", "/cerca?q=ceramica",
+				"/acquisti/elenco-articoli", "/vendite/elenco-articoli", "/articoli/campi?categoria=SET_REGALO",
 				"/magazzino?ordine=VALORE", "/magazzino/lotti?stato=IN_VENDITA", "/vendite?stato=RESA"));
 		for (Dimensione dimensione : Dimensione.values()) {
 			pagine.add("/report?per=" + dimensione);
@@ -122,12 +117,9 @@ class PagineSenzaTransazioneTest {
 		rigaAcquistoRepository.findAll().forEach(lotto -> {
 			if (lotto.getQuantitaResidua() > 0) {
 				pagine.addAll(List.of("/magazzino/lotti/" + lotto.getId() + "/rettifica",
-						"/magazzino/lotti/" + lotto.getId() + "/grading", "/vendite/nuova?lottoId=" + lotto.getId()));
+						"/vendite/nuova?lottoId=" + lotto.getId()));
 			}
 		});
-		gradingRepository.findAll().stream()
-			.filter(g -> g.getStato() == StatoGrading.INVIATO)
-			.forEach(g -> pagine.add("/magazzino/grading/" + g.getId() + "/rientro"));
 		verifica(pagine);
 	}
 

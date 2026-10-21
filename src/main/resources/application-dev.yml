@@ -1,9 +1,9 @@
-# Profilo di sviluppo: avvia/riusa automaticamente il PostgreSQL di docker-compose.yml
+# Profilo di sviluppo: avvia/riusa automaticamente il PostgreSQL di docker-compose.dev.yml (solo database)
 spring:
   docker:
     compose:
       enabled: true
-      file: docker-compose.yml
+      file: docker-compose.dev.yml
       lifecycle-management: start-only
   thymeleaf:
     cache: false

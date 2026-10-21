@@ -87,10 +87,9 @@ public class ArticoloService {
 	@Transactional
 	public void elimina(Long id) {
 		Articolo articolo = trova(id);
-		if (rigaAcquistoRepository.existsByArticoloId(id) || spesaRepository.existsByArticoloId(id)
-				|| articoloRepository.usatoInGrading(id)) {
+		if (rigaAcquistoRepository.existsByArticoloId(id) || spesaRepository.existsByArticoloId(id)) {
 			throw new OperazioneNonConsentitaException(
-					"L'articolo \"" + articolo.getNome() + "\" ha acquisti, spese o grading collegati e non può essere eliminato");
+					"L'articolo \"" + articolo.getNome() + "\" ha acquisti o spese collegati e non può essere eliminato");
 		}
 		articoloRepository.delete(articolo);
 		fileStorage.elimina(articolo.getFotoPath());

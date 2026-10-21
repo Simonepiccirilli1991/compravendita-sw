@@ -112,7 +112,7 @@ public class Acquisto extends AuditedEntity {
 
 	/**
 	 * Isola un pezzo disponibile di un lotto in una riga separata dello stesso acquisto,
-	 * con lo stesso costo unitario (es. una carta da mandare a gradare). Se il lotto ha un solo
+	 * con lo stesso costo unitario (es. un pezzo da vendere separatamente). Se il lotto ha un solo
 	 * pezzo restituisce il lotto stesso.
 	 */
 	public RigaAcquisto scorporaPezzo(RigaAcquisto lotto) {

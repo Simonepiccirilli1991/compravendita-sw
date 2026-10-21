@@ -22,9 +22,7 @@ import it.compravendita.gestionale.TestcontainersConfiguration;
 import it.compravendita.gestionale.acquisti.AcquistoRepository;
 import it.compravendita.gestionale.catalogo.ArticoloRepository;
 import it.compravendita.gestionale.catalogo.Categoria;
-import it.compravendita.gestionale.magazzino.GradingRepository;
 import it.compravendita.gestionale.magazzino.RettificaMagazzinoRepository;
-import it.compravendita.gestionale.magazzino.StatoGrading;
 import it.compravendita.gestionale.report.CalcoloEconomicoService;
 import it.compravendita.gestionale.report.Periodo;
 import it.compravendita.gestionale.report.Risultato;
@@ -54,9 +52,6 @@ class DatiDemoTest {
 	ArticoloRepository articoloRepository;
 
 	@Autowired
-	GradingRepository gradingRepository;
-
-	@Autowired
 	RettificaMagazzinoRepository rettificaRepository;
 
 	@Autowired
@@ -84,9 +79,9 @@ class DatiDemoTest {
 		assertThat(venditaRepository.findAll()).extracting(Vendita::getStato)
 			.contains(StatoVendita.COMPLETATA, StatoVendita.RESA, StatoVendita.ANNULLATA);
 		assertThat(venditaRepository.findAll()).allMatch(v -> !v.getDataVendita().isAfter(oggi));
-		assertThat(gradingRepository.findAll()).extracting(g -> g.getStato())
-			.contains(StatoGrading.RIENTRATO, StatoGrading.INVIATO);
-		assertThat(articoloRepository.findAll()).anyMatch(a -> a.getCategoria() == Categoria.CARTA_GRADATA);
+		assertThat(articoloRepository.findAll()).extracting(a -> a.getCategoria())
+			.contains(Categoria.TAZZA, Categoria.TAZZA_TERMICA, Categoria.BICCHIERE, Categoria.SET_REGALO,
+					Categoria.ACCESSORIO);
 		assertThat(rettificaRepository.count()).isPositive();
 
 		// nel complesso l'attività è in utile, con qualche vendita in perdita
@@ -96,13 +91,14 @@ class DatiDemoTest {
 
 		mvc.perform(get("/dashboard"))
 			.andExpect(status().isOk())
-			.andExpect(content().string(containsString("Charizard")));
+			.andExpect(content().string(containsString("Tazza")));
 		mvc.perform(get("/report").param("per", "PIATTAFORMA"))
 			.andExpect(status().isOk())
-			.andExpect(content().string(containsString("Cardmarket")));
+			.andExpect(content().string(containsString("Vinted")))
+			.andExpect(content().string(containsString("Etsy")));
 		mvc.perform(get("/magazzino"))
 			.andExpect(status().isOk())
-			.andExpect(content().string(containsString("LEGO Titanic")));
+			.andExpect(content().string(containsString("Tazza Darth Vader 3D")));
 	}
 
 }

@@ -2,7 +2,7 @@
 <html lang="it" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
 <head>
-    <title th:text="${articolo} ? 'Modifica articolo · Compravendita' : 'Nuovo articolo · Compravendita'">Articolo</title>
+    <title th:text="${articolo} ? 'Modifica articolo · Gestionale Tazze' : 'Nuovo articolo · Gestionale Tazze'">Articolo</title>
 </head>
 <body>
 <main>
@@ -50,22 +50,6 @@
                         <option value="">Non specificata</option>
                         <option th:each="c : ${condizioni}" th:value="${c}" th:text="${c.etichetta}"></option>
                     </select>
-                </div>
-                <div class="col-12 col-sm-6 col-lg-4">
-                    <label for="lingua" class="form-label">Lingua</label>
-                    <input type="text" th:field="*{lingua}" class="form-control" list="lingue" maxlength="30"
-                           th:classappend="${#fields.hasErrors('lingua')} ? 'is-invalid'">
-                    <datalist id="lingue">
-                        <option value="ITA"></option>
-                        <option value="ENG"></option>
-                        <option value="JAP"></option>
-                        <option value="KOR"></option>
-                        <option value="CHN"></option>
-                        <option value="FRA"></option>
-                        <option value="DEU"></option>
-                        <option value="ESP"></option>
-                    </datalist>
-                    <div class="invalid-feedback" th:errors="*{lingua}"></div>
                 </div>
             </div>
 

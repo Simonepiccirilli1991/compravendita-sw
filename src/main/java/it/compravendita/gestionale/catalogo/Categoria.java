@@ -2,11 +2,11 @@ package it.compravendita.gestionale.catalogo;
 
 public enum Categoria {
 
-	CARTA_SINGOLA("Carta singola"),
-	CARTA_GRADATA("Carta gradata"),
-	SEALED_TCG("Sealed TCG"),
-	VIDEOGIOCO("Videogioco"),
-	LEGO("LEGO"),
+	TAZZA("Tazza"),
+	TAZZA_TERMICA("Tazza termica / Borraccia"),
+	BICCHIERE("Bicchiere"),
+	SET_REGALO("Set / Confezione regalo"),
+	ACCESSORIO("Accessori"),
 	ALTRO("Altro");
 
 	private final String etichetta;

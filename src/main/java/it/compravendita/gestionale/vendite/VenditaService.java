@@ -228,7 +228,6 @@ public class VenditaService {
 			if (dati.getLottoId() != null) {
 				RigaAcquisto lotto = rigaAcquistoRepository.findById(dati.getLottoId())
 					.filter(l -> l.getArticolo().getId().equals(articolo.getId()))
-					.filter(l -> l.getStato() != StatoOggetto.IN_GRADING)
 					.filter(l -> l.getQuantitaResidua() >= dati.getQuantita())
 					.orElseThrow(() -> new OperazioneNonConsentitaException(
 							"Il lotto scelto per \"" + articolo.getNome() + "\" non ha abbastanza pezzi"));

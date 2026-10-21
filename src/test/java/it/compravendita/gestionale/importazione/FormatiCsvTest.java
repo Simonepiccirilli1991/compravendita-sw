@@ -57,12 +57,12 @@ class FormatiCsvTest {
 		assertThat(ImportazioneService.data("32/13/2026")).isNull();
 		assertThat(ImportazioneService.normalizza(" Quantità ")).isEqualTo("quantita");
 		assertThat(ImportazioneService.normalizza("Prezzo unitario")).isEqualTo("prezzo_unitario");
-		assertThat(ImportazioneService.enumDa(Categoria.values(), "carta gradata", Categoria::getEtichetta))
-			.isEqualTo(Categoria.CARTA_GRADATA);
-		assertThat(ImportazioneService.enumDa(Categoria.values(), "SEALED_TCG", Categoria::getEtichetta))
-			.isEqualTo(Categoria.SEALED_TCG);
-		assertThat(ImportazioneService.enumDa(Condizione.values(), "near mint", Condizione::getEtichetta))
-			.isEqualTo(Condizione.NEAR_MINT);
+		assertThat(ImportazioneService.enumDa(Categoria.values(), "tazza termica / borraccia", Categoria::getEtichetta))
+			.isEqualTo(Categoria.TAZZA_TERMICA);
+		assertThat(ImportazioneService.enumDa(Categoria.values(), "SET_REGALO", Categoria::getEtichetta))
+			.isEqualTo(Categoria.SET_REGALO);
+		assertThat(ImportazioneService.enumDa(Condizione.values(), "come nuovo", Condizione::getEtichetta))
+			.isEqualTo(Condizione.COME_NUOVO);
 		assertThat(ImportazioneService.enumDa(Categoria.values(), "boh", Categoria::getEtichetta)).isNull();
 	}
 

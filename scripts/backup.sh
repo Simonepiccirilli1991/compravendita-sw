@@ -5,7 +5,7 @@ set -eu
 
 RADICE=$(cd "$(dirname "$0")/.." && pwd)
 DESTINAZIONE=${1:-"$RADICE/backups"}
-CONTAINER=compravendita-db
+CONTAINER=compravendita-sw-tazze-db
 DATABASE=${DB_NAME:-compravendita}
 UTENTE=${DB_USER:-compravendita}
 

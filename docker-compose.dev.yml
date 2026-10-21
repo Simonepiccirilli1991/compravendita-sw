@@ -1,0 +1,12 @@
+# Solo il database, usato in sviluppo da `mvnw spring-boot:run` (profilo dev): l'applicazione gira in locale.
+# Stesso progetto, container e volume di docker-compose.yml, quindi i dati sono gli stessi.
+name: compravendita-sw-tazze
+
+services:
+  postgres:
+    extends:
+      file: docker-compose.yml
+      service: postgres
+
+volumes:
+  pgdata:

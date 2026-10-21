@@ -2,7 +2,7 @@
 <html lang="it" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
 <head>
-    <title>Importa inventario · Compravendita</title>
+    <title>Importa inventario · Gestionale Tazze</title>
 </head>
 <body>
 <main>
@@ -27,14 +27,14 @@
                 <div class="card-body small">
                     <p class="mb-2">Ogni riga è un lotto di merce già in tuo possesso.</p>
                     <ul class="mb-2">
-                        <li><strong>Obbligatorie:</strong> <code>nome</code>, <code>categoria</code> (es. Carta singola, Carta gradata,
-                            Sealed TCG, Videogioco, LEGO, Altro), <code>quantita</code>, <code>prezzo_unitario</code> (costo per pezzo).</li>
-                        <li><strong>Facoltative:</strong> <code>brand</code> (creato se non esiste), <code>lingua</code>, <code>condizione</code>,
+                        <li><strong>Obbligatorie:</strong> <code>nome</code>, <code>categoria</code> (Tazza, Tazza termica / Borraccia,
+                            Bicchiere, Set / Confezione regalo, Accessori, Altro), <code>quantita</code>, <code>prezzo_unitario</code> (costo per pezzo).</li>
+                        <li><strong>Facoltative:</strong> <code>brand</code> (creato se non esiste), <code>condizione</code>,
                             <code>data_acquisto</code> (gg/mm/aaaa, oggi se vuota), <code>fornitore</code>, <code>stato</code>
                             (in magazzino, in vendita, in arrivo), <code>note</code>.</li>
-                        <li><strong>Dettagli di categoria:</strong> una colonna per attributo con il suo nome, es. <code>set</code>,
-                            <code>numeroCarta</code>, <code>enteGrading</code>, <code>voto</code>, <code>numeroCertificato</code>,
-                            <code>console</code>, <code>numeroSet</code>. Quelli obbligatori per la categoria vanno compilati.</li>
+                        <li><strong>Dettagli di categoria:</strong> una colonna per attributo con il suo nome, es. <code>materiale</code>,
+                            <code>capacita</code>, <code>colore</code>, <code>soggetto</code>, <code>forma</code>,
+                            <code>numeroPezzi</code>, <code>tipoAccessorio</code>. Quelli obbligatori per la categoria vanno compilati.</li>
                     </ul>
                     <p class="mb-0 text-secondary">Se un articolo con lo stesso nome, categoria e brand esiste già, i pezzi vengono
                         aggiunti a quello. Le righe con la stessa data e lo stesso fornitore diventano un unico acquisto.

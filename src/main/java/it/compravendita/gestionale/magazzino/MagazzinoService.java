@@ -71,7 +71,6 @@ public class MagazzinoService {
 		TypedQuery<GiacenzaArticolo> query = em.createQuery("select new " + GiacenzaArticolo.class.getName()
 				+ "(a.id, a.nome, a.categoria, b.nome, sum(r.quantitaResidua),"
 				+ " sum(case when r.stato = " + STATO + "IN_ARRIVO then r.quantitaResidua else 0 end),"
-				+ " sum(case when r.stato = " + STATO + "IN_GRADING then r.quantitaResidua else 0 end),"
 				+ " sum(case when r.stato = " + STATO + "IN_VENDITA then r.quantitaResidua else 0 end),"
 				+ " sum(r.costoUnitarioEffettivo * r.quantitaResidua), min(ac.dataAcquisto))"
 				+ from + where + " group by a.id, a.nome, a.categoria, b.nome order by " + ordine,
@@ -114,12 +113,11 @@ public class MagazzinoService {
 		Object[] riga = em.createQuery("select coalesce(sum(r.quantitaResidua), 0),"
 				+ " coalesce(sum(r.costoUnitarioEffettivo * r.quantitaResidua), 0), count(distinct r.articolo.id),"
 				+ " coalesce(sum(case when r.stato = " + STATO + "IN_ARRIVO then r.quantitaResidua else 0 end), 0),"
-				+ " coalesce(sum(case when r.stato = " + STATO + "IN_GRADING then r.quantitaResidua else 0 end), 0),"
 				+ " coalesce(sum(case when r.stato = " + STATO + "IN_VENDITA then r.quantitaResidua else 0 end), 0)"
 				+ " from RigaAcquisto r where r.quantitaResidua > 0", Object[].class)
 			.getSingleResult();
 		return new RiepilogoMagazzino(numero(riga[0]), (BigDecimal) riga[1], numero(riga[2]), numero(riga[3]),
-				numero(riga[4]), numero(riga[5]));
+				numero(riga[4]));
 	}
 
 	public Page<RigaAcquisto> lotti(FiltroMagazzino filtro, Pageable pageable) {
@@ -158,9 +156,6 @@ public class MagazzinoService {
 	@Transactional
 	public RettificaMagazzino registraRettifica(Long lottoId, RettificaForm form) {
 		RigaAcquisto lotto = lotto(lottoId);
-		if (lotto.getStato() == StatoOggetto.IN_GRADING) {
-			throw new OperazioneNonConsentitaException("La carta è in grading: annulla o registra prima il rientro");
-		}
 		if (form.getQuantita() > lotto.getQuantitaResidua()) {
 			throw new OperazioneNonConsentitaException(
 					"Puoi rettificare al massimo " + lotto.getQuantitaResidua() + " pezzi");
@@ -189,7 +184,7 @@ public class MagazzinoService {
 		return valore == null ? 0 : ((Number) valore).longValue();
 	}
 
-	public record RiepilogoMagazzino(long pezzi, BigDecimal valore, long articoli, long inArrivo, long inGrading,
+	public record RiepilogoMagazzino(long pezzi, BigDecimal valore, long articoli, long inArrivo,
 			long inVendita) {
 	}
 

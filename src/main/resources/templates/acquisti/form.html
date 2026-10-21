@@ -2,7 +2,7 @@
 <html lang="it" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
 <head>
-    <title th:text="${acquisto} ? 'Modifica acquisto · Compravendita' : 'Nuovo acquisto · Compravendita'">Acquisto</title>
+    <title th:text="${acquisto} ? 'Modifica acquisto · Gestionale Tazze' : 'Nuovo acquisto · Gestionale Tazze'">Acquisto</title>
 </head>
 <body>
 <main>
@@ -43,7 +43,10 @@
                                 <datalist id="canali">
                                     <option value="eBay"></option>
                                     <option value="Vinted"></option>
-                                    <option value="Cardmarket"></option>
+                                    <option value="Etsy"></option>
+                                    <option value="Temu"></option>
+                                    <option value="AliExpress"></option>
+                                    <option value="Ingrosso"></option>
                                     <option value="Subito"></option>
                                     <option value="Wallapop"></option>
                                     <option value="Fiera"></option>

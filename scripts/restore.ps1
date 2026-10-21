@@ -18,7 +18,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $radice = Resolve-Path (Join-Path $PSScriptRoot "..")
-$container = "compravendita-db"
+$container = "compravendita-sw-tazze-db"
 $database = if ($env:DB_NAME) { $env:DB_NAME } else { "compravendita" }
 $utente = if ($env:DB_USER) { $env:DB_USER } else { "compravendita" }
 

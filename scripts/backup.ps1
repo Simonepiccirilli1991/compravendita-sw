@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     Crea backups\AAAA-MM-GG_HHMMSS\ con:
-      - database.dump   dump del database dal container Docker "compravendita-db"
+      - database.dump   dump del database dal container Docker "compravendita-sw-tazze-db"
       - uploads.zip     copia di data\uploads (foto articoli e ricevute)
     Il container deve essere avviato (docker compose up -d).
 
@@ -25,7 +25,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $radice = Resolve-Path (Join-Path $PSScriptRoot "..")
-$container = "compravendita-db"
+$container = "compravendita-sw-tazze-db"
 $database = if ($env:DB_NAME) { $env:DB_NAME } else { "compravendita" }
 $utente = if ($env:DB_USER) { $env:DB_USER } else { "compravendita" }
 

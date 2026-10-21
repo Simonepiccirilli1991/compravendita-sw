@@ -1,14 +1,22 @@
+# Gestionale Tazze: database + applicazione.
+#   docker compose up -d --build                  avvia tutto (app su http://localhost:8080)
+#   docker compose --profile tools up -d          aggiunge pgAdmin su http://localhost:5050
+#   docker compose down                           ferma tutto (i dati restano nel volume)
+# Progetto separato dalla versione carte: container, rete e volume propri.
+name: compravendita-sw-tazze
+
 services:
   postgres:
     image: postgres:16
-    container_name: compravendita-db
+    container_name: compravendita-sw-tazze-db
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${DB_NAME:-compravendita}
       POSTGRES_USER: ${DB_USER:-compravendita}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-compravendita}
+      TZ: Europe/Rome
     ports:
-      - "5432:5432"
+      - "${DB_PUBLISHED_PORT:-5432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -17,13 +25,11 @@ services:
       timeout: 5s
       retries: 10
 
-  # Applicazione in container (immagine dal Dockerfile): `docker compose --profile app up -d --build`.
-  # Non serve per lo sviluppo: con `mvnw spring-boot:run` parte solo il database.
+  # Applicazione (immagine costruita dal Dockerfile)
   app:
     build: .
-    image: compravendita-gestionale
-    container_name: compravendita-app
-    profiles: ["app"]
+    image: compravendita-sw-tazze
+    container_name: compravendita-sw-tazze-app
     restart: unless-stopped
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
@@ -37,22 +43,22 @@ services:
     ports:
       - "${APP_PORT:-8080}:8080"
     volumes:
-      # stessa cartella usata in sviluppo e dagli script di backup
+      # foto degli articoli: stessa cartella usata in sviluppo e dagli script di backup
       - ./data/uploads:/data/uploads
     depends_on:
       postgres:
         condition: service_healthy
 
-  # Interfaccia web per ispezionare il DB: avvio con `docker compose --profile tools up -d`
+  # Interfaccia web per ispezionare il DB (facoltativa)
   pgadmin:
     image: dpage/pgadmin4:9
-    container_name: compravendita-pgadmin
+    container_name: compravendita-sw-tazze-pgadmin
     profiles: ["tools"]
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@local.dev
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
-      - "5050:80"
+      - "${PGADMIN_PORT:-5050}:80"
     depends_on:
       - postgres
 

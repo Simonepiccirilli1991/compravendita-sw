@@ -18,8 +18,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 /**
- * Voce di catalogo. I dati specifici della categoria (set, numero carta, ente di grading,
- * console, numero set LEGO, ...) sono in {@link #getAttributi()}, salvati come JSONB.
+ * Voce di catalogo. I dati specifici della categoria (materiale, capacità, soggetto,
+ * colore, forma, ...) sono in {@link #getAttributi()}, salvati come JSONB.
  * Le chiavi standard sono in {@link AttributiArticolo}.
  */
 @Entity

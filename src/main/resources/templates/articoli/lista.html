@@ -2,7 +2,7 @@
 <html lang="it" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
 <head>
-    <title>Catalogo · Compravendita</title>
+    <title>Catalogo · Gestionale Tazze</title>
 </head>
 <body>
 <main>
@@ -16,7 +16,7 @@
           hx-push-url="true" hx-trigger="input changed delay:300ms from:input[name='q'], change">
         <div class="row g-2">
             <div class="col-12 col-md-4">
-                <input type="search" name="q" class="form-control" placeholder="Nome, n° certificato, n° set…"
+                <input type="search" name="q" class="form-control" placeholder="Nome, soggetto, colore, materiale…"
                        th:value="${filtro.q}" aria-label="Cerca">
             </div>
             <div class="col-6 col-md-3">

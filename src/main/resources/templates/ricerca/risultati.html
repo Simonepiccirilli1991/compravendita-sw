@@ -2,7 +2,7 @@
 <html lang="it" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{fragments/layout :: layout(~{::title}, ~{::main})}">
 <head>
-    <title>Ricerca · Compravendita</title>
+    <title>Ricerca · Gestionale Tazze</title>
 </head>
 <body>
 <main>
@@ -10,7 +10,7 @@
     <form th:action="@{/cerca}" method="get" class="mb-3" role="search">
         <div class="input-group">
             <input type="search" name="q" class="form-control form-control-lg" th:value="${q}" autofocus
-                   placeholder="Nome articolo, n° certificato, n° set, fornitore, acquirente, n° ordine…" aria-label="Cerca">
+                   placeholder="Nome articolo, soggetto, colore, fornitore, acquirente, n° vendita…" aria-label="Cerca">
             <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
         </div>
     </form>

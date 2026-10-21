@@ -25,7 +25,7 @@ import jakarta.persistence.Query;
  *
  * <ul>
  * <li>Netto = lordo + spedizione incassata − commissioni − spedizione, imballaggio e altri costi</li>
- * <li>Profitto = netto − costo del venduto (FIFO, costi accessori e grading inclusi) − costi dei resi</li>
+ * <li>Profitto = netto − costo del venduto (FIFO, costi accessori inclusi) − costi dei resi</li>
  * <li>ROI % = profitto / costo del venduto × 100</li>
  * <li>Margine % = profitto / lordo × 100</li>
  * </ul>
@@ -204,11 +204,7 @@ public class CalcoloEconomicoService {
 				       coalesce(sum(v.costo_spedizione + v.costo_imballaggio + v.altri_costi), 0)
 				from vendita v where v.stato = 'COMPLETATA' and v.data_vendita between :da and :a
 				""", periodo).getSingleResult();
-		BigDecimal grading = somma("""
-				select coalesce(sum(g.costo), 0) from grading g
-				where g.stato = 'RIENTRATO' and g.data_rientro between :da and :a
-				""", periodo);
-		return new ContoAnnuale(anno, riepilogo.acquistato(), grading, riepilogo.vendite(),
+		return new ContoAnnuale(anno, riepilogo.acquistato(), riepilogo.vendite(),
 				Importi.importo((BigDecimal) vendite[0]), Importi.importo((BigDecimal) vendite[1]),
 				Importi.importo((BigDecimal) vendite[2]), riepilogo.perditeRettifiche(), riepilogo.speseGenerali(),
 				rimanenze(periodo.fine()));
@@ -217,7 +213,7 @@ public class CalcoloEconomicoService {
 	/**
 	 * Valore al costo dei pezzi in giacenza a fine giornata della data indicata: pezzi acquistati
 	 * entro quella data meno quelli venduti (contando come vendute anche le vendite annullate o
-	 * rese dopo quella data) e quelli rettificati. Il costo è quello attuale del lotto, grading
+	 * rese dopo quella data) e quelli rettificati. Il costo è quello attuale del lotto, spese collegate
 	 * compreso.
 	 */
 	public BigDecimal rimanenze(LocalDate data) {

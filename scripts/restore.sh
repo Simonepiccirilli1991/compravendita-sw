@@ -9,7 +9,7 @@ if [ $# -ne 1 ]; then
 fi
 CARTELLA=$1
 RADICE=$(cd "$(dirname "$0")/.." && pwd)
-CONTAINER=compravendita-db
+CONTAINER=compravendita-sw-tazze-db
 DATABASE=${DB_NAME:-compravendita}
 UTENTE=${DB_USER:-compravendita}
 

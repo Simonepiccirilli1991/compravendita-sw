@@ -2,7 +2,7 @@
 <html lang="it" xmlns:th="http://www.thymeleaf.org">
 <body>
 
-<!--/* Riepilogo compatto di un lotto, usato nei form di rettifica e grading */-->
+<!--/* Riepilogo compatto di un lotto, usato nel form di rettifica */-->
 <div th:fragment="riepilogoLotto(lotto)" class="card shadow-sm mb-3">
     <div class="card-body d-flex flex-wrap gap-4 align-items-center">
         <div>
@@ -68,23 +68,6 @@
         <div class="card-body text-secondary small" th:if="${#lists.isEmpty(lotti)}">
             Nessun acquisto registrato per questo articolo.
         </div>
-    </div>
-
-    <div class="card shadow-sm mt-3" th:unless="${#lists.isEmpty(gradings)}">
-        <div class="card-header fw-semibold">Grading</div>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item d-flex flex-wrap justify-content-between gap-2" th:each="g : ${gradings}">
-                <span>
-                    <span class="badge" th:classappend="${g.stato.classeBadge}" th:text="${g.stato.etichetta}">Stato</span>
-                    <span th:text="|${g.ente} · inviata il ${@formati.data(g.dataInvio)}|">PSA</span>
-                    <th:block th:if="${g.stato.name() == 'RIENTRATO'}">
-                        → <a th:href="@{/articoli/{id}(id=${g.rigaAcquisto.articolo.id})}"
-                             th:text="|voto ${@formati.numero(g.voto)} (${g.rigaAcquisto.articolo.nome})|">voto</a>
-                    </th:block>
-                </span>
-                <span class="text-secondary small" th:text="|Costo ${@formati.euro(g.costo)}|">Costo</span>
-            </li>
-        </ul>
     </div>
 
     <div class="card shadow-sm mt-3" th:unless="${#lists.isEmpty(rettifiche)}">

@@ -27,14 +27,10 @@ public class MagazzinoController {
 
 	private final MagazzinoService magazzinoService;
 
-	private final GradingService gradingService;
-
 	private final BrandService brandService;
 
-	public MagazzinoController(MagazzinoService magazzinoService, GradingService gradingService,
-			BrandService brandService) {
+	public MagazzinoController(MagazzinoService magazzinoService, BrandService brandService) {
 		this.magazzinoService = magazzinoService;
-		this.gradingService = gradingService;
 		this.brandService = brandService;
 	}
 
@@ -125,85 +121,13 @@ public class MagazzinoController {
 		return "redirect:/magazzino/rettifiche";
 	}
 
-	/** Frammento HTMX per la scheda articolo: lotti, rettifiche e grading dell'articolo. */
+	/** Frammento HTMX per la scheda articolo: lotti e rettifiche dell'articolo. */
 	@GetMapping("/articoli/{articoloId}")
 	String movimentiArticolo(@PathVariable Long articoloId, Model model) {
 		model.addAttribute("articoloId", articoloId);
 		model.addAttribute("lotti", magazzinoService.lottiArticolo(articoloId));
 		model.addAttribute("rettifiche", magazzinoService.rettificheArticolo(articoloId));
-		model.addAttribute("gradings", gradingService.perArticolo(articoloId));
 		return "magazzino/articolo :: movimenti";
-	}
-
-	// ------------------------------------------------------------------ grading
-
-	@GetMapping("/grading")
-	String grading(@RequestParam(required = false) StatoGrading stato, Model model) {
-		model.addAttribute("elenco", gradingService.elenco(stato));
-		model.addAttribute("statoFiltro", stato);
-		model.addAttribute("statiGrading", StatoGrading.values());
-		model.addAttribute("sezione", "grading");
-		return "magazzino/grading";
-	}
-
-	@GetMapping("/lotti/{id}/grading")
-	String nuovoGrading(@PathVariable Long id, Model model) {
-		return mostraInvio(id, new InvioGradingForm(), model);
-	}
-
-	@PostMapping("/lotti/{id}/grading")
-	String inviaGrading(@PathVariable Long id, @Valid @ModelAttribute("form") InvioGradingForm form,
-			BindingResult binding, Model model, RedirectAttributes redirect) {
-		if (binding.hasErrors()) {
-			return mostraInvio(id, form, model);
-		}
-		try {
-			gradingService.invia(id, form);
-			redirect.addFlashAttribute("messaggio", "Carta inviata a " + form.getEnte());
-			return "redirect:/magazzino/grading";
-		}
-		catch (OperazioneNonConsentitaException ex) {
-			model.addAttribute("errore", ex.getMessage());
-			return mostraInvio(id, form, model);
-		}
-	}
-
-	@GetMapping("/grading/{id}/rientro")
-	String rientro(@PathVariable Long id, Model model) {
-		Grading grading = gradingService.trova(id);
-		RientroGradingForm form = new RientroGradingForm();
-		form.setNomeArticolo(grading.getArticoloOriginale().getNome());
-		form.setCosto(grading.getCosto());
-		return mostraRientro(grading, form, model);
-	}
-
-	@PostMapping("/grading/{id}/rientro")
-	String registraRientro(@PathVariable Long id, @Valid @ModelAttribute("form") RientroGradingForm form,
-			BindingResult binding, Model model, RedirectAttributes redirect) {
-		if (binding.hasErrors()) {
-			return mostraRientro(gradingService.trova(id), form, model);
-		}
-		try {
-			Long articoloId = gradingService.rientro(id, form).getId();
-			redirect.addFlashAttribute("messaggio", "Rientro registrato: creato l'articolo gradato");
-			return "redirect:/articoli/" + articoloId;
-		}
-		catch (OperazioneNonConsentitaException ex) {
-			model.addAttribute("errore", ex.getMessage());
-			return mostraRientro(gradingService.trova(id), form, model);
-		}
-	}
-
-	@PostMapping("/grading/{id}/annulla")
-	String annullaGrading(@PathVariable Long id, RedirectAttributes redirect) {
-		try {
-			gradingService.annulla(id);
-			redirect.addFlashAttribute("messaggio", "Grading annullato: la carta è tornata in magazzino");
-		}
-		catch (OperazioneNonConsentitaException ex) {
-			redirect.addFlashAttribute("errore", ex.getMessage());
-		}
-		return "redirect:/magazzino/grading";
 	}
 
 	private String mostraRettifica(Long lottoId, RettificaForm form, Model model) {
@@ -211,21 +135,6 @@ public class MagazzinoController {
 		model.addAttribute("form", form);
 		model.addAttribute("motivi", MotivoRettifica.values());
 		return "magazzino/rettifica-form";
-	}
-
-	private String mostraInvio(Long lottoId, InvioGradingForm form, Model model) {
-		RigaAcquisto lotto = magazzinoService.lotto(lottoId);
-		model.addAttribute("lotto", lotto);
-		model.addAttribute("inviabile", GradingService.inviabile(lotto));
-		model.addAttribute("form", form);
-		model.addAttribute("enti", gradingService.enti());
-		return "magazzino/grading-invio";
-	}
-
-	private String mostraRientro(Grading grading, RientroGradingForm form, Model model) {
-		model.addAttribute("grading", grading);
-		model.addAttribute("form", form);
-		return "magazzino/grading-rientro";
 	}
 
 	private void aggiungiFiltri(Model model) {

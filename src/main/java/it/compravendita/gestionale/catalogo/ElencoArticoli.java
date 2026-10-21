@@ -60,7 +60,7 @@ public class ElencoArticoli {
 			.toList();
 	}
 
-	/** Es. "Charizard Base Set · PSA · 9 · 44556677 #12". */
+	/** Es. "Tazza Stitch sagomata · Ceramica · 450 · Azzurra #12". */
 	public String etichetta(Articolo articolo) {
 		return etichetta(articolo, null);
 	}

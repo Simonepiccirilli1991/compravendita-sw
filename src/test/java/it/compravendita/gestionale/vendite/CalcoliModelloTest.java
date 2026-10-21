@@ -22,7 +22,7 @@ import it.compravendita.gestionale.piattaforme.Piattaforma;
  */
 class CalcoliModelloTest {
 
-	private final Articolo charizard = new Articolo("Charizard ex 199/165", Categoria.CARTA_SINGOLA,
+	private final Articolo charizard = new Articolo("Charizard ex 199/165", Categoria.TAZZA,
 			new Brand("Pokémon"));
 
 	@Test
@@ -53,7 +53,7 @@ class CalcoliModelloTest {
 
 	@Test
 	void nettoVendita() {
-		Vendita vendita = new Vendita(LocalDate.of(2026, 10, 10), new Piattaforma("Cardmarket"));
+		Vendita vendita = new Vendita(LocalDate.of(2026, 10, 10), new Piattaforma("Etsy"));
 		vendita.aggiungiRiga(new RigaVendita(charizard, 2, new BigDecimal("25.00")));
 		vendita.setSpedizioneIncassata(new BigDecimal("3.00"));
 		vendita.setCommissioniPiattaforma(new BigDecimal("2.50"));

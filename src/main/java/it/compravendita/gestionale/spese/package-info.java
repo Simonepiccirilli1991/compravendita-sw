@@ -1,4 +1,4 @@
 /**
- * Spese generiche dell'attività (grading, materiali, abbonamenti, fiere).
+ * Spese generiche dell'attività (materiali, imballaggi, pubblicità, abbonamenti, fiere).
  */
 package it.compravendita.gestionale.spese;

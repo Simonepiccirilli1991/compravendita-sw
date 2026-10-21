@@ -17,7 +17,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 /**
- * Spesa dell'attività. Se collegata a una riga d'acquisto (es. grading di una carta)
+ * Spesa dell'attività. Se collegata a una riga d'acquisto (es. una personalizzazione o riparazione)
  * può essere aggiunta al costo di quel lotto; altrimenti è un costo generale.
  */
 @Entity

@@ -24,12 +24,10 @@ public interface RigaAcquistoRepository extends JpaRepository<RigaAcquisto, Long
 
 	/**
 	 * Lotti con pezzi vendibili per un articolo, dal più vecchio al più recente (ordine FIFO).
-	 * Le carte in grading sono escluse.
 	 */
 	@Query("""
 			select r from RigaAcquisto r join r.acquisto a
 			where r.articolo.id = :articoloId and r.quantitaResidua > 0
-			  and r.stato <> it.compravendita.gestionale.magazzino.StatoOggetto.IN_GRADING
 			order by a.dataAcquisto asc, r.id asc
 			""")
 	List<RigaAcquisto> findDisponibiliFifo(@Param("articoloId") Long articoloId);
@@ -44,13 +42,12 @@ public interface RigaAcquistoRepository extends JpaRepository<RigaAcquisto, Long
 	List<RigaAcquisto> findByArticolo(@Param("articoloId") Long articoloId);
 
 	/**
-	 * Righe di un acquisto referenziate da vendite, grading, rettifiche o spese: non possono
+	 * Righe di un acquisto referenziate da vendite, rettifiche o spese: non possono
 	 * essere eliminate né modificate.
 	 */
 	@Query("""
 			select r.id from RigaAcquisto r where r.acquisto.id = :acquistoId and (
 			    exists (select av.id from AllocazioneVendita av where av.rigaAcquisto = r)
-			    or exists (select g.id from Grading g where g.rigaAcquisto = r)
 			    or exists (select rm.id from RettificaMagazzino rm where rm.rigaAcquisto = r)
 			    or exists (select s.id from Spesa s where s.rigaAcquisto = r))
 			""")
@@ -60,7 +57,6 @@ public interface RigaAcquistoRepository extends JpaRepository<RigaAcquisto, Long
 	@Query("""
 			select r.articolo.id, sum(r.quantitaResidua) from RigaAcquisto r
 			where r.quantitaResidua > 0
-			  and r.stato <> it.compravendita.gestionale.magazzino.StatoOggetto.IN_GRADING
 			group by r.articolo.id
 			""")
 	List<Object[]> contaPezziVendibili();

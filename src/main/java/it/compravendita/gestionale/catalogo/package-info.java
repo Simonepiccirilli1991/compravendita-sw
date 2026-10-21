@@ -1,4 +1,4 @@
 /**
- * Catalogo articoli (carte, sealed, videogiochi, LEGO, altro) e brand.
+ * Catalogo articoli (tazze, tazze termiche, bicchieri, set regalo, accessori) e brand.
  */
 package it.compravendita.gestionale.catalogo;

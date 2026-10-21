@@ -53,18 +53,18 @@ class CatalogoWebTest {
 	AppProperties appProperties;
 
 	@Test
-	void creaCartaGradataConAttributiEFoto() throws Exception {
-		Long pokemon = brandRepository.findByNomeIgnoreCase("Pokémon").orElseThrow().getId();
-		MockMultipartFile foto = new MockMultipartFile("foto", "psa.jpg", "image/jpeg", new byte[] { 1, 2, 3 });
+	void creaTazzaConAttributiEFoto() throws Exception {
+		Long disney = brandRepository.findByNomeIgnoreCase("Disney").orElseThrow().getId();
+		MockMultipartFile foto = new MockMultipartFile("foto", "tazza.jpg", "image/jpeg", new byte[] { 1, 2, 3 });
 
 		String location = mvc.perform(multipart("/articoli").file(foto).with(csrf())
-				.param("nome", "Charizard Base Set")
-				.param("categoria", "CARTA_GRADATA")
-				.param("brandId", pokemon.toString())
-				.param("lingua", "ENG")
-				.param("attributi[enteGrading]", "PSA")
-				.param("attributi[voto]", "9")
-				.param("attributi[numeroCertificato]", "44556677"))
+				.param("nome", "Tazza Stitch sagomata")
+				.param("categoria", "TAZZA")
+				.param("brandId", disney.toString())
+				.param("condizione", "NUOVO_CONFEZIONATO")
+				.param("attributi[materiale]", "Ceramica")
+				.param("attributi[capacita]", "450")
+				.param("attributi[soggetto]", "Stitch e Angel"))
 			.andExpect(status().is3xxRedirection())
 			.andExpect(redirectedUrlPattern("/articoli/*"))
 			.andExpect(flash().attribute("messaggio", "Articolo creato"))
@@ -74,27 +74,28 @@ class CatalogoWebTest {
 
 		Long id = Long.valueOf(location.substring(location.lastIndexOf('/') + 1));
 		Articolo articolo = articoloRepository.findById(id).orElseThrow();
-		assertThat(articolo.getAttributo("enteGrading")).isEqualTo("PSA");
-		assertThat(new BigDecimal(articolo.getAttributo("voto").toString())).isEqualByComparingTo("9");
+		assertThat(articolo.getAttributo("materiale")).isEqualTo("Ceramica");
+		assertThat(new BigDecimal(articolo.getAttributo("capacita").toString())).isEqualByComparingTo("450");
 		assertThat(articolo.getFotoPath()).startsWith("articoli/");
 		assertThat(Path.of(appProperties.uploadDir().toString(), articolo.getFotoPath())).exists();
 
 		mvc.perform(get("/articoli/{id}", id))
 			.andExpect(status().isOk())
-			.andExpect(content().string(containsString("44556677")));
+			.andExpect(content().string(containsString("Stitch e Angel")))
+			.andExpect(content().string(containsString("Nuovo con confezione")));
 	}
 
 	@Test
 	void attributiObbligatoriMancantiMostranoErrori() throws Exception {
 		mvc.perform(post("/articoli").with(csrf())
-				.param("nome", "Carta senza voto")
-				.param("categoria", "CARTA_GRADATA")
-				.param("attributi[enteGrading]", "PSA"))
+				.param("nome", "Accessorio senza tipo")
+				.param("categoria", "ACCESSORIO")
+				.param("attributi[materiale]", "Acciaio inox"))
 			.andExpect(status().isOk())
 			.andExpect(view().name("articoli/form"))
 			.andExpect(model().attributeExists("erroriAttributi"))
 			.andExpect(content().string(containsString("Campo obbligatorio")));
-		assertThat(articoloRepository.findByNomeContainingIgnoreCaseOrderByNomeAsc("senza voto")).isEmpty();
+		assertThat(articoloRepository.findByNomeContainingIgnoreCaseOrderByNomeAsc("senza tipo")).isEmpty();
 	}
 
 	@Test
@@ -106,29 +107,29 @@ class CatalogoWebTest {
 
 	@Test
 	void campiDinamiciPerCategoria() throws Exception {
-		mvc.perform(get("/articoli/campi").param("categoria", "LEGO").header("HX-Request", "true"))
+		mvc.perform(get("/articoli/campi").param("categoria", "SET_REGALO").header("HX-Request", "true"))
 			.andExpect(status().isOk())
-			.andExpect(content().string(containsString("attributi[numeroSet]")))
+			.andExpect(content().string(containsString("attributi[numeroPezzi]")))
 			.andExpect(content().string(not(containsString("<html"))));
 	}
 
 	@Test
 	void listaFiltraEConRichiestaHtmxRestituisceSoloRisultati() throws Exception {
-		Brand lego = brandRepository.findByNomeIgnoreCase("LEGO").orElseThrow();
-		Articolo falcon = new Articolo("Millennium Falcon", Categoria.LEGO, lego);
-		falcon.setAttributo("numeroSet", "75192");
-		articoloRepository.save(falcon);
-		articoloRepository.save(new Articolo("Super Mario 64", Categoria.VIDEOGIOCO, null));
+		Brand potter = brandRepository.findByNomeIgnoreCase("Harry Potter").orElseThrow();
+		Articolo termica = new Articolo("Tazza termica Hogwarts", Categoria.TAZZA_TERMICA, potter);
+		termica.setAttributo("materiale", "Acciaio inox");
+		articoloRepository.save(termica);
+		articoloRepository.save(new Articolo("Bicchiere Nutella vintage", Categoria.BICCHIERE, null));
 
-		mvc.perform(get("/articoli").param("categoria", "LEGO"))
+		mvc.perform(get("/articoli").param("categoria", "TAZZA_TERMICA"))
 			.andExpect(status().isOk())
-			.andExpect(content().string(containsString("Millennium Falcon")))
-			.andExpect(content().string(not(containsString("Super Mario 64"))));
+			.andExpect(content().string(containsString("Tazza termica Hogwarts")))
+			.andExpect(content().string(not(containsString("Bicchiere Nutella vintage"))));
 
-		mvc.perform(get("/articoli").param("q", "mario").header("HX-Request", "true"))
+		mvc.perform(get("/articoli").param("q", "nutella").header("HX-Request", "true"))
 			.andExpect(status().isOk())
-			.andExpect(content().string(containsString("Super Mario 64")))
-			.andExpect(content().string(not(containsString("Millennium Falcon"))))
+			.andExpect(content().string(containsString("Bicchiere Nutella vintage")))
+			.andExpect(content().string(not(containsString("Tazza termica Hogwarts"))))
 			.andExpect(content().string(not(containsString("<html"))));
 	}
 
@@ -150,8 +151,8 @@ class CatalogoWebTest {
 
 	@Test
 	void brandConArticoliNonEliminabile() throws Exception {
-		Brand sega = brandRepository.findByNomeIgnoreCase("Sega").orElseThrow();
-		articoloRepository.save(new Articolo("Sonic", Categoria.VIDEOGIOCO, sega));
+		Brand sega = brandRepository.findByNomeIgnoreCase("Thun").orElseThrow();
+		articoloRepository.save(new Articolo("Tazza angioletti", Categoria.TAZZA, sega));
 
 		mvc.perform(post("/brand/{id}/elimina", sega.getId()).with(csrf()))
 			.andExpect(flash().attribute("errore", containsString("disattivalo")));
@@ -159,7 +160,7 @@ class CatalogoWebTest {
 
 		mvc.perform(get("/brand"))
 			.andExpect(status().isOk())
-			.andExpect(content().string(containsString("Sega")));
+			.andExpect(content().string(containsString("Thun")));
 	}
 
 	@Test
