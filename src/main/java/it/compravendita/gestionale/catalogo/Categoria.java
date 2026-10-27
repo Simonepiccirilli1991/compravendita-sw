@@ -7,6 +7,8 @@ public enum Categoria {
 	SEALED_TCG("Sealed TCG"),
 	VIDEOGIOCO("Videogioco"),
 	LEGO("LEGO"),
+	TAZZA("Tazze e bicchieri"),
+	OGGETTISTICA("Oggettistica e gadget"),
 	ALTRO("Altro");
 
 	private final String etichetta;

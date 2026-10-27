@@ -217,7 +217,7 @@
         </div>
 
         <div class="card shadow-sm mt-3">
-            <div class="card-header fw-semibold">Riepilogo costi</div>
+            <div class="card-header fw-semibold">Riepilogo costi e prezzi suggeriti</div>
             <div id="anteprima" th:fragment="anteprima" th:attr="hx-get=@{/acquisti/anteprima}"
                  hx-include="#form-acquisto" hx-swap="outerHTML"
                  hx-trigger="change from:#form-acquisto, keyup changed delay:500ms from:#form-acquisto, righeAggiornate from:body">
@@ -230,6 +230,7 @@
                             <th class="text-end">Merce</th>
                             <th class="text-end">Quota costi</th>
                             <th class="text-end">Costo unitario effettivo</th>
+                            <th:block th:replace="~{prezzi/fragments :: intestazioni}"></th:block>
                         </tr>
                         </thead>
                         <tbody>
@@ -239,9 +240,10 @@
                             <td class="text-end" th:text="${@formati.euro(r.totalePrezzo())}">0</td>
                             <td class="text-end" th:text="${@formati.euro(r.quota())}">0</td>
                             <td class="text-end fw-semibold" th:text="${@formati.euro(r.costoUnitario())}">0</td>
+                            <th:block th:replace="~{prezzi/fragments :: celle(${calcoloPrezzi}, ${r.costoUnitario()})}"></th:block>
                         </tr>
                         <tr th:if="${#lists.isEmpty(anteprima.righe())}">
-                            <td colspan="5" class="text-secondary text-center py-3">Aggiungi gli articoli per vedere i costi.</td>
+                            <td colspan="7" class="text-secondary text-center py-3">Aggiungi gli articoli per vedere i costi.</td>
                         </tr>
                         </tbody>
                         <tfoot class="table-group-divider">
@@ -251,10 +253,12 @@
                             <td class="text-end" th:text="${@formati.euro(anteprima.totaleMerce())}">0</td>
                             <td class="text-end" th:text="${@formati.euro(anteprima.totaleCosti())}">0</td>
                             <td class="text-end" th:text="|Totale speso: ${@formati.euro(anteprima.totale())}|">0</td>
+                            <td colspan="2"></td>
                         </tr>
                         </tfoot>
                     </table>
                 </div>
+                <p th:replace="~{prezzi/fragments :: nota(${calcoloPrezzi})}"></p>
             </div>
         </div>
 

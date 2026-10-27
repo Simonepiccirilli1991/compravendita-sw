@@ -60,6 +60,7 @@
                         <th>Stato</th>
                         <th class="text-end">Disponibili</th>
                         <th class="text-end">Costo unit.</th>
+                        <th:block th:replace="~{prezzi/fragments :: intestazioni}"></th:block>
                         <th class="text-end">Valore</th>
                         <th class="text-end">Giorni</th>
                         <th></th>
@@ -81,6 +82,7 @@
                         <td><span th:replace="~{magazzino/fragments :: stato(${l.stato})}"></span></td>
                         <td class="text-end" th:text="|${l.quantitaResidua} / ${l.quantita}|">1 / 1</td>
                         <td class="text-end" th:text="${@formati.euro(l.costoUnitarioEffettivo)}">0</td>
+                        <th:block th:replace="~{prezzi/fragments :: celle(${calcoloPrezzi}, ${l.costoUnitarioEffettivo})}"></th:block>
                         <td class="text-end fw-semibold" th:text="${@formati.euro(l.valoreResiduo)}">0</td>
                         <td class="text-end" th:text="${@formati.giorniDa(l.acquisto.dataAcquisto)}">0</td>
                         <td class="text-end">
@@ -88,11 +90,12 @@
                         </td>
                     </tr>
                     <tr th:if="${pagina.empty}">
-                        <td colspan="8" class="text-center text-secondary py-4">Nessun lotto trovato.</td>
+                        <td colspan="10" class="text-center text-secondary py-4">Nessun lotto trovato.</td>
                     </tr>
                     </tbody>
                 </table>
             </div>
+            <p th:replace="~{prezzi/fragments :: nota(${calcoloPrezzi})}"></p>
         </div>
 
         <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 gap-2" th:if="${pagina.totalElements > 0}">

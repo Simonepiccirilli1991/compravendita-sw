@@ -331,6 +331,7 @@ public class DatiDemo {
 			case SEALED_TCG -> x < 0.5 ? "Cardmarket" : x < 0.8 ? "eBay" : "Fiera";
 			case VIDEOGIOCO -> x < 0.4 ? "eBay" : x < 0.7 ? "Vinted" : "Subito";
 			case LEGO -> x < 0.5 ? "eBay" : x < 0.8 ? "Subito" : "Privato";
+			case TAZZA, OGGETTISTICA -> x < 0.5 ? "Vinted" : x < 0.8 ? "eBay" : "Subito";
 			case ALTRO -> x < 0.5 ? "Subito" : "eBay";
 		};
 	}

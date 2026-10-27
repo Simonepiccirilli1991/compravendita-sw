@@ -74,6 +74,7 @@
                     <th class="text-end">Quota costi</th>
                     <th class="text-end">Costi aggiuntivi</th>
                     <th class="text-end">Costo unit. effettivo</th>
+                    <th:block th:replace="~{prezzi/fragments :: intestazioni}"></th:block>
                     <th></th>
                 </tr>
                 </thead>
@@ -90,6 +91,7 @@
                     <td class="text-end" th:text="${@formati.euro(r.quotaCostiAccessori)}">0</td>
                     <td class="text-end" th:text="${@formati.euro(r.costiAggiuntivi)}">0</td>
                     <td class="text-end fw-semibold" th:text="${@formati.euro(r.costoUnitarioEffettivo)}">0</td>
+                    <th:block th:replace="~{prezzi/fragments :: celle(${calcoloPrezzi}, ${r.costoUnitarioEffettivo})}"></th:block>
                     <td class="text-end">
                         <div th:replace="~{magazzino/fragments :: azioniLotto(${r}, ${'/acquisti/' + acquisto.id})}"></div>
                     </td>
@@ -97,6 +99,7 @@
                 </tbody>
             </table>
         </div>
+        <p th:replace="~{prezzi/fragments :: nota(${calcoloPrezzi})}"></p>
     </div>
 
     <div th:attr="hx-get=@{/report/acquisti/{id}(id=${acquisto.id})}" hx-trigger="load" hx-swap="outerHTML"></div>

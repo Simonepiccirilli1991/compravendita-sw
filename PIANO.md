@@ -117,3 +117,9 @@ La cartella di progetto `compravendita-sw` è vuota: si parte da zero.
 > vendita Cardmarket netto 33,88 €, profitto 17,38 €; LEGO su eBay netto 237,15 €, profitto 72,15 €, ROI 43,7%;
 > dopo l'annullamento giacenza carte tornata a 10 e KPI ricalcolati; carta gradata PSA 9 con costo 30,50 €
 > (5,50 + 25 di grading), venduta a 120 € con profitto 73,55 € e ROI 241,1%. Backup e ripristino provati.
+
+---
+
+## Prezzi suggeriti e oggetti fuori categoria (portati da `tazze`)
+- [x] Prezzi suggeriti per il regime forfettario agevolato: prezzo minimo (in pari a fine anno, con la quota dei contributi INPS fissi) e consigliato (più il margine) per ogni riga d'acquisto, nel form, nel dettaglio, nei lotti e nella scheda articolo; valori INPS 2026 dalla circolare n. 14/2026 con riduzione del 35%; parametri, simulazione e conteggio annuo in *Prezzi e tasse* (migrazione `V7__parametri_prezzo.sql`)
+- [x] Categorie per oggetti fuori dal core (tazze, bicchieri, gadget, …) con i loro attributi (migrazione `V8__categorie_oggettistica.sql`); dati esistenti invariati

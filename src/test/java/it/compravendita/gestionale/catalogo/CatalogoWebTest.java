@@ -1,6 +1,7 @@
 package it.compravendita.gestionale.catalogo;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -82,6 +83,37 @@ class CatalogoWebTest {
 		mvc.perform(get("/articoli/{id}", id))
 			.andExpect(status().isOk())
 			.andExpect(content().string(containsString("44556677")));
+	}
+
+	@Test
+	void creaOggettiFuoriDalCore() throws Exception {
+		String location = mvc.perform(post("/articoli").with(csrf())
+				.param("nome", "Tazza Pikachu")
+				.param("categoria", "TAZZA")
+				.param("attributi[materiale]", "Ceramica")
+				.param("attributi[capacita]", "350")
+				.param("attributi[colore]", "Giallo"))
+			.andExpect(redirectedUrlPattern("/articoli/*"))
+			.andReturn()
+			.getResponse()
+			.getRedirectedUrl();
+		Long id = Long.valueOf(location.substring(location.lastIndexOf('/') + 1));
+		Articolo tazza = articoloRepository.findById(id).orElseThrow();
+		assertThat(tazza.getCategoria()).isEqualTo(Categoria.TAZZA);
+		assertThat(tazza.getAttributo("capacita")).isEqualTo(350);
+		mvc.perform(get("/articoli/{id}", id))
+			.andExpect(status().isOk())
+			.andExpect(content().string(allOf(containsString("Tazze e bicchieri"), containsString("Capacità (ml)"),
+					containsString("Ceramica"))));
+
+		mvc.perform(post("/articoli").with(csrf())
+				.param("nome", "Portachiavi One Piece")
+				.param("categoria", "OGGETTISTICA")
+				.param("attributi[tipoOggetto]", "Portachiavi"))
+			.andExpect(redirectedUrlPattern("/articoli/*"));
+		assertThat(articoloRepository.findByNomeContainingIgnoreCaseOrderByNomeAsc("Portachiavi"))
+			.singleElement()
+			.satisfies(a -> assertThat(a.getCategoria()).isEqualTo(Categoria.OGGETTISTICA));
 	}
 
 	@Test

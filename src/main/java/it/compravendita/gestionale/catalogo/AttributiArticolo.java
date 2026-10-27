@@ -31,6 +31,13 @@ public final class AttributiArticolo {
 	public static final String ANNO = "anno";
 	public static final String STATO_SCATOLA = "statoScatola";
 
+	// Tazze, bicchieri e oggettistica fuori dal core (stesse chiavi del branch tazze)
+	public static final String MATERIALE = "materiale";
+	public static final String CAPACITA = "capacita";
+	public static final String COLORE = "colore";
+	public static final String SOGGETTO = "soggetto";
+	public static final String TIPO_OGGETTO = "tipoOggetto";
+
 	private AttributiArticolo() {
 	}
 

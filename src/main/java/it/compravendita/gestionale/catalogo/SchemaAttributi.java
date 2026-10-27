@@ -1,10 +1,13 @@
 package it.compravendita.gestionale.catalogo;
 
 import static it.compravendita.gestionale.catalogo.AttributiArticolo.ANNO;
+import static it.compravendita.gestionale.catalogo.AttributiArticolo.CAPACITA;
+import static it.compravendita.gestionale.catalogo.AttributiArticolo.COLORE;
 import static it.compravendita.gestionale.catalogo.AttributiArticolo.COMPLETEZZA;
 import static it.compravendita.gestionale.catalogo.AttributiArticolo.CONSOLE;
 import static it.compravendita.gestionale.catalogo.AttributiArticolo.EDIZIONE;
 import static it.compravendita.gestionale.catalogo.AttributiArticolo.ENTE_GRADING;
+import static it.compravendita.gestionale.catalogo.AttributiArticolo.MATERIALE;
 import static it.compravendita.gestionale.catalogo.AttributiArticolo.NUMERO_CARTA;
 import static it.compravendita.gestionale.catalogo.AttributiArticolo.NUMERO_CERTIFICATO;
 import static it.compravendita.gestionale.catalogo.AttributiArticolo.NUMERO_SET;
@@ -12,8 +15,10 @@ import static it.compravendita.gestionale.catalogo.AttributiArticolo.RARITA;
 import static it.compravendita.gestionale.catalogo.AttributiArticolo.REGIONE;
 import static it.compravendita.gestionale.catalogo.AttributiArticolo.RETRO;
 import static it.compravendita.gestionale.catalogo.AttributiArticolo.SET;
+import static it.compravendita.gestionale.catalogo.AttributiArticolo.SOGGETTO;
 import static it.compravendita.gestionale.catalogo.AttributiArticolo.STATO_SCATOLA;
 import static it.compravendita.gestionale.catalogo.AttributiArticolo.TEMA;
+import static it.compravendita.gestionale.catalogo.AttributiArticolo.TIPO_OGGETTO;
 import static it.compravendita.gestionale.catalogo.AttributiArticolo.TIPO_PRODOTTO;
 import static it.compravendita.gestionale.catalogo.AttributiArticolo.VOTO;
 
@@ -69,6 +74,17 @@ public class SchemaAttributi {
 				CampoAttributo.testo(TEMA, "Tema"),
 				CampoAttributo.intero(ANNO, "Anno", 1949, 2100),
 				CampoAttributo.scelta(STATO_SCATOLA, "Stato scatola", "Perfetta", "Buona", "Danneggiata")));
+		CampoAttributo soggetto = CampoAttributo.testo(SOGGETTO, "Soggetto / tema");
+		campi.put(Categoria.TAZZA, List.of(
+				CampoAttributo.scelta(MATERIALE, "Materiale", "Ceramica", "Porcellana", "Gres", "Vetro", "Acciaio inox",
+						"Smalto", "Plastica", "Bambù", "Altro"),
+				CampoAttributo.intero(CAPACITA, "Capacità (ml)", 10, 5000),
+				CampoAttributo.testo(COLORE, "Colore"),
+				soggetto));
+		campi.put(Categoria.OGGETTISTICA, List.of(
+				CampoAttributo.testo(TIPO_OGGETTO, "Tipo di oggetto"),
+				CampoAttributo.testo(MATERIALE, "Materiale"),
+				soggetto));
 		campi.put(Categoria.ALTRO, List.of());
 	}
 

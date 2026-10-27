@@ -48,6 +48,16 @@ class SchemaAttributiTest {
 	}
 
 	@Test
+	void tazzaConCapacitaIntera() {
+		assertThat(schema.valida(Categoria.TAZZA, Map.of("materiale", "Gres", "capacita", "400")).valori())
+			.containsEntry("materiale", "Gres")
+			.containsEntry("capacita", 400);
+		assertThat(schema.valida(Categoria.TAZZA, Map.of("materiale", "Legno")).errori())
+			.containsEntry("materiale", "Valore non ammesso");
+		assertThat(schema.valida(Categoria.OGGETTISTICA, Map.of()).valido()).isTrue();
+	}
+
+	@Test
 	void legoAnnoInteroESiNoVideogioco() {
 		assertThat(schema.valida(Categoria.LEGO, Map.of("numeroSet", "75192", "anno", "2017")).valori())
 			.containsEntry("anno", 2017);

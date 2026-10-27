@@ -1,7 +1,7 @@
 # Gestionale Compravendita
 
 Gestionale per tracciare acquisti, magazzino e vendite di carte (Pokémon, One Piece – singole, gradate, sealed),
-videogiochi, LEGO e altri oggetti, con calcolo di netto, ROI e dashboard. Il piano di sviluppo è in [PIANO.md](PIANO.md).
+videogiochi, LEGO e oggetti fuori dal core (tazze e bicchieri, oggettistica e gadget, altro), con calcolo di netto, ROI e dashboard. Il piano di sviluppo è in [PIANO.md](PIANO.md).
 
 ## Stack
 - Java 21, Spring Boot 4.1, Spring Data JPA, Flyway, Spring Security
@@ -57,6 +57,29 @@ stesso modo. Per la demo in container: `SPRING_PROFILES_ACTIVE=prod,demo docker 
 Abbonamenti, materiali, fiere e altri costi dell'attività si registrano in *Spese* (barra laterale). Entrano nel
 profitto netto di dashboard, report e riepilogo annuale, ma non nel costo dei singoli articoli; si esportano in
 Excel/CSV come le altre liste.
+
+## Prezzi suggeriti (regime forfettario agevolato)
+Per ogni riga d'acquisto il gestionale suggerisce due prezzi di vendita per pezzo, visibili nel riepilogo del form
+mentre si compila l'acquisto, nel dettaglio dell'acquisto, nei lotti del magazzino e nella scheda dell'articolo
+(sul costo del prossimo lotto da vendere):
+- **prezzo minimo**: copre costo d'acquisto, commissioni, imballaggio, spedizione, imposta e contributi, compresa
+  la quota dei costi fissi; vendendo tutto a questo prezzo con gli incassi previsti, a fine anno si va in pari;
+- **prezzo consigliato**: resta in più il margine desiderato sul costo d'acquisto; arrotondato per eccesso ai 50
+  centesimi.
+
+Il calcolo segue le regole 2026 di un commerciante in regime forfettario con il regime contributivo agevolato:
+- reddito = 40% degli incassi (coefficiente del commercio), imposta sostitutiva 5% sul reddito meno i contributi;
+- contributi INPS commercianti 24,48% con minimale di 18.808 € e maternità 0,62 € al mese
+  ([circolare INPS n. 14 del 9/2/2026](https://www.inps.it/it/it/inps-comunica/atti/circolari-messaggi-e-normativa/dettaglio.circolari-e-messaggi.2026.02.circolare-numero-14-del-09-02-2026_15162.html));
+- riduzione del 35% sia sul minimale sia sull'eccedenza, maternità intera (legge 190/2014, art. 1, commi 77-84;
+  circolare INPS n. 35/2016): **3.000,17 € l'anno di contributi fissi**, dovuti anche con incassi bassi, e 15,91%
+  sul reddito oltre il minimale.
+
+Con gli incassi previsti in un anno il gestionale separa quanto costa ogni vendita in più (sotto il minimale
+solo il 2% di imposta, sopra anche i contributi) dai costi fissi (contributi sul minimale e altri costi), che divide
+sugli incassi come percentuale di ogni prezzo: con 10.000 € previsti pesano il 28,5%, con 30.000 € circa il 9,5%.
+I parametri si cambiano in *Prezzi e tasse*, dove una simulazione mostra la ripartizione di un prezzo e il conteggio
+dell'anno; ogni anno vanno aggiornati con la nuova circolare INPS e verificati con il commercialista.
 
 ## Import ed export
 - **Export:** nelle liste di acquisti, vendite e magazzino i pulsanti *Excel* e *CSV* scaricano i dati con i filtri
